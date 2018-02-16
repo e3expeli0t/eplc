@@ -2,9 +2,9 @@ package Output
 
 import (
 	"fmt"
-	"github.com/logrusorgru/aurora"
+	"./color"
 )
 
 func PrintLog(log ...interface{}) {
-	fmt.Println(aurora.Green("[*]"), log)
+	fmt.Println(color.LightGreen("[*]"), log)
 }

@@ -1,12 +1,16 @@
 package main
 
-import (
+import
+(
+	"./apllex"
+	"./aplparse"
 	"./Output"
-	"./applex"
 	"io"
 	"os"
 )
-
+/*
+todo: add errors in the lexer to the fallowing operations: StringLiterals matching ,MultiLines comments (will be added soon)
+*/
 func main() {
 	var reader io.Reader
 	reader, err := os.Open("/tmp/test.apl")
@@ -17,11 +21,6 @@ func main() {
 	}
 
 	var lexer = apllex.New(reader)
-
-	tmp := lexer.Next()
-
-	for tmp.Ttype != apllex.EOF {
-		Output.PrintLog(tmp.Lexme, "is type", tmp.Ttype)
-		tmp = lexer.Next()
-	}
+	var parser = aplparse.Parser{lexer}
+	Output.PrintLog(&parser, &lexer)
 }
