@@ -7,7 +7,7 @@ __check_defined = \
 install:
 
 	@:$(call check_defined, GOPATH, please set it up and then run make)
-	@:$(call check_defined, GOBIN, please set it up and then run make)
+	@#:$(call check_defined, GOBIN, please set it up and then run make)
 	@:$(call check_defined, GOROOT, please set it up and then run make)
 	@command -v go >/dev/null 2>&1 || { echo >&2 "Please install go. Aborting."; exit 1; }
 	@command -v dep >/dev/null 2>&1 || { echo >&2 "Please install dep. Aborting."; exit 1; } # for the future
