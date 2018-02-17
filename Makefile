@@ -12,4 +12,4 @@ install:
 	@command -v go >/dev/null 2>&1 || { echo >&2 "Please install go. Aborting."; exit 1; }
 	@command -v dep >/dev/null 2>&1 || { echo >&2 "Please install dep. Aborting."; exit 1; } # for the future
 	@go build src/libapl/aplc.go
-	@sudo cp aplc /bin/aplc
+	@sudo mv aplc /bin/aplc
