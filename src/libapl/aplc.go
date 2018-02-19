@@ -1,26 +1,37 @@
 package main
 
-import
-(
+import (
 	"./apllex"
 	"./aplparse"
 	"./Output"
 	"io"
 	"os"
 )
-/*
-todo: add errors in the lexer to the fallowing operations: StringLiterals matching ,MultiLines comments (will be added soon)
-*/
-func main() {
-	var reader io.Reader
-	reader, err := os.Open("/tmp/test.apl")
 
-	if err != nil {
-		println("Shit", err.Error())
-		os.Exit(0)
+func main() {
+	Output.PrintStartMSG()
+
+	if len(os.Args) <= 1 {
+		Output.PrintErr("please supply file name")
 	}
 
-	var lexer = apllex.New(reader)
+	args := os.Args[1:]
+	file := args[0]
+
+	var reader io.Reader
+	reader, err := os.Open(file)
+
+	if err != nil {
+		Output.PrintErr("file: '" + file + "' don't exists")
+	}
+
+	var lexer = apllex.New(reader, file)
+	Output.PrintLog(" <aplc> Parsing: '"+file+"' ")
 	var parser = aplparse.Parser{lexer}
-	Output.PrintLog(&parser, &lexer)
+	var tmp = parser.Lexer.Next()
+
+	for tmp.Ttype != apllex.EOF {
+		Output.PrintLog(tmp.Lexme)
+		tmp = parser.Lexer.Next()
+	}
 }

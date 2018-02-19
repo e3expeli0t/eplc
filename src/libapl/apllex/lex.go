@@ -14,10 +14,11 @@ var (
 
 type Lexer struct {
 	Buffer *bufio.Reader
+	filename string
 }
 
-func New(file io.Reader) Lexer {
-	return Lexer{bufio.NewReader(file)}
+func New(file io.Reader, name string) Lexer {
+	return Lexer{bufio.NewReader(file), name}
 }
 
 func (l *Lexer) scanNumbers() Token {
@@ -100,7 +101,7 @@ func (l *Lexer) Next() Token {
 			}
 			l.unread()
 
-			return Token{Ttype: PLUS, Lexme: "*"}
+			return Token{Ttype: PLUS, Lexme: "+"}
 
 		case '-':
 			if ch = l.read(); ch == '=' {
@@ -123,6 +124,9 @@ func (l *Lexer) Next() Token {
 				l.unread()
 				l.readLine()
 				return l.Next()
+			} else if ch == '*' {
+					l.skipMltLinesComment()
+					return l.Next()
 			}
 			l.unread()
 
@@ -153,7 +157,7 @@ func (l *Lexer) Next() Token {
 		case '"':
 			return l.matchBy('"')
 		}
-		Errors.TokenError(":", line, ":", lineOffset, ": Couldn't resolve token: '", ch, "'. try removing it")
+		Errors.TokenError(":"+l.filename+":",line, ":", lineOffset, ": Couldn't resolve token: '"+string(ch)+ "'. try removing it")
 	}
 	return Token{"", EOF}
 }
@@ -175,6 +179,10 @@ func (l *Lexer) skipWhiteSpaces() {
 	ch := l.read()
 
 	for ch == '\n' || ch == '\t' || ch == '\r' || ch == ' ' {
+		if ch == '\n' {
+			lineOffset = 0;
+			line += 1;
+		}
 		ch = l.read()
 	}
 	l.unread()
@@ -197,7 +205,6 @@ func (l *Lexer) read() rune {
 		return -1
 	}
 	lineOffset += 1
-
 	return char
 }
 
@@ -221,6 +228,24 @@ func (l *Lexer) scanID() Token {
 	}
 
 	return Token{Ttype: ID, Lexme: buf.String()}
+}
+
+func (l *Lexer) skipMltLinesComment() {
+	ch := l.read()
+
+	for {
+		if ch == '*' && l.read() == '/' {
+			break;
+		} else if ch == -1 {
+			break;
+		} else {
+			ch = l.read()
+		}
+	}
+
+	if ch == -1 {
+		Errors.Lexical(":"+l.filename+": error found EOF expected '*/' ")
+	}
 }
 
 func (l *Lexer) unread() {

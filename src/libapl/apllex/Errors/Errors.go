@@ -1,8 +1,14 @@
 package Errors
 
-import "fmt"
+import (
+	"../../Output"
+)
 
 func TokenError(msg ...interface{}) {
-	fmt.Println("Aplc_runtime: <Lexical>: ", msg)
+	Output.PrintErr("Lexical", msg...)
 	//panic("Lexical analysis error")
+}
+
+func Lexical(msg ...interface{}) {
+	Output.PrintErr("Lexical", msg...)
 }
