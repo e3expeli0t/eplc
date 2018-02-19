@@ -1,5 +1,9 @@
 package color
 
+/*
+	Writer: faith
+	git link: https://github.com/fatih/color.git
+ */
 import (
 "strconv"
 )

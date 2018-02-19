@@ -24,14 +24,4 @@ func main() {
 	if err != nil {
 		Output.PrintErr("file: '" + file + "' don't exists")
 	}
-
-	var lexer = apllex.New(reader, file)
-	Output.PrintLog(" <aplc> Parsing: '"+file+"' ")
-	var parser = aplparse.Parser{lexer}
-	var tmp = parser.Lexer.Next()
-
-	for tmp.Ttype != apllex.EOF {
-		Output.PrintLog(tmp.Lexme)
-		tmp = parser.Lexer.Next()
-	}
 }
