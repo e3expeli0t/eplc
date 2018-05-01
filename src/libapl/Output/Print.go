@@ -2,7 +2,7 @@ package Output
 
 import (
 	"fmt"
-	"./color"
+	"aplc/src/libapl/Output/color"
 	"os"
 )
 

@@ -1,9 +1,8 @@
 package main
 
 import (
-	"./apllex"
-	"./aplparse"
-	"./Output"
+	"aplc/src/libapl/apllex"
+	"aplc/src/libapl/Output"
 	"io"
 	"os"
 )
@@ -24,4 +23,13 @@ func main() {
 	if err != nil {
 		Output.PrintErr("file: '" + file + "' don't exists")
 	}
+	var lexer = apllex.New(reader, file)
+	Output.PrintLog(" <aplc> Parsing: '"+file+"' ")
+	var tmp = lexer.Next()
+
+	for tmp.Ttype != apllex.EOF {
+		Output.PrintLog(tmp.Lexme)
+		tmp = lexer.Next()
+	}
+
 }

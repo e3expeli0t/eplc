@@ -1,6 +1,6 @@
 package aplparse
 
-import "../apllex"
+import "aplc/src/libapl/apllex"
 
 type Parser struct {
 	Lexer apllex.Lexer
@@ -9,8 +9,3 @@ type Parser struct {
 func (p *Parser) readNextToken() apllex.Token {
 	return p.Lexer.Next()
 }
-
-/*
-func (p *Parser) ConstructAST() AST {
-}
-*/

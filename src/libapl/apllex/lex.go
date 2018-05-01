@@ -1,10 +1,13 @@
 package apllex
 
 import (
-	"./Errors"
+
+	"aplc/src/libapl/apllex/Errors"
 	"bufio"
 	"bytes"
 	"io"
+	"unicode/utf8"
+	"fmt"
 )
 
 var (
@@ -12,13 +15,20 @@ var (
 	lineOffset uint
 )
 
+//Lexer struct 
 type Lexer struct {
 	Buffer *bufio.Reader
 	filename string
 }
 
+//New Lexer
 func New(file io.Reader, name string) Lexer {
 	return Lexer{bufio.NewReader(file), name}
+}
+
+//Checks the charecter encoding
+func (l *Lexer) checkEncodiung(ch rune) bool {
+	return utf8.ValidRune(ch)
 }
 
 func (l *Lexer) scanNumbers() Token {
@@ -42,6 +52,7 @@ func (l *Lexer) scanNumbers() Token {
 	return Token{Ttype: NUM, Lexme: buf.String()}
 }
 
+//Next reads the input stream and resolve the type of the readed character
 func (l *Lexer) Next() Token {
 	l.skipWhiteSpaces()
 	ch := l.read()
@@ -157,10 +168,13 @@ func (l *Lexer) Next() Token {
 		case '"':
 			return l.matchBy('"')
 		}
-		Errors.TokenError(":"+l.filename+":",line, ":", lineOffset, ": Couldn't resolve token: '"+string(ch)+ "'. try removing it")
+		Errors.TokenError(line, lineOffset, ch, l.filename)
 	}
+	//The go compiler don't detectd unreachable code, so we need to put it here
 	return Token{"", EOF}
 }
+
+
 func (l *Lexer) matchBy(s rune) Token {
 	var buffer bytes.Buffer
 	ch := l.read()
@@ -175,13 +189,14 @@ func (l *Lexer) matchBy(s rune) Token {
 	return Token{Ttype: STRINGLITERAL, Lexme: buffer.String()}
 }
 
+//Skips the whitespaces
 func (l *Lexer) skipWhiteSpaces() {
 	ch := l.read()
 
 	for ch == '\n' || ch == '\t' || ch == '\r' || ch == ' ' {
-		if ch == '\n' {
+		if ch == '\n'{
 			lineOffset = 0;
-			line += 1;
+			line++;
 		}
 		ch = l.read()
 	}
@@ -204,7 +219,12 @@ func (l *Lexer) read() rune {
 	if err != nil {
 		return -1
 	}
-	lineOffset += 1
+
+	if !l.checkEncodiung(char) {
+		Errors.Lexical( l.filename+":"+fmt.Sprint(line)+":"+fmt.Sprint(lineOffset)+": Invalid character: U", uint(char))
+	}
+
+	lineOffset++
 	return char
 }
 
@@ -249,5 +269,6 @@ func (l *Lexer) skipMltLinesComment() {
 }
 
 func (l *Lexer) unread() {
+	lineOffset--
 	l.Buffer.UnreadRune()
 }
