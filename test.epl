@@ -1,5 +1,0 @@
-import a;
-
-fnc main(): void {
-    out.put("A"*34);    
-}
