@@ -25,9 +25,11 @@ const (
 	UINT8   		TokenType = iota //uint8 type
 	UINT16   		TokenType = iota //uint16 type
 	UINT32   		TokenType = iota //uint32 type
-	UINT64   		TokenType = iota //uint64 type	
+	UINT64   		TokenType = iota //uint64 type
+	FLOAT16   	   	TokenType = iota //float16 type	
 	FLOAT32   		TokenType = iota //float32 type
 	FLOAT64   	   	TokenType = iota //float64 type
+	FLOAT   	   	TokenType = iota //float type
 	CMX64   	   	TokenType = iota //cmx64 type
 	CMX   		   	TokenType = iota //cmx type
 	LONG 			TokenType = iota // long type

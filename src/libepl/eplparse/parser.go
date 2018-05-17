@@ -3,11 +3,10 @@ package eplparse
 import  (
 	"eplc/src/libepl/epllex"
 	"eplc/src/libepl/Output"
-	"io"
 )
 
-func New (source io.Reader, fname string) Parser {
-	return Parser {Lexer: epllex.New(source, fname)}
+func New (lx epllex.Lexer) Parser {
+	return Parser{lx}
 }
 
 type Parser struct {
@@ -16,12 +15,13 @@ type Parser struct {
 
 func (p *Parser) Construct() {
 
-	tmp := p.readNextToken()
+	var tmp = p.readNextToken()
 
-	for p.readNextToken().Ttype != epllex.EOF {
+	for tmp.Ttype != epllex.EOF {
 		Output.PrintLog(tmp.Lexme)
-		tmp = p.readNextToken()	
+		tmp = p.readNextToken()
 	}
+
 }
 
 func (p *Parser) expression() {
