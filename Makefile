@@ -10,8 +10,8 @@ install:
 	@command -v go >/dev/null 2>&1 || { echo >&2 "Please install go. Aborting."; exit 1; }
 	@command -v dep >/dev/null 2>&1 || { echo >&2 "Please install dep. Aborting."; exit 1; } # for the future
 	dep ensure
+	go test -v eplc/src/libepl/epllex
 	go build -i -v -o eplc-$(version) src/eplc.go
-	go test eplc/src/libepl/epllex -v
 	mkdir target
 	mkdir target/bin
 	mv eplc-$(version) target/bin

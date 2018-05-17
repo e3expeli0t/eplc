@@ -21,7 +21,6 @@ package epllex
 import (
 	"testing"
 	"strings"
-	"fmt"
 )
 
 
@@ -90,7 +89,7 @@ func TestLexer(t *testing.T) {
 		{"int64", INT64},
 		{"float16", FLOAT16},
 		{"float64", FLOAT64},
-		{"flot64", FLOAT64},
+		{"float64", FLOAT64},
 		{"float", FLOAT},
 		{"long", LONG},
 		{"cmx64", CMX64},
@@ -103,11 +102,7 @@ func TestLexer(t *testing.T) {
 	}
 
 	for _, tst := range table{
-		fmt.Printf("--Checking token '%s'...", tst.inToken)
-		if checkType(tst.inToken, tst.outType) {
-			fmt.Println("passed.")
-		}else{
-			fmt.Println("fail.")
+		if !checkType(tst.inToken, tst.outType) {
 			t.Errorf("[!] Couldn't match token '%s' to type %d", tst.inToken, tst.outType)
 		}
 	}
