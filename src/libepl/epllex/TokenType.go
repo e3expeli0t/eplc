@@ -1,3 +1,21 @@
+/*
+*	eplc
+*	Copyright (C) 2018 eplc core team
+*
+*	This program is free software: you can redistribute it and/or modify
+*	it under the terms of the GNU General Public License as published by
+*	the Free Software Foundation, either version 3 of the License, or
+*	(at your option) any later version.
+*
+*	This program is distributed in the hope that it will be useful,
+*	but WITHOUT ANY WARRANTY; without even the implied warranty of
+*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*	GNU General Public License for more details.
+*
+*	You should have received a copy of the GNU General Public License
+*	along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package epllex
 
 /*
@@ -25,9 +43,11 @@ const (
 	UINT8   		TokenType = iota //uint8 type
 	UINT16   		TokenType = iota //uint16 type
 	UINT32   		TokenType = iota //uint32 type
-	UINT64   		TokenType = iota //uint64 type	
+	UINT64   		TokenType = iota //uint64 type
+	FLOAT16   	   	TokenType = iota //float16 type	
 	FLOAT32   		TokenType = iota //float32 type
 	FLOAT64   	   	TokenType = iota //float64 type
+	FLOAT   	   	TokenType = iota //float type
 	CMX64   	   	TokenType = iota //cmx64 type
 	CMX   		   	TokenType = iota //cmx type
 	LONG 			TokenType = iota // long type

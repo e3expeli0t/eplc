@@ -5,20 +5,21 @@ check_defined = \
 __check_defined = \
     $(if $(value $1),, \
       $(error Undefined $1$(if $2, ($2))))
+
 install:
 	@command -v go >/dev/null 2>&1 || { echo >&2 "Please install go. Aborting."; exit 1; }
 	@command -v dep >/dev/null 2>&1 || { echo >&2 "Please install dep. Aborting."; exit 1; } # for the future
 	dep ensure
 	go build -i -v -o eplc-$(version) src/eplc.go
+	go test eplc/src/libepl/epllex -v
 	mkdir target
 	mkdir target/bin
-	mkdir target/tests
-	mv epl-tests target/tests
 	mv eplc-$(version) target/bin
-
-	@sudo mv target/bin/eplc-$(version) /bin/eplc
+	@sudo mv target/bin/eplc-$(version) /bin/
 
 clean:
-	mv target/tests/epl-tests .
 	rm -rf target
-	sudo rm -rf /bin/eplc	 
+	sudo rm -rf /bin/eplc-$(version)	 
+
+list:
+	ls /bin/epl-*
