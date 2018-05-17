@@ -240,23 +240,16 @@ func (l *Lexer) read() rune {
 func (l *Lexer) scanID() Token {
 	var buf bytes.Buffer
 	ch := l.read()
-	idig := false
 
 	for isLetter(ch) || isNum(ch) {
-		if isNum(ch) {
-			idig = true
-		}
 
 		buf.WriteRune(ch)
 		ch = l.read()
 	}
 	l.unread()
 
-	if !idig {
-		return resolveType(buf)
-	}
 
-	return Token{Ttype: ID, Lexme: buf.String()}
+	return resolveType(buf)
 }
 
 func (l *Lexer) skipMltLinesComment() {
