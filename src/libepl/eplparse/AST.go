@@ -18,19 +18,42 @@
 
 package eplparse
 
-import "eplc/src/libepl/epllex"
+//import "eplc/src/libepl/epllex"
 
+/*
+	AST (or Abstract Syntax Tree) is whats the parser producing
+*/
 type AST struct {
-	_type epllex.TokenType
+	nodes []Node
+}
+
+type Node struct {
+	_type NType
 	_value string
-	parent *AST
-	childrens []AST
+	left *Node
+	right *Node
+	parent *Node
 }
 
-func (an *AST) IsRoot() bool  {
-	return an.parent == nil 
+type NType int 
+
+const (
+	FNC_DECL NType 		= iota //fnc id()[:type] [-> id]
+	FNC_EXP_DECL NType 	= iota 
+	VAR_DECL NType 		= iota
+	VAR_EXP_DECL NType 	= iota
+	ASSIGN NType 		= iota
+	ADD NType 			= iota
+	BLOCK NType 		= iota
+	BOOL_EXPR NType 	= iota
+)
+
+
+//Check if the 
+func (an *AST) IsRoot(n *Node) bool  {
+	return n.parent == nil 
 }
 
-func (an *AST) IsData() bool {
-	return len(an._value) == 0
+func (an *AST) IsData(n *Node) bool {
+	return len(n._value) == 0
 }

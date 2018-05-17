@@ -43,6 +43,7 @@ func isNum(ch rune) bool {
 func reserve() {
 	reserved["repeat"] = REPEAT
 	reserved["until"] = UNTIL
+	reserved["define"] = DEFINE
 	reserved["fnc"] = FNC
 	reserved["if"] = IF
 	reserved["else"] = ELSE
@@ -64,6 +65,8 @@ func reserve() {
 	reserved["uint16"] = UINT16
 	reserved["uint32"] = UINT32
 	reserved["uint64"] = UINT64
+	reserved["float"] = FLOAT
+	reserved["float16"] = FLOAT16
 	reserved["float32"] = FLOAT32
 	reserved["float64"] = FLOAT64
 	reserved["cmx64"] = CMX64
