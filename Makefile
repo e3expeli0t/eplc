@@ -1,4 +1,7 @@
 version=0.1.2
+branch=devel
+msg=bug fixing
+
 check_defined = \
     $(strip $(foreach 1,$1, \
         $(call __check_defined,$1,$(strip $(value 2)))))
@@ -28,3 +31,14 @@ devel_tests:
 
 list:
 	ls /bin/epl-*
+
+update_remote:clean
+	git add .
+	git commit -a -m "$(msg)"
+	git push
+
+update:
+	git pull
+
+switch:
+	git checkout $(branch) 
