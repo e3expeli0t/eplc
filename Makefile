@@ -33,12 +33,12 @@ list:
 	ls /bin/epl-*
 
 update_remote:clean
-	git add .
-	git commit -a -m "$(msg)"
-	git push
+	@git add .
+	@git commit -a -m "$(msg)"
+	@git push
 
 update:
-	git pull
+	@git pull
 
 switch:
 	git checkout $(branch) 
