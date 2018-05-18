@@ -10,7 +10,7 @@ install:
 	@command -v go >/dev/null 2>&1 || { echo >&2 "Please install go. Aborting."; exit 1; }
 	@command -v dep >/dev/null 2>&1 || { echo >&2 "Please install dep. Aborting."; exit 1; } # for the future
 	dep ensure
-	go test -v eplc/src/libepl/epllex
+	go test -v eplc/src/libepl/epllex -cover 
 	go build -i -v -o eplc-$(version) src/eplc.go
 	mkdir target
 	mkdir target/bin
@@ -20,6 +20,11 @@ install:
 clean:
 	rm -rf target
 	sudo rm -rf /bin/eplc-$(version)	 
+
+devel_tests:
+	dep ensure
+	go test -v eplc/src/libepl/epllex -covermode=count -coverprofile=count.out fmt
+	go tool cover -html=count.out
 
 list:
 	ls /bin/epl-*

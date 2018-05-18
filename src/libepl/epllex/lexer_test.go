@@ -25,7 +25,7 @@ import (
 
 
 func checkType(lexme string, tt TokenType) bool {
-	lx := New(strings.NewReader(lexme), "test.epl")
+	lx := New(strings.NewReader(lexme), "test_lexer.epl")
 	
 	return lx.Next().Ttype == tt;
 }

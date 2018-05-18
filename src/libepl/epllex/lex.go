@@ -37,11 +37,12 @@ var (
 type Lexer struct {
 	Buffer *bufio.Reader
 	filename string
+	ST SymbolTable
 }
 
 //New Lexer
 func New(file io.Reader, name string) Lexer {
-	return Lexer{bufio.NewReader(file), name}
+	return Lexer{Buffer: bufio.NewReader(file), ST: SymbolTable{map[string]*SymbolData{}}, filename: name}
 }
 
 //Checks the charecter encoding
@@ -266,8 +267,17 @@ func (l *Lexer) scanID() Token {
 	}
 	l.unread()
 
+	if l.ST.Get(buf.String()) != (SymbolData{}) {
+		return Token{buf.String(), ID}
+	}
 
-	return resolveType(buf)
+	tmp := resolveType(buf)
+	
+	if tmp.Ttype == ID {
+		l.ST.Add(&SymbolData{symbol: tmp.Lexme})
+	}
+
+	return tmp
 }
 
 func (l *Lexer) skipMltLinesComment() {

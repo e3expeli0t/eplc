@@ -3,4 +3,6 @@ test.epl
 aplc*
 eplc*
 header
-
+count.out
+devel_logs.txt
+bootsrap_system_devel
