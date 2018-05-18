@@ -14,7 +14,7 @@
 #Introduction:
 
 Epl is multi paradigmatic systems programming language . That focuses on easy complex software systems
-production. The language is easy to learn and code.
+production and security. The language is easy to learn and code.
 
 #Language semantics:
 1. Variables and types
