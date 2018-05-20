@@ -299,4 +299,3 @@ Cflag are uncompiles epl commands that will tell the compiler about certain chan
 | `@Optimize` | eplc will perform special optimiztions|
 | `@DeleteSymbols` | eplc will strip all the program symbols.|  
 
-#Grammar

@@ -6,3 +6,4 @@ header
 count.out
 devel_logs.txt
 bootsrap_system_devel
+*.nvis
