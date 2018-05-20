@@ -28,7 +28,12 @@ func TokenError(line uint, lineOffset uint, token rune, filename string) {
 	Output.PrintErr("Lexical", filename+":"+fmt.Sprint(line)+":"+fmt.Sprint(lineOffset)+": Could't resolve Token '"+string(token)+"'")
 }
 
-//Lexical prints lexical error msg
+//Prints lexical error msg and quits after that
+func FatalLexical(msg ...interface{}) {
+	Output.PrintFatalErr("Lexical", msg...)
+}
+
+//Lexical prints lexical error msg without quiting
 func Lexical(msg ...interface{}) {
 	Output.PrintErr("Lexical", msg...)
 }

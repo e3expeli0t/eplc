@@ -1,5 +1,5 @@
 # eplc compiler 
-eplc is a compiler for the epl programming language
+eplc is a compiler frontend for the epl programming language
 
 #project planing
 * until 25/6/18 complete the parser

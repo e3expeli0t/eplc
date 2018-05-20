@@ -16,7 +16,6 @@
 *	along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 package eplparse
 
 import  (
@@ -24,18 +23,31 @@ import  (
 	"eplc/src/libepl/Output"
 )
 
+
+
+//New carete new parser struct
 func New (lx epllex.Lexer) Parser {
 	return Parser{lx}
 }
 
+/*
+	Parser. the parser job is to take tokenized stream from the lexer
+	and construct a tree form it, the tree is calld AST (Abstract Syntax Tree) 
+	by the set of rules that the language grammar produce
+	There are couple of parser kinds, in this version of epl (bootstrap) we are going
+	to use a parser that calld predictive parser (The grammar class is LL(k)).
+	In the future  i'm planning to implement LR(0) parser
+*/
 type Parser struct {
 	Lexer epllex.Lexer
 }
 
+//Construct new AST from the token stream
 func (p *Parser) Construct() {
 
 	var tmp = p.readNextToken()
 
+	//For debugging prep
 	for tmp.Ttype != epllex.EOF {
 		Output.PrintLog(tmp.Lexme)
 		tmp = p.readNextToken()
@@ -43,9 +55,6 @@ func (p *Parser) Construct() {
 
 }
 
-func (p *Parser) expression() {
-
-}
 
 func (p *Parser) match(t epllex.Token) bool{
 	return p.readNextToken() == t 

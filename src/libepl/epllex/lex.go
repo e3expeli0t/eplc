@@ -31,9 +31,13 @@ import (
 var (
 	line       uint
 	lineOffset uint
+	errCount  uint
 )
 
-//Lexer struct 
+/*
+	Lexer. the job of the lexer is to break the input stream into
+	meaningful parts that later will be used by the parser and the SDT
+*/
 type Lexer struct {
 	Buffer *bufio.Reader
 	filename string
@@ -45,7 +49,7 @@ func New(file io.Reader, name string) Lexer {
 	return Lexer{Buffer: bufio.NewReader(file), ST: SymbolTable{map[string]*SymbolData{}}, filename: name}
 }
 
-//Checks the charecter encoding
+//Checks if the charecter is valid utf
 func (l *Lexer) checkEncodiung(ch rune) bool {
 	return utf8.ValidRune(ch)
 }
@@ -197,8 +201,15 @@ func (l *Lexer) Next() Token {
 			return l.matchBy('"')
 		}
 		Errors.TokenError(line, lineOffset, ch, l.filename)
+		errCount++;
+		
+		if errCount > 5 {
+			Errors.FatalLexical("To many errors")
+		}
+		l.Next()
 	}
-	//The go compiler don't detectd unreachable code, so we need to put it here
+	
+	Errors.FatalLexical("To many errors")
 	return Token{"", EOF}
 }
 
