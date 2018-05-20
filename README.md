@@ -11,7 +11,7 @@ eplc is a compiler frontend for the epl programming language
 * 20/1/19 - 20/1/20 rewrite all the compiler in epl
 
 #Project status
-* build: passe
+* build: pass
 
 #build
 * git clone <eplc>
