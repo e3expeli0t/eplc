@@ -3,13 +3,14 @@
 ##Contents:
 1. introduction
 2. language semantics
-3. runtime
-4. sub-languages
-5. optimization
-6. aliases
-7. avm
-8. packages and libraries
-9. What next?
+3. special types 
+4. runtime
+5. sub-languages
+6. optimization
+7. aliases
+8. avm
+9. packages and libraries
+10. What next?
 
 #Introduction:
 
@@ -17,15 +18,17 @@ Epl is multi paradigmatic systems programming language . That focuses on easy co
 production and security. The language is easy to learn and code.
 
 #Language semantics:
+
 1. Variables and types
 2. Functions
 3. If –else
 4. Loops
 5. Cfalgs
-6. Memory
-7. Functions groups
-8. Air
-9. Next updates
+6. Grammar
+7. Memory
+8. Functions groups
+9. AIR
+10. Next updates
 
 ##Variables and types:
 ###types:
@@ -218,6 +221,80 @@ else
 The stmt prints Wowww 232 is bigger then 90.
 
 ##Loops:
- ```
-to be continue
+Loops are a way fo a programmer to write code that will execute n times without having to write n times that peace of code. For example suppose 
+we wont to write program thats calculate the factorial of a number n,
+we can't write 1*2*3*4*...*n so we need to use loop. in epl there are
+4 kinds of loops. move, repeat, repeat-until and until.
+
+###move
+The move loop look like this:
+
 ```
+#!epl
+move x in range n {
+    out.put(x);
+}
+```
+which will print all the numbers from 1 to n. the  ```in```  keywords means that x will be equal 
+to any number that the range iterator returns.
+
+
+##repaet
+The repeat loop is infinite loop.
+example:
+
+```
+#!epl
+repeat {
+    out.put("This will never stop");
+}
+```
+which will print forever "this will never stop".
+We can put braces after the keyword ``repeat`` and we can put inside them a loop varibale (means that he is 
+in the scope of the loop).
+For example: 
+
+```
+
+#!epl
+repeat (i int = 0) {
+
+    out.put("i equal to ", i);
+} 
+```
+
+the compiler will generated code that increased i every time the loop start over
+
+##until-repeat
+until-repeat loops are in the form of:
+
+```
+#!epl
+
+repeat(i int = 0) {
+    out.put("This will print only 5 times");
+} until (i < 5);
+```
+which will print "this will print only 5 times" for 5 times
+
+###until
+Until loops are in the form of:
+
+```
+#!epl
+until (2 == 3) {
+    out.put("As long as math exists this will never stoop printing");
+}
+```
+
+Which means that the loop will continue to execute until certain condition happens
+(This is the equivalent of while loops in c-like languages)
+
+#Cflags
+Cflag are uncompiles epl commands that will tell the compiler about certain changes that you did in your code. After the parser finished is job the aliases engine is calld and he will configure the AIR code generator for this changes. In the bootstrap version the support of compiler flags is limited to thows that are listed here:
+
+*@MainFunc- Tell eplc that the next function is the main function
+*@Optimize - eplc will perform special optimiztions
+*@DeleteSymbols - eplc will strip all the program symbols.  
+
+#Grammar
