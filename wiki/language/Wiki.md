@@ -293,8 +293,10 @@ Which means that the loop will continue to execute until certain condition happe
 #Cflags
 Cflag are uncompiles epl commands that will tell the compiler about certain changes that you did in your code. After the parser finished is job the aliases engine is calld and he will configure the AIR code generator for this changes. In the bootstrap version the support of compiler flags is limited to thows that are listed here:
 
-*@MainFunc- Tell eplc that the next function is the main function
-*@Optimize - eplc will perform special optimiztions
-*@DeleteSymbols - eplc will strip all the program symbols.  
+| flag  | description |
+| --- | --- |
+| \@MainFunc|Tell eplc that the next function is the main function|
+| \@Optimize | eplc will perform special optimiztions|
+| \@DeleteSymbols | eplc will strip all the program symbols.|  
 
 #Grammar
