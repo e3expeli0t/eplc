@@ -295,8 +295,8 @@ Cflag are uncompiles epl commands that will tell the compiler about certain chan
 
 | flag  | description |
 | --- | --- |
-| @MainFunc|Tell eplc that the next function is the main function|
-| @SOptimize | eplc will perform special optimiztions|
-| @DeleteSymbols | eplc will strip all the program symbols.|  
+| `@MainFunc`|Tell eplc that the next function is the main function|
+| `@Optimize` | eplc will perform special optimiztions|
+| `@DeleteSymbols` | eplc will strip all the program symbols.|  
 
 #Grammar
