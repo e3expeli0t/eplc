@@ -82,17 +82,17 @@ func (l *Lexer) Next() Token {
 
 	if ch == -1 {
 		return Token{Ttype: EOF, Lexme: ""}
-	} else if ch == '\n' {
-		line++
 	} else if isLetter(ch) {
 		l.unread()
-		return l.scanID()
+		return l.scanID(false)
 	} else if isNum(ch) {
 		l.unread()
 		return l.scanNumbers()
 	} else {
 
 		switch ch {
+		case '@':
+			return l.scanID(true)
 		case '!':
 			return Token{Ttype: NOT, Lexme: "!"}
 		case ';':
@@ -260,14 +260,14 @@ func (l *Lexer) read() rune {
 	}
 
 	if !l.checkEncodiung(char) {
-		Errors.Lexical( l.filename+":"+fmt.Sprint(line)+":"+fmt.Sprint(lineOffset)+": Invalid character: U", uint(char))
+		Errors.Lexical( l.filename+":"+fmt.Sprint(line)+":"+fmt.Sprint(lineOffset)+": Invalid character: ", uint(char))
 	}
 
 	lineOffset++
 	return char
 }
 
-func (l *Lexer) scanID() Token {
+func (l *Lexer) scanID(cf bool) Token {
 	var buf bytes.Buffer
 	ch := l.read()
 
@@ -277,6 +277,10 @@ func (l *Lexer) scanID() Token {
 		ch = l.read()
 	}
 	l.unread()
+
+	if cf {
+		return Token{buf.String(), CFLAG} 
+	}
 
 	if l.ST.Get(buf.String()) != (SymbolData{}) {
 		return Token{buf.String(), ID}
@@ -305,7 +309,7 @@ func (l *Lexer) skipMltLinesComment() {
 	}
 
 	if ch == -1 {
-		Errors.Lexical(":"+l.filename+": error found EOF expected '*/' ")
+		Errors.FatalLexical(":"+l.filename+": error found EOF expected '*/' ")
 	}
 }
 

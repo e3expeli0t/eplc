@@ -109,7 +109,7 @@ const (
 	DOT            	TokenType = iota // .
 	COMMA          	TokenType = iota // ,
 	RETURN_IND 		TokenType = iota // :
-
-
+	CFLAG			TokenType = iota // @id
+	
 	EOF 			TokenType = -(iota + 1) // '\0'
 )
