@@ -73,6 +73,7 @@ func reserve() {
 	reserved["cmx"] = CMX
 	reserved["string"] = STRING
 	reserved["long"] = LONG
+	reserved["bool"] = BOOL
 }
 
 func resolveType(buffer bytes.Buffer) Token {

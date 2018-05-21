@@ -104,6 +104,7 @@ const (
 	DEFINE         	TokenType = iota // define
 	STRUCT         	TokenType = iota // struct
 	TYPE           	TokenType = iota // type
+	IMPORT 			TokenType = iota // import
 	
 	SEMICOLON      	TokenType = iota // ;
 	DOT            	TokenType = iota // .

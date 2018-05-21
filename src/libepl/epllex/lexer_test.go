@@ -102,6 +102,8 @@ func TestLexer(t *testing.T) {
 		{"uint32", UINT32},
 		{"uint64", UINT64},
 		{"uint", UINT},
+		{"bool", BOOL},
+		{"import", IMPORT},
 		{"string", STRING},
 	}
 
