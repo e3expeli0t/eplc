@@ -55,6 +55,9 @@ func (p *Parser) Construct() {
 
 }
 
+func (p *Parser) fnc_decl() {
+	
+}
 
 func (p *Parser) match(t epllex.Token) bool{
 	return p.readNextToken() == t 
