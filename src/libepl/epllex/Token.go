@@ -74,6 +74,9 @@ func reserve() {
 	reserved["string"] = STRING
 	reserved["long"] = LONG
 	reserved["bool"] = BOOL
+	reserved["import"] = IMPORT
+	reserved["true"] = TRUE
+	reserved["false" ] = FALSE
 }
 
 func resolveType(buffer bytes.Buffer) Token {

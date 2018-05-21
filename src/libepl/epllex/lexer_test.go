@@ -39,6 +39,7 @@ func TestLexer(t *testing.T) {
 		{"23", NUM},
 		{"2.3", REAL},
 		{"HELLO3433", ID},
+		{"h", ID},
 		{"@MainFunc", CFLAG},
 		{"//commant\n/*More commant*/",EOF},
 		{"\n\n\"string\"", STRINGLITERAL},
@@ -103,6 +104,8 @@ func TestLexer(t *testing.T) {
 		{"uint64", UINT64},
 		{"uint", UINT},
 		{"bool", BOOL},
+		{"true", TRUE},
+		{"false", FALSE},
 		{"import", IMPORT},
 		{"string", STRING},
 	}

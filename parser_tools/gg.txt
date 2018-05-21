@@ -1,3 +1,0 @@
-]0;IPython: eplc/parser_toolsS ::= F 
-S ::= ( S + F )
-F ::= a

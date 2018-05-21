@@ -92,6 +92,8 @@ const (
 
 	IF             	TokenType = iota // if
 	ELSE           	TokenType = iota // else
+	TRUE 			TokenType = iota //Boolean type
+	FALSE 			TokenType = iota // Boolean type
 	
 	MOVE           	TokenType = iota // move
 	UNTIL          	TokenType = iota // until

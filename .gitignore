@@ -10,4 +10,4 @@ bootsrap_system_devel
 parser-tools
 *.pyc
 *.py
-grammar.md
+#grammar.md
