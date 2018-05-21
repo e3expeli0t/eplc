@@ -12,7 +12,7 @@ __check_defined = \
 install:
 	@command -v go >/dev/null 2>&1 || { echo >&2 "Please install go. Aborting."; exit 1; }
 	@command -v dep >/dev/null 2>&1 || { echo >&2 "Please install dep. Aborting."; exit 1; } # for the future
-	dep ensure
+	dep ensure -v
 	go test -v eplc/src/libepl/epllex -cover 
 	go build -i -v -o eplc-$(version) src/eplc.go
 	mkdir target
@@ -30,7 +30,7 @@ devel_tests:
 	go tool cover -html=count.out
 
 list:
-	ls /bin/epl-*
+	@ls  /bin/epl*
 
 update_remote:clean
 	@git add .
