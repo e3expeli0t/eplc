@@ -55,8 +55,12 @@ func (p *Parser) Construct() {
 
 }
 
-func (p *Parser) fnc_decl() {
+func (p *Parser) fnc() {
+	if p.readNextToken().Ttype != epllex.FNC {
+		//perr
+	}
 	
+
 }
 
 func (p *Parser) match(t epllex.Token) bool{

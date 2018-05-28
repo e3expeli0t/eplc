@@ -38,14 +38,16 @@ type Node struct {
 type NType int 
 
 const (
-	FNC_DECL NType 		= iota //fnc id()[:type] [-> id]
-	FNC_EXP_DECL NType 	= iota 
-	VAR_DECL NType 		= iota
-	VAR_EXP_DECL NType 	= iota
+	FNCDECL NType 		= iota //fnc id()[:type] [-> id]
+	FNCIMPL NType	 	= iota 
+	VARDECL NType 		= iota
 	ASSIGN NType 		= iota
+	MATHOP 				= iota
+	IF		 			= iota
 	ADD NType 			= iota
 	BLOCK NType 		= iota
 	BOOL_EXPR NType 	= iota
+	PROGRAM 			= iota
 )
 
 
