@@ -11,3 +11,6 @@ parser-tools
 *.pyc
 *.py
 #grammar.md
+parser-tools
+tools
+
