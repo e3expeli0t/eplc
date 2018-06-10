@@ -57,3 +57,9 @@ func (an *AST) IsRoot(n *Node) bool  {
 func (an *AST) IsData(n *Node) bool {
 	return len(n._value) == 0
 }
+
+type IF Node
+type MOVE Node
+type REPEAT Node
+type FNC Node
+type EXPRESSION Node
