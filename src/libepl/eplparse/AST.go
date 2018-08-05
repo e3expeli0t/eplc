@@ -41,6 +41,7 @@ type (
 
 	Block struct {
 
+<<<<<<< HEAD
 	}
 	
 	VarDecl struct {
@@ -73,3 +74,13 @@ type (
 		Stmts []IfElseIfStatement
 	}
 )
+=======
+func (an *AST) IsData(n *Node) bool {
+	return len(n._value) == 0
+}
+
+type IF struct {
+	ST *SymbolTable
+	condition BOOL_EXPR
+}
+>>>>>>> 9dd32b163eca093275fa40b9d7f69814ffc07d47
