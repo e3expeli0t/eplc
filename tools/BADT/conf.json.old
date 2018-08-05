@@ -1,0 +1,4 @@
+{
+    "links":["https://github.com/antlr/antlr4/archive/master.zip","https://github.com/google/go-trace/archive/master.zip"], 
+    "building system" : "go build"
+}

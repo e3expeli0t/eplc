@@ -1,0 +1,38 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/e3expeli0t/.Go/src/eplc/tools/Support/epldbg/linenoise.h
+
+/home/e3expeli0t/.Go/src/eplc/tools/Support/epldbg/luncher.cpp
+iostream
+-
+vector
+-
+sstream
+-
+cstring
+-
+sys/wait.h
+-
+sys/ptrace.h
+-
+unistd.h
+-
+luncher.h
+/home/e3expeli0t/.Go/src/eplc/tools/Support/epldbg/luncher.h
+linenoise.h
+/home/e3expeli0t/.Go/src/eplc/tools/Support/epldbg/linenoise.h
+
+/home/e3expeli0t/.Go/src/eplc/tools/Support/epldbg/luncher.h
+utility
+-
+string
+-
+linux/types.h
+-
+
