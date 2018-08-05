@@ -25,7 +25,7 @@ import (
 
 //TokenError prints error msg with precise info about the token that cause the error
 func TokenError(line uint, lineOffset uint, token rune, filename string) {
-	Output.PrintErr("Lexical", filename+":"+fmt.Sprint(line)+":"+fmt.Sprint(lineOffset)+": Could't resolve Token '"+string(token)+"'")
+	Output.PrintErr("Lexical", fmt.Sprintf("%s:%d:%d: Could't resolve Token %#U", filename, line, lineOffset, token))
 }
 
 //Prints lexical error msg and quits after that

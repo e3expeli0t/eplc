@@ -23,39 +23,53 @@ package eplparse
 /*
 	AST (or Abstract Syntax Tree) is whats the parser producing
 */
-type AST struct {
-	nodes []Node
+
+type Node interface {
+	Start()
+	End()
 }
 
-type Node struct {
-	_type NType
-	_value string
-	left *Node
-	right *Node
-	parent *Node
-}
 
-type NType int 
+type VarStat string 
 
 const (
-	FNCDECL NType 		= iota //fnc id()[:type] [-> id]
-	FNCIMPL NType	 	= iota 
-	VARDECL NType 		= iota
-	ASSIGN NType 		= iota
-	MATHOP 				= iota
-	IF		 			= iota
-	ADD NType 			= iota
-	BLOCK NType 		= iota
-	BOOL_EXPR NType 	= iota
-	PROGRAM 			= iota
+	FixedVar VarStat = "**FIXED**"
 )
 
+type ( 
+	
 
-//Check if the 
-func (an *AST) IsRoot(n *Node) bool  {
-	return n.parent == nil 
-}
+	Block struct {
 
-func (an *AST) IsData(n *Node) bool {
-	return len(n._value) == 0
-}
+	}
+	
+	VarDecl struct {
+		name string
+		stat VarStat 
+	}
+
+ 	VarExplicitDecl struct {
+		VarDecl
+		value string
+	}
+
+	Import struct {
+		Imports []string
+	}
+
+	BoolExpr struct {}
+
+	IfElseStatment struct {
+		Condition BoolExpr
+		Code *Block
+		Else *Block	
+	}
+
+	IfStatement struct {
+		Condition BoolExpr
+		Code *Block
+	}
+	IfElseIfStatement struct{
+		Stmts []IfElseIfStatement
+	}
+)

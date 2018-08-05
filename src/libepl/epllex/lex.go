@@ -41,12 +41,11 @@ var (
 type Lexer struct {
 	Buffer *bufio.Reader
 	filename string
-	ST SymbolTable
 }
 
 //New Lexer
 func New(file io.Reader, name string) Lexer {
-	return Lexer{Buffer: bufio.NewReader(file), ST: SymbolTable{map[string]*SymbolData{}}, filename: name}
+	return Lexer{Buffer: bufio.NewReader(file), filename: name}
 }
 
 //Checks if the charecter is valid utf
@@ -200,6 +199,7 @@ func (l *Lexer) Next() Token {
 		case '"':
 			return l.matchBy('"')
 		}
+
 		Errors.TokenError(line, lineOffset, ch, l.filename)
 		errCount++;
 		
@@ -210,11 +210,12 @@ func (l *Lexer) Next() Token {
 	}
 	
 	Errors.FatalLexical("To many errors")
-	return Token{"", EOF}
+	return Token{"", EOF, line, lineOffset}
 }
 
 
 func (l *Lexer) matchBy(s rune) Token {
+	startOffset := lineOffset
 	var buffer bytes.Buffer
 	ch := l.read()
 	buffer.WriteRune(s)
@@ -225,7 +226,7 @@ func (l *Lexer) matchBy(s rune) Token {
 	}
 	buffer.WriteRune(ch)
 
-	return Token{Ttype: STRINGLITERAL, Lexme: buffer.String()}
+	return Token{Ttype: STRINGLITERAL, Lexme: buffer.String(), Start:startOffset,End: lineOffset}
 }
 
 //Skips the whitespaces
@@ -268,6 +269,7 @@ func (l *Lexer) read() rune {
 }
 
 func (l *Lexer) scanID(cf bool) Token {
+	startOffset := lineOffset
 	var buf bytes.Buffer
 	ch := l.read()
 
@@ -279,19 +281,20 @@ func (l *Lexer) scanID(cf bool) Token {
 	l.unread()
 
 	if cf {
-		return Token{buf.String(), CFLAG} 
+		return Token{buf.String(), CFLAG, startOffset, lineOffset} 
 	}
 
+	/*
 	if l.ST.Get(buf.String()) != (SymbolData{}) {
 		return Token{buf.String(), ID}
 	}
-
+*/
 	tmp := resolveType(buf)
-	
+/*	
 	if tmp.Ttype == ID {
 		l.ST.Add(&SymbolData{symbol: tmp.Lexme})
 	}
-
+*/
 	return tmp
 }
 

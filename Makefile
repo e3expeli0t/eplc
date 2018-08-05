@@ -1,4 +1,4 @@
-version=0.0.1
+mversion=0.0.1
 branch=devel
 msg=bug fixing
 
@@ -9,21 +9,39 @@ __check_defined = \
     $(if $(value $1),, \
       $(error Undefined $1$(if $2, ($2))))
 
-install:
+build:
+	@#make clean
 	@command -v go >/dev/null 2>&1 || { echo >&2 "Please install go. Aborting."; exit 1; }
 	@command -v dep >/dev/null 2>&1 || { echo >&2 "Please install dep. Aborting."; exit 1; } # for the future
-	dep ensure -v
+	
+	@echo Checking dependencies...
+	dep ensure
+	
+	@echo Running tests...
 	go test -v eplc/src/libepl/epllex -cover 
+	
+	@echo Building eplc...
 	go build -i -v -o eplc-$(version) src/eplc.go
-	mkdir target
-	mkdir target/bin
-	mv eplc-$(version) target/bin
-	@sudo mv target/bin/eplc-$(version) /bin/
+	@mkdir target
+	@mkdir target/bin
+	@mv eplc-$(version) target/bin
+
+	@echo Building support tools
+	cd tools/Support/epldbg/; cmake .
+	cd tools/Support/epldbg/; make
+
+install:
+	make build
+	install target/bin/eplc-$(version)
+
 
 clean:
-	rm -rf target
-	sudo rm -rf /bin/eplc-$(version)	 
+	@echo Removing eplc targets...
+	@rm -rf target
+	@sudo rm -rf /bin/eplc-$(version)	 
 
+	@echo Removing Support targets...
+	@cd tools/Support/epldbg/; make clean	
 devel_tests:
 	dep ensure
 	go test -v eplc/src/libepl/epllex -covermode=count -coverprofile=count.out fmt
@@ -36,8 +54,7 @@ update_remote:clean
 	@git add .
 	@git commit -a -m "$(msg)"
 	@git push
-
-update:
+sync:
 	@git pull
 
 switch:
