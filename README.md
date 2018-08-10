@@ -5,7 +5,7 @@ eplc is a compiler frontend for the epl programming language
 * build: fail
 
 #build
-* git clone <eplc>
+* git clone https://e3expeli0t@bitbucket.org/lsplct/eplc.git
 * cd eplc
 * make build
 
