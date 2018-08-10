@@ -222,7 +222,7 @@ The stmt prints Wowww 232 is bigger then 90.
 
 ##Loops:
 Loops are a way fo a programmer to write code that will execute n times without having to write n times that peace of code. For example suppose 
-we wont to write program thats calculate the factorial of a number n,
+we want to write program thats calculate the factorial of a number n,
 we can't write 1*2*3*4*...*n so we need to use loop. in epl there are
 4 kinds of loops. move, repeat, repeat-until and until.
 
