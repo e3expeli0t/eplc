@@ -2,7 +2,7 @@
 eplc is a compiler frontend for the epl programming language
 
 #Project status
-* build: pass
+* build: fail
 
 #build
 * git clone <eplc>
