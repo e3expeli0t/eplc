@@ -7,7 +7,7 @@ count.out
 devel_logs.txt
 bootsrap_system_devel
 *.nvis
-parser-tools
+parser_tools
 *.pyc
 *.py
 #grammar.md
