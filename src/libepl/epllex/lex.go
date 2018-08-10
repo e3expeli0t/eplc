@@ -54,6 +54,7 @@ func (l *Lexer) checkEncodiung(ch rune) bool {
 }
 
 func (l *Lexer) scanNumbers() Token {
+	startOffset := lineOffset
 	var buf bytes.Buffer
 	ch := l.read()
 	irn := false
@@ -68,10 +69,10 @@ func (l *Lexer) scanNumbers() Token {
 	l.unread()
 
 	if irn {
-		return Token{Ttype: REAL, Lexme: buf.String()}
+		return Token{Ttype: REAL, Lexme: buf.String(), Start: startOffset, End: lineOffset}
 	}
 
-	return Token{Ttype: NUM, Lexme: buf.String()}
+	return Token{Ttype: NUM, Lexme: buf.String(), Start: startOffset, End: lineOffset}
 }
 
 //Next reads the input stream and resolve the type of the readed character
@@ -80,7 +81,7 @@ func (l *Lexer) Next() Token {
 	ch := l.read()
 
 	if ch == -1 {
-		return Token{Ttype: EOF, Lexme: ""}
+		return Token{Ttype: EOF, Lexme: "", Start: 0, End: 0}
 	} else if isLetter(ch) {
 		l.unread()
 		return l.scanID(false)
@@ -215,7 +216,7 @@ func (l *Lexer) Next() Token {
 
 
 func (l *Lexer) matchBy(s rune) Token {
-	startOffset := lineOffset
+	start := [2]uint{lineOffset,line}
 	var buffer bytes.Buffer
 	ch := l.read()
 	buffer.WriteRune(s)
@@ -226,7 +227,7 @@ func (l *Lexer) matchBy(s rune) Token {
 	}
 	buffer.WriteRune(ch)
 
-	return Token{Ttype: STRINGLITERAL, Lexme: buffer.String(), Start:startOffset,End: lineOffset}
+	return Token{Ttype: STRINGLITERAL, Lexme: buffer.String(), Start:start}
 }
 
 //Skips the whitespaces
@@ -269,7 +270,8 @@ func (l *Lexer) read() rune {
 }
 
 func (l *Lexer) scanID(cf bool) Token {
-	startOffset := lineOffset
+	start := [2]uint{line, lineOffset}
+
 	var buf bytes.Buffer
 	ch := l.read()
 
@@ -281,7 +283,7 @@ func (l *Lexer) scanID(cf bool) Token {
 	l.unread()
 
 	if cf {
-		return Token{buf.String(), CFLAG, startOffset, lineOffset} 
+		return Token{buf.String(), CFLAG, startOffset-1,} 
 	}
 
 	/*
@@ -289,7 +291,7 @@ func (l *Lexer) scanID(cf bool) Token {
 		return Token{buf.String(), ID}
 	}
 */
-	tmp := resolveType(buf)
+	tmp := resolveType(buf, startOffset, lineOffset)
 /*	
 	if tmp.Ttype == ID {
 		l.ST.Add(&SymbolData{symbol: tmp.Lexme})
@@ -317,6 +319,11 @@ func (l *Lexer) skipMltLinesComment() {
 }
 
 func (l *Lexer) unread() {
-	lineOffset--
+	if lineOffset-1 < 0 {
+		line--
+
+	} else {
+		lineOffset--
+	}
 	l.Buffer.UnreadRune()
 }

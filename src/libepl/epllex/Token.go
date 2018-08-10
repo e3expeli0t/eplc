@@ -30,8 +30,7 @@ var (
 type Token struct {
 	Lexme string
 	Ttype TokenType
-	Start uint
-	End uint
+	Start [2]uint //index 1 is line index 2 is ofsset 
 }
 
 func isLetter(ch rune) bool {
@@ -81,7 +80,7 @@ func reserve() {
 	reserved["false" ] = FALSE
 }
 
-func resolveType(buffer bytes.Buffer, start uint, end uint) Token {
+func resolveType(buffer bytes.Buffer, start [2]uint) Token {
 	reserve()
 
 	if buffer.Len() < 2 {
@@ -92,5 +91,5 @@ func resolveType(buffer bytes.Buffer, start uint, end uint) Token {
 		return Token{Ttype: val, Lexme: buffer.String()}
 	}
 
-	return Token{Ttype: ID, Lexme: buffer.String(), Start: start, End: end}
+	return Token{Ttype: ID, Lexme: buffer.String(), Start: start}
 }

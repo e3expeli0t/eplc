@@ -50,7 +50,7 @@ devel_tests:
 list:
 	@ls  /bin/epl*
 
-update_remote:clean
+update:clean
 	@git add .
 	@git commit -a -m "$(msg)"
 	@git push
