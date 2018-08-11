@@ -25,4 +25,6 @@ eplc is a compiler frontend for the epl programming language
 |install|install eplc|
 
 #patches
-from now on all the changes in the patch will be listed in the `patachs.md` file 
+from now on all the changes in the patch will be listed in the `patachs.md` file
+future patches will be in the  `future.md`
+every code patch if he is written in go, is formatted by gofmt 
