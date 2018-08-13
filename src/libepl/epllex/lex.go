@@ -26,15 +26,15 @@ import (
 	"unicode/utf8"
 )
 
-var prevOffset uint =0
+var prevOffset uint = 0
 /*
 	Lexer. the job of the lexer is to break the input stream into
 	meaningful parts that later will be used by the parser and the IR generator
 	The lexer is Deterministic finite state machine (Deterministic finite automata)
 */
 type Lexer struct {
-	Buffer   *bufio.Reader
-	Filename string
+	Buffer     *bufio.Reader
+	Filename   string
 	Line       uint
 	LineOffset uint
 	ErrCount   uint
@@ -209,7 +209,7 @@ func (l *Lexer) matchBy(s rune) Token {
 	}
 	buffer.WriteRune(ch)
 
-	return Token{Ttype: STRINGLITERAL, Lexme: buffer.String(), StartOffset: startOffset-1, StartLine: startLine}
+	return Token{Ttype: STRINGLITERAL, Lexme: buffer.String(), StartOffset: startOffset - 1, StartLine: startLine}
 }
 
 func (l *Lexer) scanNumbers() Token {
@@ -254,7 +254,7 @@ func (l *Lexer) scanID(cf bool) Token {
 	l.unread()
 
 	if cf {
-		return Token{Lexme: buf.String(), Ttype: CFLAG, StartOffset: startOffset-1, StartLine: startLine}
+		return Token{Lexme: buf.String(), Ttype: CFLAG, StartOffset: startOffset - 1, StartLine: startLine}
 	}
 
 	/*
