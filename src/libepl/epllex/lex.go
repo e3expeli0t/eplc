@@ -19,43 +19,206 @@
 package epllex
 
 import (
-
 	"eplc/src/libepl/epllex/Errors"
 	"bufio"
 	"bytes"
 	"io"
 	"unicode/utf8"
-	"fmt"
 )
 
-var (
-	line       uint
-	lineOffset uint
-	errCount  uint
-)
-
+var prevOffset uint =0
 /*
 	Lexer. the job of the lexer is to break the input stream into
-	meaningful parts that later will be used by the parser and the SDT
+	meaningful parts that later will be used by the parser and the IR generator
+	The lexer is Deterministic finite state machine (Deterministic finite automata)
 */
 type Lexer struct {
-	Buffer *bufio.Reader
-	filename string
+	Buffer   *bufio.Reader
+	Filename string
+	Line       uint
+	LineOffset uint
+	ErrCount   uint
 }
 
 //New Lexer
 func New(file io.Reader, name string) Lexer {
-	return Lexer{Buffer: bufio.NewReader(file), filename: name}
+	return Lexer{Buffer: bufio.NewReader(file), Filename: name, Line: 0, LineOffset: 0, ErrCount: 0}
 }
 
-//Checks if the charecter is valid utf
-func (l *Lexer) checkEncodiung(ch rune) bool {
+//Checks if the character is valid utf
+func (l *Lexer) checkEncoding(ch rune) bool {
 	return utf8.ValidRune(ch)
 }
 
+//Next reads the input stream and resolve the type of the read character
+func (l *Lexer) Next() Token {
+	l.skipWhiteSpaces() //if there are whitespaces skip them
+
+	//Save the Line and the Line offset for the parser error handling
+	startOffset := l.LineOffset
+	startLine := l.Line
+
+	ch := l.read() //read one char
+
+	if ch == -1 {
+		return Token{Ttype: EOF, Lexme: "", StartOffset: 0, StartLine: 0}
+	} else if isLetter(ch) {
+		l.unread()
+		return l.scanID(false)
+	} else if isNum(ch) {
+		l.unread()
+		return l.scanNumbers()
+	} else {
+
+		switch ch {
+		case '@':
+			//Read the string that followed the @ char and return it as compiler flag
+			return l.scanID(true)
+		case '!':
+			return Token{Ttype: NOT, Lexme: "!", StartOffset: startOffset, StartLine: startLine}
+		case ';':
+			return Token{Ttype: SEMICOLON, Lexme: ";", StartOffset: startOffset, StartLine: startLine}
+		case '.':
+			return Token{Ttype: DOT, Lexme: ".", StartOffset: startOffset, StartLine: startLine}
+		case ',':
+			return Token{Ttype: COMMA, Lexme: ",", StartOffset: startOffset, StartLine: startLine}
+		case ':':
+			return Token{Ttype: RETURN_IND, Lexme: ":", StartOffset: startOffset, StartLine: startLine}
+		case '[':
+			return Token{Ttype: LSUBSCRIPT, Lexme: "[", StartOffset: startOffset, StartLine: startLine}
+		case ']':
+			return Token{Ttype: RSUBSCRIPT, Lexme: "]", StartOffset: startOffset, StartLine: startLine}
+		case '{':
+			return Token{Ttype: LBRACE, Lexme: "{", StartOffset: startOffset, StartLine: startLine}
+		case '}':
+			return Token{Ttype: RBRACE, Lexme: "}", StartOffset: startOffset, StartLine: startLine}
+		case '(':
+			return Token{Ttype: LPAR, Lexme: "(", StartOffset: startOffset, StartLine: startLine}
+		case ')':
+			return Token{Ttype: RPAR, Lexme: ")", StartOffset: startOffset, StartLine: startLine}
+		case '|':
+			if ch = l.read(); ch == '|' {
+				return Token{Ttype: OR, Lexme: "||", StartOffset: startOffset, StartLine: startLine}
+			}
+			l.unread()
+
+			return Token{Ttype: UNARYOR, Lexme: "|", StartOffset: startOffset, StartLine: startLine}
+		case '&':
+			if ch = l.read(); ch == '&' {
+				return Token{Ttype: AND, Lexme: "&&", StartOffset: startOffset, StartLine: startLine}
+			}
+			l.unread()
+
+			return Token{Ttype: UNARYAND, Lexme: "&", StartOffset: startOffset, StartLine: startLine}
+		case '+':
+			if ch = l.read(); ch == '=' {
+				return Token{Ttype: PLUSEQUAL, Lexme: "+=", StartOffset: startOffset, StartLine: startLine}
+			}
+			l.unread()
+
+			return Token{Ttype: PLUS, Lexme: "+", StartOffset: startOffset, StartLine: startLine}
+
+		case '-':
+			if ch = l.read(); ch == '=' {
+				return Token{Ttype: MINUSEQUAL, Lexme: "-=", StartOffset: startOffset, StartLine: startLine}
+			}
+			l.unread()
+
+			return Token{Ttype: MINUS, Lexme: "-", StartOffset: startOffset, StartLine: startLine}
+		case '*':
+			if ch = l.read(); ch == '=' {
+				return Token{Ttype: MULTEQUAL, Lexme: "*=", StartOffset: startOffset, StartLine: startLine}
+			}
+			l.unread()
+
+			return Token{Ttype: MULT, Lexme: "*", StartOffset: startOffset, StartLine: startLine}
+		case '/':
+			if ch = l.read(); ch == '=' {
+				return Token{Ttype: DEVEQUAL, Lexme: "/=", StartOffset: startOffset, StartLine: startLine}
+			} else if ch == '/' {
+				l.unread()
+				l.readLine()
+				return l.Next()
+			} else if ch == '*' {
+				l.skipMltLinesComment()
+				return l.Next()
+			}
+			l.unread()
+
+			return Token{Ttype: DEV, Lexme: "/", StartOffset: startOffset, StartLine: startLine}
+		case '>':
+			if ch = l.read(); ch == '=' {
+				return Token{Ttype: GE, Lexme: ">=", StartOffset: startOffset, StartLine: startLine}
+			}
+			l.unread()
+			if ch = l.read(); ch == '>' {
+				return Token{Ttype: RSHIFT, Lexme: ">>", StartOffset: startOffset, StartLine: startLine}
+			}
+			l.unread()
+
+			return Token{Ttype: GT, Lexme: ">", StartOffset: startOffset, StartLine: startLine}
+		case '<':
+			if ch = l.read(); ch == '=' {
+				return Token{Ttype: LE, Lexme: "<=", StartOffset: startOffset, StartLine: startLine}
+			}
+			l.unread()
+
+			if ch = l.read(); ch == '<' {
+				return Token{Ttype: LSHIFT, Lexme: "<<", StartOffset: startOffset, StartLine: startLine}
+			}
+			l.unread()
+
+			return Token{Ttype: LT, Lexme: "<", StartOffset: startOffset, StartLine: startLine}
+		case '=':
+			if ch = l.read(); ch == '=' {
+				return Token{Ttype: EQ, Lexme: "==", StartOffset: startOffset, StartLine: startLine}
+			}
+			l.unread()
+
+			return Token{Ttype: ASSIGN, Lexme: "=", StartOffset: startOffset, StartLine: startLine}
+		case '\'':
+			return l.matchBy('\'')
+		case '"':
+			return l.matchBy('"')
+		}
+		Errors.TokenError(l.Line, l.LineOffset, ch, l.Filename)
+		l.ErrCount++
+
+		if l.ErrCount > 5 {
+			Errors.FatalLexical("To many errors")
+		}
+		l.Next()
+	}
+
+	Errors.FatalLexical("To many errors")
+	return Token{"", EOF, l.Line, l.LineOffset}
+}
+
+func (l *Lexer) matchBy(s rune) Token {
+	var buffer bytes.Buffer
+
+	startOffset := l.LineOffset
+	startLine := l.Line
+
+	ch := l.read()
+	buffer.WriteRune(s)
+
+	for ch != s {
+		buffer.WriteRune(ch)
+		ch = l.read()
+	}
+	buffer.WriteRune(ch)
+
+	return Token{Ttype: STRINGLITERAL, Lexme: buffer.String(), StartOffset: startOffset-1, StartLine: startLine}
+}
+
 func (l *Lexer) scanNumbers() Token {
-	startOffset := lineOffset
+
+	startOffset := l.LineOffset
+	startLine := l.Line
+
 	var buf bytes.Buffer
+
 	ch := l.read()
 	irn := false
 
@@ -69,165 +232,43 @@ func (l *Lexer) scanNumbers() Token {
 	l.unread()
 
 	if irn {
-		return Token{Ttype: REAL, Lexme: buf.String(), Start: startOffset, End: lineOffset}
+		return Token{Ttype: REAL, Lexme: buf.String(), StartOffset: startOffset, StartLine: startLine}
 	}
 
-	return Token{Ttype: NUM, Lexme: buf.String(), Start: startOffset, End: lineOffset}
+	return Token{Ttype: NUM, Lexme: buf.String(), StartOffset: startOffset, StartLine: startLine}
 }
 
-//Next reads the input stream and resolve the type of the readed character
-func (l *Lexer) Next() Token {
-	l.skipWhiteSpaces()
+func (l *Lexer) scanID(cf bool) Token {
+
+	startOffset := l.LineOffset
+	startLine := l.Line
+
+	var buf bytes.Buffer
 	ch := l.read()
 
-	if ch == -1 {
-		return Token{Ttype: EOF, Lexme: "", Start: 0, End: 0}
-	} else if isLetter(ch) {
-		l.unread()
-		return l.scanID(false)
-	} else if isNum(ch) {
-		l.unread()
-		return l.scanNumbers()
-	} else {
+	for isLetter(ch) || isNum(ch) {
 
-		switch ch {
-		case '@':
-			return l.scanID(true)
-		case '!':
-			return Token{Ttype: NOT, Lexme: "!"}
-		case ';':
-			return Token{Ttype: SEMICOLON, Lexme: ";"}
-		case '.':
-			return Token{Ttype: DOT, Lexme: "."}
-		case ',':
-			return Token{Ttype: COMMA, Lexme: ","}
-		case ':':
-			return Token{Ttype: RETURN_IND, Lexme: ":"}
-		case '[':
-			return Token{Ttype: LSUBSCRIPT, Lexme: "["}
-		case ']':
-			return Token{Ttype: RSUBSCRIPT, Lexme: "]"}
-		case '{':
-			return Token{Ttype: LBRACE, Lexme: "{"}
-		case '}':
-			return Token{Ttype: RBRACE, Lexme: "}"}
-		case '(':
-			return Token{Ttype: LPAR, Lexme: "("}
-		case ')':
-			return Token{Ttype: RPAR, Lexme: ")"}
-		case '|':
-			if ch = l.read(); ch == '|' {
-				return Token{Ttype: OR, Lexme: "||"}
-			}
-			l.unread()
-
-			return Token{Ttype: UNARYOR, Lexme: "|"}
-		case '&':
-			if ch = l.read(); ch == '&' {
-				return Token{Ttype: AND, Lexme: "&&"}
-			}
-			l.unread()
-
-			return Token{Ttype: UNARYAND, Lexme: "&"}
-		case '+':
-			if ch = l.read(); ch == '=' {
-				return Token{Ttype: PLUSEQUAL, Lexme: "+="}
-			}
-			l.unread()
-
-			return Token{Ttype: PLUS, Lexme: "+"}
-
-		case '-':
-			if ch = l.read(); ch == '=' {
-				return Token{Ttype: MINUSEQUAL, Lexme: "-="}
-			}
-			l.unread()
-
-			return Token{Ttype: MINUS, Lexme: "-"}
-		case '*':
-			if ch = l.read(); ch == '=' {
-				return Token{Ttype: MULTEQUAL, Lexme: "*="}
-			}
-			l.unread()
-
-			return Token{Ttype: MULT, Lexme: "*"}
-		case '/':
-			if ch = l.read(); ch == '=' {
-				return Token{Ttype: DEVEQUAL, Lexme: "/="}
-			} else if ch == '/' {
-				l.unread()
-				l.readLine()
-				return l.Next()
-			} else if ch == '*' {
-					l.skipMltLinesComment()
-					return l.Next()
-			}
-			l.unread()
-
-			return Token{Ttype: DEV, Lexme: "/"}
-		case '>':
-			if ch = l.read(); ch == '=' {
-				return Token{Ttype: GE, Lexme: ">="}
-			}
-			l.unread();  
-			if ch = l.read(); ch == '>' {
-				return Token{Ttype: RSHIFT, Lexme: ">>"}
-			}
-			l.unread()
-
-			return Token{Ttype: GT, Lexme: ">"}
-		case '<':
-			if ch = l.read(); ch == '=' {
-				return Token{Ttype: LE, Lexme: "<="}
-			}
-			l.unread();  
-			
-			if ch = l.read(); ch == '<' {
-				return Token{Ttype: LSHIFT, Lexme: "<<"}
-			}
-			l.unread()
-
-			return Token{Ttype: LT, Lexme: "<"}
-		case '=':
-			if ch = l.read(); ch == '=' {
-				return Token{Ttype: EQ, Lexme: "=="}
-			}
-			l.unread()
-
-			return Token{Ttype: ASSIGN, Lexme: "="}
-		case '\'':
-			return l.matchBy('\'')
-		case '"':
-			return l.matchBy('"')
-		}
-
-		Errors.TokenError(line, lineOffset, ch, l.filename)
-		errCount++;
-		
-		if errCount > 5 {
-			Errors.FatalLexical("To many errors")
-		}
-		l.Next()
-	}
-	
-	Errors.FatalLexical("To many errors")
-	return Token{"", EOF, line, lineOffset}
-}
-
-
-func (l *Lexer) matchBy(s rune) Token {
-	start := [2]uint{lineOffset,line}
-	var buffer bytes.Buffer
-	ch := l.read()
-	buffer.WriteRune(s)
-
-	for ch != s {
-		buffer.WriteRune(ch)
+		buf.WriteRune(ch)
 		ch = l.read()
 	}
-	buffer.WriteRune(ch)
+	l.unread()
 
-	return Token{Ttype: STRINGLITERAL, Lexme: buffer.String(), Start:start}
+	if cf {
+		return Token{Lexme: buf.String(), Ttype: CFLAG, StartOffset: startOffset-1, StartLine: startLine}
+	}
+
+	/*
+	if l.ST.Get(buf.String()) != (SymbolData{}) {
+		return Token{buf.String(), ID}
+	}
+*/
+	tmp := resolveType(buf, startLine, startOffset)
+	/*
+		if tmp.Ttype == ID {
+			l.ST.Add(&SymbolData{symbol: tmp.Lexme})
+		}
+	*/
+	return tmp
 }
 
 //Skips the whitespaces
@@ -235,13 +276,32 @@ func (l *Lexer) skipWhiteSpaces() {
 	ch := l.read()
 
 	for ch == '\n' || ch == '\t' || ch == '\r' || ch == ' ' {
-		if ch == '\n'{
-			lineOffset = 0;
-			line++;
+		if ch == '\n' {
+			prevOffset = l.LineOffset
+			l.LineOffset = 0
+			l.Line++
 		}
 		ch = l.read()
 	}
 	l.unread()
+}
+
+func (l *Lexer) skipMltLinesComment() {
+	ch := l.read()
+
+	for {
+		if ch == '*' && l.read() == '/' {
+			break
+		} else if ch == -1 {
+			break
+		} else {
+			ch = l.read()
+		}
+	}
+
+	if ch == -1 {
+		Errors.FatalLexical(":" + l.Filename + ": error found EOF expected '*/' ")
+	}
 }
 
 func (l *Lexer) readLine() {
@@ -261,69 +321,21 @@ func (l *Lexer) read() rune {
 		return -1
 	}
 
-	if !l.checkEncodiung(char) {
-		Errors.Lexical( l.filename+":"+fmt.Sprint(line)+":"+fmt.Sprint(lineOffset)+": Invalid character: ", uint(char))
+	if !l.checkEncoding(char) {
+		Errors.EncodingError(l.Line, l.LineOffset, l.Filename, char)
+		l.ErrCount++
 	}
 
-	lineOffset++
+	l.LineOffset++
 	return char
 }
 
-func (l *Lexer) scanID(cf bool) Token {
-	start := [2]uint{line, lineOffset}
-
-	var buf bytes.Buffer
-	ch := l.read()
-
-	for isLetter(ch) || isNum(ch) {
-
-		buf.WriteRune(ch)
-		ch = l.read()
-	}
-	l.unread()
-
-	if cf {
-		return Token{buf.String(), CFLAG, startOffset-1,} 
-	}
-
-	/*
-	if l.ST.Get(buf.String()) != (SymbolData{}) {
-		return Token{buf.String(), ID}
-	}
-*/
-	tmp := resolveType(buf, startOffset, lineOffset)
-/*	
-	if tmp.Ttype == ID {
-		l.ST.Add(&SymbolData{symbol: tmp.Lexme})
-	}
-*/
-	return tmp
-}
-
-func (l *Lexer) skipMltLinesComment() {
-	ch := l.read()
-
-	for {
-		if ch == '*' && l.read() == '/' {
-			break;
-		} else if ch == -1 {
-			break;
-		} else {
-			ch = l.read()
-		}
-	}
-
-	if ch == -1 {
-		Errors.FatalLexical(":"+l.filename+": error found EOF expected '*/' ")
-	}
-}
-
 func (l *Lexer) unread() {
-	if lineOffset-1 < 0 {
-		line--
-
+	if l.LineOffset == 0 {
+		l.Line--
+		l.LineOffset = prevOffset
 	} else {
-		lineOffset--
+		l.LineOffset--
 	}
 	l.Buffer.UnreadRune()
 }

@@ -16,7 +16,7 @@
 *	along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-package eplparse
+package ast
 
 //import "eplc/src/libepl/epllex"
 
@@ -26,22 +26,17 @@ package eplparse
 
 type Node interface {
 	Start()
-	End()
-}
+	Left() *Node
+	Right() *Node
 
+}
 
 type VarStat string 
 
-const (
-	FixedVar VarStat = "**FIXED**"
-)
-
-type ( 
-	
+type (
 
 	Block struct {
-
-<<<<<<< HEAD
+		nodes []
 	}
 	
 	VarDecl struct {
@@ -74,13 +69,20 @@ type (
 		Stmts []IfElseIfStatement
 	}
 )
-=======
-func (an *AST) IsData(n *Node) bool {
-	return len(n._value) == 0
+func (b *Block) Start() {
+}
+func (v *VarDecl) Start() {
+}
+func (v *VarExplicitDecl) Start() {
+}
+func (i *Import) Start() {
+}
+func (b *BoolExpr) Start() {
+}
+func (i *IfElseStatment) Start() {
+}
+func (i *IfElseIfStatement) Start() {
+}
+func (i *IfStatement) Start() {
 }
 
-type IF struct {
-	ST *SymbolTable
-	condition BOOL_EXPR
-}
->>>>>>> 9dd32b163eca093275fa40b9d7f69814ffc07d47

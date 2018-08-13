@@ -19,18 +19,16 @@
 package epllex
 
 import (
-	"fmt"
 	"testing"
 	"strings"
 )
 
 
-func checkType(lexme string, tt TokenType, start uint, end uint) bool {
+func checkType(lexme string, tt TokenType, startLine uint, startOffset uint) bool {
 	lx := New(strings.NewReader(lexme), "test_lexer.epl")
 	tk := lx.Next()
-	fmt.Printf("type: %d, lexme: %s, start: %d, end:%d \r", tk.Ttype, tk.Lexme, tk.Start, tk.End)
-	fmt.Println()
-	return tk.End == end && tk.Start == start && tk.Ttype == tt
+	//fmt.Printf("type: %d, lexme: %s, start Line: %d, start offset:%d \n", tk.Ttype, tk.Lexme, tk.StartLine, tk.StartOffset)
+	return tk.StartLine == startLine && tk.StartOffset == startOffset && tk.Ttype == tt
 }
 
 
@@ -38,85 +36,85 @@ func TestLexer(t *testing.T) {
 	table := []struct {
 		inToken string
 		outType TokenType
-		start uint
-		end uint
+		startLine uint
+		startOffset uint
 	}{
-		{"23", NUM, 0, 1},
-		{"2.3", REAL, 1, 3},
-		{"HELLO3433", ID, 0, 9},
-		{"h", ID, 0, 1},
-		{"@MainFunc", CFLAG, 0, 9},
-		{"//commant\n/*More commant*/",EOF, 0, 0},
-		{"\n\n\"string\"", STRINGLITERAL, 3, 7},
-		{"\n'string'", STRINGLITERAL, 2, 7},
-		{"if", IF, 0, 2},
-		{"else", ELSE, 0, 4},
-		{"repeat", REPEAT, 0, 6},
-		{"until", UNTIL, 0, 5},
-		{"move", MOVE, 0, 4},
-		{"in", IN, 0, 2},
-		{"static", STATIC, 0, 6},
-		{"fixed", FIXED, 0, 5},
-		{"decl", DECL, 0, 4},
-		{"define", DEFINE, 0, 6},
-		{"type", TYPE, 0, 4},
-		{"struct", STRUCT, 0, 6},
-		{"fnc", FNC, 0, 3},
-		{"+", PLUS, 0, 1},
-		{"-", MINUS, 0, 1},
-		{"/", DEV, 0, 1},
-		{"*", MULT, 0, 1},
-		{"{", LBRACE, 0, 1},
-		{"}", RBRACE, 0, 1},
-		{"(", LPAR, 0, 1},
-		{")", RPAR, 0, 1},
-		{"[", LSUBSCRIPT, 0, 1},
-		{"]", RSUBSCRIPT, 0, 1},
-		{"+=", PLUSEQUAL, 0, 2},
-		{"-=", MINUSEQUAL, 0, 2},
-		{"*=", MULTEQUAL, 0, 2},
-		{"/=", DEVEQUAL, 0, 2},
-		{"=", ASSIGN, 0, 1},
-		{">", GT, 0, 1},
-		{"<", LT, 0, 1},
-		{"==", EQ, 0, 2},
-		{">=", GE, 0, 2},
-		{"<=", LE, 0, 2},
-		{"&&", AND, 0, 2},
-		{"||", OR, 0, 2},
-		{"!", NOT, 0, 1},
-		{"|", UNARYOR, 0, 1},
-		{"&", UNARYAND, 0, 1},
-		{"<<", LSHIFT, 0, 2},
-		{">>", RSHIFT, 0, 2},
-		{";", SEMICOLON, 0, 1},
-		{":", RETURN_IND, 0, 1},
-		{",", COMMA, 0, 1},
-		{".", DOT, 0, 1},
-		{"int", INT, 0, 3},
-		{"int16", INT16, 0, 5},
-		{"int32", INT32, 0, 5},
-		{"int64", INT64, 0, 5},
-		{"float16", FLOAT16, 0, 7},
-		{"float64", FLOAT64, 0, 7},
-		{"float64", FLOAT64, 0, 7},
-		{"float", FLOAT, 0, 5},
-		{"long", LONG, 0, 4},
-		{"cmx64", CMX64, 0, 5},
-		{"cmx", CMX, 0, 3},
-		{"uint16", UINT16, 0, 6},
-		{"uint32", UINT32, 0, 6},
-		{"uint64", UINT64, 0, 6},
-		{"uint", UINT, 0, 4},
-		{"bool", BOOL, 0, 4},
-		{"true", TRUE, 0, 4},
-		{"false", FALSE, 0, 4},
-		{"import", IMPORT, 0, 6},
-		{"string", STRING, 0, 6},
+		{"23", NUM, 0, 0},
+		{"2.3", REAL, 0, 0},
+		{"HELLO3433", ID, 0, 0},
+		{"h", ID, 0, 0},
+		{"@MainFunc", CFLAG, 0, 0},
+		{"//comment\n/*More comment*/",EOF, 0, 0},
+		{"\n\n\"string\"", STRINGLITERAL, 2, 0},
+		{"\n'string'", STRINGLITERAL, 1, 0},
+		{"if", IF, 0, 0},
+		{"else", ELSE, 0, 0},
+		{"repeat", REPEAT, 0, 0},
+		{"until", UNTIL, 0, 0},
+		{"move", MOVE, 0, 0},
+		{"in", IN, 0, 0},
+		{"static", STATIC, 0, 0},
+		{"fixed", FIXED, 0, 0},
+		{"decl", DECL, 0, 0},
+		{"define", DEFINE, 0, 0},
+		{"type", TYPE, 0, 0},
+		{"struct", STRUCT, 0, 0},
+		{"fnc", FNC, 0, 0},
+		{"+", PLUS, 0, 0},
+		{"-", MINUS, 0, 0},
+		{"/", DEV, 0, 0},
+		{"*", MULT, 0, 0},
+		{"{", LBRACE, 0, 0},
+		{"}", RBRACE, 0, 0},
+		{"(", LPAR, 0, 0},
+		{")", RPAR, 0, 0},
+		{"[", LSUBSCRIPT, 0, 0},
+		{"]", RSUBSCRIPT, 0, 0},
+		{"+=", PLUSEQUAL, 0, 0},
+		{"-=", MINUSEQUAL, 0, 0},
+		{"*=", MULTEQUAL, 0, 0},
+		{"/=", DEVEQUAL, 0, 0},
+		{"=", ASSIGN, 0, 0},
+		{">", GT, 0, 0},
+		{"<", LT, 0, 0},
+		{"==", EQ, 0, 0},
+		{">=", GE, 0, 0},
+		{"<=", LE, 0, 0},
+		{"&&", AND, 0, 0},
+		{"||", OR, 0, 0},
+		{"!", NOT, 0, 0},
+		{"|", UNARYOR, 0, 0},
+		{"&", UNARYAND, 0, 0},
+		{"<<", LSHIFT, 0, 0},
+		{">>", RSHIFT, 0, 0},
+		{";", SEMICOLON, 0, 0},
+		{":", RETURN_IND, 0, 0},
+		{",", COMMA, 0, 0},
+		{".", DOT, 0, 0},
+		{"int", INT, 0, 0},
+		{"int16", INT16, 0, 0},
+		{"int32", INT32, 0, 0},
+		{"int64", INT64, 0, 0},
+		{"float16", FLOAT16, 0, 0},
+		{"float64", FLOAT64, 0, 0},
+		{"float64", FLOAT64, 0, 0},
+		{"float", FLOAT, 0, 0},
+		{"long", LONG, 0, 0},
+		{"cmx64", CMX64, 0, 0},
+		{"cmx", CMX, 0, 0},
+		{"uint16", UINT16, 0, 0},
+		{"uint32", UINT32, 0, 0},
+		{"uint64", UINT64, 0, 0},
+		{"uint", UINT, 0, 0},
+		{"bool", BOOL, 0, 0},
+		{"true", TRUE, 0, 0},
+		{"false", FALSE, 0, 0},
+		{"import", IMPORT, 0, 0},
+		{"string", STRING, 0, 0},
 	}
 
 	for _, tst := range table{
-		if !checkType(tst.inToken, tst.outType, tst.start, tst.end) {
+		if !checkType(tst.inToken, tst.outType, tst.startLine, tst.startOffset) {
 			t.Errorf("[!] Couldn't match token '%s' to type %d", tst.inToken, tst.outType)
 			break
 		}

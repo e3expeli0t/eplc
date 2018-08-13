@@ -22,6 +22,7 @@ import (
 	"eplc/src/libepl/eplparse/errors"
 	"eplc/src/libepl/epllex"
 	"eplc/src/libepl/eplparse/symboltable"
+	"fmt"
 )
 
 var (
@@ -35,11 +36,11 @@ func New(lx epllex.Lexer) Parser {
 }
 
 /*
-	Parser. the parser job is to take tokenized stream from the lexer
-	and construct a tree form it, the tree is calld AST (Abstract Syntax Tree)
+	Parser. the parser job is to take tokensized stream from the lexer
+	and construct a tree form it, the tree is called AST (Abstract Syntax Tree)
 	by the set of rules that the language grammar produce
 	There are couple of parser kinds, in this version of epl (bootstrap) we are going
-	to use a parser that calld predictive parser (The grammar class is LL(k)).
+	to use a parser that called predictive parser (The grammar class is LL(k)).
 	In the future  i'm planning to implement LR(0) parser
 */
 type Parser struct {
@@ -75,7 +76,9 @@ func (p *Parser) NextScope() {
 }
 
 //Construct new AST from the token stream
-func (p *Parser) Construct(){}
+func (p *Parser) Construct(){
+	p.ParseProgram()
+}
 
 func (p *Parser) ParseProgram() Node {
 	p.readNextToken()
@@ -84,17 +87,28 @@ func (p *Parser) ParseProgram() Node {
 
 	if p.match(epllex.IMPORT){
 		if p.match_n(epllex.ID) {
-			ASt = p.ParseImport()
+			AST = p.ParseImport()
 		} else {
-			//errors.ParsingError()
+			errors.ParsingError(p.Lexer.Filename, currentToken.StartLine, currentToken.StartOffset, fmt.Sprintf("Invalid import statement. expected string got %s", lookahead.Lexme))
 		}
 	} else {
 
 	}
+
+	return AST
 }
 
 func (p *Parser)ParseImport() Node {
+	var importList []string
 
+	for p.match_n(epllex.SEMICOLON){
+		fmt.Println(lookahead.Lexme)
+		if p.match(epllex.ID) {
+			importList = append(importList, currentToken.Lexme)
+			fmt.Println(importList)
+		}
+	}
+	return &Import{importList}
 }
 
 

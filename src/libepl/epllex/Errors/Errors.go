@@ -33,6 +33,10 @@ func FatalLexical(msg ...interface{}) {
 	Output.PrintFatalErr("Lexical", msg...)
 }
 
+func EncodingError(line uint, lineOffset uint, filename string, char rune) {
+	Output.PrintErr("Lexical", fmt.Sprintf("%s:%d:%d: Encoding error %#U", filename, line, lineOffset, char))
+}
+
 //Lexical prints lexical error msg without quiting
 func Lexical(msg ...interface{}) {
 	Output.PrintErr("Lexical", msg...)

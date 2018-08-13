@@ -1,7 +1,7 @@
 mversion=0.0.1
 branch=devel
 msg=bug fixing
-
+dep_args=
 check_defined = \
     $(strip $(foreach 1,$1, \
         $(call __check_defined,$1,$(strip $(value 2)))))
@@ -15,7 +15,7 @@ build:
 	@command -v dep >/dev/null 2>&1 || { echo >&2 "Please install dep. Aborting."; exit 1; } # for the future
 	
 	@echo Checking dependencies...
-	dep ensure
+	dep ensure $(dep_args)
 	
 	@echo Running tests...
 	go test -v eplc/src/libepl/epllex -cover 
@@ -43,14 +43,14 @@ clean:
 	@echo Removing Support targets...
 	@cd tools/Support/epldbg/; make clean	
 devel_tests:
-	dep ensure
+	dep ensure $(dep_args)
 	go test -v eplc/src/libepl/epllex -covermode=count -coverprofile=count.out fmt
 	go tool cover -html=count.out
-
 list:
 	@ls  /bin/epl*
 
 update:clean
+	@rm -rf vendor/*
 	@git add .
 	@git commit -a -m "$(msg)"
 	@git push

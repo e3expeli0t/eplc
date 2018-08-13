@@ -21,7 +21,7 @@ const (
 	hidden		= 8
 	// color
 	black 		= 30		// default = 39
-	red		= 31
+	red			= 31
 	green		= 32
 	yellow		= 33
 	blue		= 34
@@ -31,9 +31,9 @@ const (
 	darkGray 	= 90
 	lightRed 	= 91
 	lightGreen 	= 92
-	lightYellow 	= 93
+	lightYellow = 93
 	lightBlue	= 94
-	lightPurple 	= 95
+	lightPurple = 95
 	lightCyan	= 96
 	white		= 97
 )

@@ -1,1 +1,1 @@
-required = ["github.com/jessevdk/go-flags"] #For future use
+#required = ["github.com/jessevdk/go-flags"] #For future use
