@@ -14,21 +14,21 @@
 *
 *	You should have received a copy of the GNU General Public License
 *	along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package main
 
 import (
 	"eplc/src/libepl"
 	"eplc/src/libepl/Output"
+	"fmt"
 	"io"
 	"os"
-	"fmt"
-	"github.com/pkg/profile"
+	//"github.com/pkg/profile"
 )
 
 func main() {
-	defer profile.Start(profile.CPUProfile).Stop()
+	//defer profile.Start(profile.CPUProfile).Stop()
 	//defer profile.Start(profile.MemProfile).Stop()
 
 	if len(os.Args) == 1 {
