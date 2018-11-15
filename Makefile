@@ -1,4 +1,4 @@
-mversion=0.0.1
+version=0.0.1
 branch=devel
 msg=bug fixing
 dep_args=
@@ -29,11 +29,17 @@ build:
 	@echo Building support tools
 	cd tools/Support/epldbg/; cmake .
 	cd tools/Support/epldbg/; make
-
+rebuild:
+	@echo Running tests...
+	go test -v eplc/src/libepl/epllex -cover
+	
+	@echo Rebuilding eplc...
+	go build -i -v -o eplc-$(version) src/eplc.go
+	@rm -rf target/bin/eplc-$(version)
+	@mv eplc-$(version) target/bin/
 install:
 	make build
 	install target/bin/eplc-$(version)
-
 
 clean:
 	@echo Removing eplc targets...

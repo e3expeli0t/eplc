@@ -2,14 +2,14 @@
 
 
 [[projects]]
-  name = "github.com/jessevdk/go-flags"
+  name = "github.com/pkg/profile"
   packages = ["."]
-  revision = "c6ca198ec95c841fdb89fc0de7496fed11ab854e"
-  version = "v1.4.0"
+  revision = "5b67d428864e92711fcbd2f8629456121a56d91f"
+  version = "v1.2.1"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fd11dcfcf11e6c96fb5413aefba29670dfaf7ebb415c2e4699bed5dd533ba9f7"
+  inputs-digest = "ce91c08f189710bbaea0401fd5e7b528ad452c034b7670f5926943b83484f984"
   solver-name = "gps-cdcl"
   solver-version = 1

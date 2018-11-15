@@ -19,9 +19,11 @@
 package eplparse
 
 import (
-	"eplc/src/libepl/eplparse/errors"
+	//"eplc/src/libepl/eplparse/errors"
 	"eplc/src/libepl/epllex"
 	"eplc/src/libepl/eplparse/symboltable"
+	"eplc/src/libepl/eplparse/ast"
+	"eplc/src/libepl/Output"
 	"fmt"
 )
 
@@ -75,40 +77,51 @@ func (p *Parser) NextScope() {
 	//TODO: Make the method go to the first scope in case the next scope is nil
 }
 
+
 //Construct new AST from the token stream
 func (p *Parser) Construct(){
-	p.ParseProgram()
-}
-
-func (p *Parser) ParseProgram() Node {
 	p.readNextToken()
+	var tmp = currentToken
 
-	var AST Node 
-
-	if p.match(epllex.IMPORT){
-		if p.match_n(epllex.ID) {
-			AST = p.ParseImport()
-		} else {
-			errors.ParsingError(p.Lexer.Filename, currentToken.StartLine, currentToken.StartOffset, fmt.Sprintf("Invalid import statement. expected string got %s", lookahead.Lexme))
-		}
-	} else {
-
+	//For debugging prep
+	for tmp.Ttype != epllex.EOF {
+		Output.PrintLog(tmp.Ttype, tmp.Lexme)
+		p.readNextToken()
+		tmp = currentToken
 	}
 
+}
+
+func (p *Parser) ParseProgram() ast.Node {
+	p.readNextToken()
+
+	var AST ast.Node
+/*
+	if p.match(epllex.IMPORT) {
+		switch a := p.ParseImport().(type) {
+		case *ast.Import:
+				fmt.Println(a)
+				break
+		}
+	} else{
+	}
+*/
 	return AST
 }
 
-func (p *Parser)ParseImport() Node {
-	var importList []string
+func (p *Parser)ParseImport() ast.Import {
 
-	for p.match_n(epllex.SEMICOLON){
+	var importList []string
+	start := currentToken.StartLine
+	
+	for !p.match(epllex.SEMICOLON) {
 		fmt.Println(lookahead.Lexme)
 		if p.match(epllex.ID) {
 			importList = append(importList, currentToken.Lexme)
-			fmt.Println(importList)
 		}
+		p.readNextToken()
 	}
-	return &Import{importList}
+	return ast.Import{start,importList}
 }
 
 

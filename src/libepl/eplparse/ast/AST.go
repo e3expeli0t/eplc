@@ -25,10 +25,7 @@ package ast
 */
 
 type Node interface {
-	Start()
-	Left() *Node
-	Right() *Node
-
+	Start() uint
 }
 
 type VarStat string 
@@ -36,7 +33,7 @@ type VarStat string
 type (
 
 	Block struct {
-		nodes []
+		nodes []Node
 	}
 	
 	VarDecl struct {
@@ -50,6 +47,7 @@ type (
 	}
 
 	Import struct {
+		StartLoc uint
 		Imports []string
 	}
 
@@ -69,13 +67,15 @@ type (
 		Stmts []IfElseIfStatement
 	}
 )
+
 func (b *Block) Start() {
 }
 func (v *VarDecl) Start() {
 }
 func (v *VarExplicitDecl) Start() {
 }
-func (i *Import) Start() {
+func (i *Import) Start() uint {
+	return i.StartLoc
 }
 func (b *BoolExpr) Start() {
 }
