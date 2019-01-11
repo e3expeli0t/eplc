@@ -1,0 +1,8 @@
+import os.internal;
+
+@MainFunc
+fnc exec(command string, args []string): os.internal {
+    if command.size < 1 {
+        self.out.put("Wooot");
+    }
+}

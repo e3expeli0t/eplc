@@ -19,12 +19,11 @@
 package eplparse
 
 import (
+	"eplc/src/libepl/Output"
 	//"eplc/src/libepl/eplparse/errors"
 	"eplc/src/libepl/epllex"
-	"eplc/src/libepl/eplparse/symboltable"
 	"eplc/src/libepl/eplparse/ast"
-	"eplc/src/libepl/Output"
-	"fmt"
+	"eplc/src/libepl/eplparse/symboltable"
 )
 
 var (
@@ -95,18 +94,13 @@ func (p *Parser) Construct(){
 func (p *Parser) ParseProgram() ast.Node {
 	p.readNextToken()
 
-	var AST ast.Node
-/*
+	var imports ast.Import
+
 	if p.match(epllex.IMPORT) {
-		switch a := p.ParseImport().(type) {
-		case *ast.Import:
-				fmt.Println(a)
-				break
-		}
-	} else{
+		imports = p.ParseImport()
 	}
-*/
-	return AST
+
+	return ast.Program{Imports: &imports}
 }
 
 func (p *Parser)ParseImport() ast.Import {
@@ -115,7 +109,6 @@ func (p *Parser)ParseImport() ast.Import {
 	start := currentToken.StartLine
 	
 	for !p.match(epllex.SEMICOLON) {
-		fmt.Println(lookahead.Lexme)
 		if p.match(epllex.ID) {
 			importList = append(importList, currentToken.Lexme)
 		}

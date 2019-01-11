@@ -18,7 +18,10 @@
 
 package ast
 
-//import "eplc/src/libepl/epllex"
+import (
+	"eplc/src/libepl/eplparse/Types"
+	"eplc/src/libepl/eplparse/symboltable"
+)
 
 /*
 	AST (or Abstract Syntax Tree) is whats the parser producing
@@ -28,20 +31,42 @@ type Node interface {
 	Start() uint
 }
 
-type VarStat string 
+type VarStat string
 
 type (
 
+	Program struct {
+		Symbols symboltable.SymbolTable
+		Imports *Import
+		Decls []DeclStmt
+		Functions []Fnc
+		MainFunction *Fnc
+	}
+
+	DeclStmt interface{
+
+	}
+
+	Fnc struct {
+		name  string
+		returnType 	Types.EplType
+		body *Block
+	}
+
 	Block struct {
+		symbols symboltable.SymbolTable
 		nodes []Node
 	}
 	
 	VarDecl struct {
+		DeclStmt
 		name string
+		varType Types.EplType
 		stat VarStat 
 	}
 
  	VarExplicitDecl struct {
+ 		DeclStmt
 		VarDecl
 		value string
 	}
@@ -53,20 +78,16 @@ type (
 
 	BoolExpr struct {}
 
-	IfElseStatment struct {
+	IfElseStmt struct {
 		Condition BoolExpr
 		Code *Block
 		Else *Block	
 	}
-
-	IfStatement struct {
-		Condition BoolExpr
-		Code *Block
-	}
-	IfElseIfStatement struct{
-		Stmts []IfElseIfStatement
-	}
 )
+
+func (Program) Start() uint {
+	panic("implement me")
+}
 
 func (b *Block) Start() {
 }
@@ -78,11 +99,5 @@ func (i *Import) Start() uint {
 	return i.StartLoc
 }
 func (b *BoolExpr) Start() {
-}
-func (i *IfElseStatment) Start() {
-}
-func (i *IfElseIfStatement) Start() {
-}
-func (i *IfStatement) Start() {
 }
 

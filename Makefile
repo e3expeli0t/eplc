@@ -2,6 +2,7 @@ version=0.0.1
 branch=devel
 msg=bug fixing
 dep_args=
+exec=test.eplc.nvis
 check_defined = \
     $(strip $(foreach 1,$1, \
         $(call __check_defined,$1,$(strip $(value 2)))))
@@ -29,6 +30,7 @@ build:
 	@echo Building support tools
 	cd tools/Support/epldbg/; cmake .
 	cd tools/Support/epldbg/; make
+
 rebuild:
 	@echo Running tests...
 	go test -v eplc/src/libepl/epllex -cover
@@ -37,10 +39,13 @@ rebuild:
 	go build -i -v -o eplc-$(version) src/eplc.go
 	@rm -rf target/bin/eplc-$(version)
 	@mv eplc-$(version) target/bin/
+
 install:
 	make build
-	install target/bin/eplc-$(version)
-
+	sudo install target/bin/eplc-$(version) /bin/
+run: 
+	make rebuild
+	./target/bin/eplc-$(version) $(exec)
 clean:
 	@echo Removing eplc targets...
 	@rm -rf target

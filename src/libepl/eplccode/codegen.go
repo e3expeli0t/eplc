@@ -14,34 +14,54 @@
 *
 *	You should have received a copy of the GNU General Public License
 *	along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package eplccode
 
 import (
+	"eplc/src/libepl/Output"
 	"eplc/src/libepl/epllex"
 	"eplc/src/libepl/eplparse"
 	"eplc/src/libepl/eplparse/ast"
 
 	"io"
-	"fmt"
+	"reflect"
 )
 
 var label uint = 0
 
 /*
-	GenerateAIR generates AIR (AVM IR) for optimization and machine 
+	GenerateAIR generates AIR (AVM IR) for optimization and machine
 	code generation by AVM
 */
 func GenerateAIR(source io.Reader, fname string) {
 	lexer := epllex.New(source, fname)
 	parser := eplparse.New(lexer)
-	genImport(parser.ParseImport())
+	file := parser.ParseProgram()
+
+	var index uint = 0
+	writer := Writer{Fname:fname, TargetName:fname[0:len(fname)-4]}
+	writer.InitializeWriter()
+
+	switch n := file.(type) {
+	case ast.Program:
+		writer.UpdateLabels(genImport(*n.Imports, &index))
+	default:
+		Output.PrintErr("codgen", "Unknown node type '", reflect.TypeOf(n), "'")
+	}
+
+	writer.WriteToTarget()
 }
 
-func genImport(node ast.Import) {
+func genImport(node ast.Import, index *uint) []Lable {
+	var labels []Lable
 	for _, i := range node.Imports {
-		fmt.Printf("L%d: link %s\n", label, i);
-		label++;
-	} 
+		labels = append(labels, CreateLable(*index, i))
+		*index++
+	}
+
+	return labels
+}
+
+func genDecls(node ast.DeclStmt) {
 }
