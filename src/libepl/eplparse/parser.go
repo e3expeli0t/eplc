@@ -20,6 +20,8 @@ package eplparse
 
 import (
 	"eplc/src/libepl/Output"
+	"eplc/src/libepl/eplparse/Types"
+
 	//"eplc/src/libepl/eplparse/errors"
 	"eplc/src/libepl/epllex"
 	"eplc/src/libepl/eplparse/ast"
@@ -100,6 +102,10 @@ func (p *Parser) ParseProgram() ast.Node {
 		imports = p.ParseImport()
 	}
 
+	if p.match(epllex.DECL) {
+
+	}
+
 	return ast.Program{Imports: &imports}
 }
 
@@ -117,6 +123,43 @@ func (p *Parser)ParseImport() ast.Import {
 	return ast.Import{start,importList}
 }
 
+
+func (p *Parser) ParseVarDecl() ast.DeclStmt {
+	var stat string
+	var id string
+	var Type Types.EplType
+
+	if p.match_n(epllex.FIXED) {
+		stat = "fixed"
+		p.readNextToken()
+	} else if p.match_n(epllex.ID){
+		stat = "unfixed"
+		p.readNextToken()
+	} else {
+		//TODO: Error handling
+	}
+
+	if p.match(epllex.ID) {
+		id = currentToken.Lexme
+	} else {
+		//TODO: Error handling
+	}
+	p.readNextToken()
+
+	if Types.IsValidBasicType(currentToken) {
+		Type = Types.ResolveType(currentToken)
+	} else {
+		Type = Types.MakeType(currentToken.Lexme)
+	}
+
+	p.readNextToken()
+
+	if p.match(epllex.SEMICOLON) {
+		//TODO: Error handling
+	}
+
+	return ast.VarDecl{}
+}
 
 func (p *Parser) match(t epllex.TokenType) bool{
 	return currentToken.Ttype == t 

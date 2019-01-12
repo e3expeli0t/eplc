@@ -43,8 +43,8 @@ type (
 		MainFunction *Fnc
 	}
 
-	DeclStmt interface{
-
+	DeclStmt interface {
+		Node
 	}
 
 	Fnc struct {

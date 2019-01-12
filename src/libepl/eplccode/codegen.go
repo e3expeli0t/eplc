@@ -28,7 +28,6 @@ import (
 	"reflect"
 )
 
-var label uint = 0
 
 /*
 	GenerateAIR generates AIR (AVM IR) for optimization and machine
@@ -40,7 +39,7 @@ func GenerateAIR(source io.Reader, fname string) {
 	file := parser.ParseProgram()
 
 	var index uint = 0
-	writer := Writer{Fname:fname, TargetName:fname[0:len(fname)-4]}
+	writer := Writer{Fname:fname}
 	writer.InitializeWriter()
 
 	switch n := file.(type) {
@@ -56,7 +55,7 @@ func GenerateAIR(source io.Reader, fname string) {
 func genImport(node ast.Import, index *uint) []Lable {
 	var labels []Lable
 	for _, i := range node.Imports {
-		labels = append(labels, CreateLable(*index, i))
+		labels = append(labels, CreateLable(*index, "link "+i))
 		*index++
 	}
 
