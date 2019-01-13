@@ -21,6 +21,8 @@ package eplparse
 import (
 	"eplc/src/libepl/Output"
 	"eplc/src/libepl/eplparse/Types"
+	"eplc/src/libepl/eplparse/errors"
+	"fmt"
 
 	//"eplc/src/libepl/eplparse/errors"
 	"eplc/src/libepl/epllex"
@@ -49,6 +51,10 @@ func New(lx epllex.Lexer) Parser {
 type Parser struct {
 	Lexer epllex.Lexer
 	ST    symboltable.SymbolTable
+}
+
+func (p *Parser) report(msg string)  {
+	errors.ParsingError(p.Lexer.Filename, p.Lexer.Line, p.Lexer.LineOffset, msg)
 }
 
 func (p *Parser) NewScope() {
@@ -95,18 +101,24 @@ func (p *Parser) Construct(){
 
 func (p *Parser) ParseProgram() ast.Node {
 	p.readNextToken()
+	p.NewScope()
 
 	var imports ast.Import
+	var decls []ast.Decl
 
 	if p.match(epllex.IMPORT) {
 		imports = p.ParseImport()
 	}
 
 	if p.match(epllex.DECL) {
-
+		for p.match(epllex.DECL) {
+			decls = append(decls, p.ParseVarDecl(symboltable.GLOBAL))
+		}
+	} else {
+		p.report(fmt.Sprintf("Found %s", currentToken.Lexme))
 	}
 
-	return ast.Program{Imports: &imports}
+	return ast.Program{Imports: &imports, Decls:decls}
 }
 
 func (p *Parser)ParseImport() ast.Import {
@@ -120,11 +132,13 @@ func (p *Parser)ParseImport() ast.Import {
 		}
 		p.readNextToken()
 	}
+
+	p.readNextToken()
 	return ast.Import{start,importList}
 }
 
 
-func (p *Parser) ParseVarDecl() ast.DeclStmt {
+func (p *Parser) ParseVarDecl(scope symboltable.ScopeType) ast.Decl {
 	var stat string
 	var id string
 	var Type Types.EplType
@@ -136,29 +150,32 @@ func (p *Parser) ParseVarDecl() ast.DeclStmt {
 		stat = "unfixed"
 		p.readNextToken()
 	} else {
-		//TODO: Error handling
+		p.report(fmt.Sprintf("Found %s expected ID or fixed tokens", currentToken.Lexme))
 	}
 
 	if p.match(epllex.ID) {
 		id = currentToken.Lexme
 	} else {
-		//TODO: Error handling
+		p.report(fmt.Sprintf("found %s expected ID", currentToken.Lexme))
 	}
 	p.readNextToken()
 
 	if Types.IsValidBasicType(currentToken) {
-		Type = Types.ResolveType(currentToken)
+		Type = *Types.ResolveType(currentToken)
 	} else {
-		Type = Types.MakeType(currentToken.Lexme)
+		Type = *Types.MakeType(stat+currentToken.Lexme)
 	}
 
 	p.readNextToken()
 
-	if p.match(epllex.SEMICOLON) {
-		//TODO: Error handling
+	if !p.match(epllex.SEMICOLON) {
+		p.readNextToken()
 	}
 
-	return ast.VarDecl{}
+	p.readNextToken()
+	p.ST.Add(symboltable.NewSymbol(id, Type, scope))
+
+	return ast.VarDecl{id, Type, ast.VarStat(stat)}
 }
 
 func (p *Parser) match(t epllex.TokenType) bool{

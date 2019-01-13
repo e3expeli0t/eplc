@@ -23,6 +23,7 @@ import (
 	"eplc/src/libepl/epllex"
 	"eplc/src/libepl/eplparse"
 	"eplc/src/libepl/eplparse/ast"
+	"fmt"
 
 	"io"
 	"reflect"
@@ -45,6 +46,10 @@ func GenerateAIR(source io.Reader, fname string) {
 	switch n := file.(type) {
 	case ast.Program:
 		writer.UpdateLabels(genImport(*n.Imports, &index))
+		for _, decl := range n.Decls {
+			fmt.Println(decl)
+			writer.UpdateLabel(genDecls(decl, &index))
+		}
 	default:
 		Output.PrintErr("codgen", "Unknown node type '", reflect.TypeOf(n), "'")
 	}
@@ -52,15 +57,26 @@ func GenerateAIR(source io.Reader, fname string) {
 	writer.WriteToTarget()
 }
 
-func genImport(node ast.Import, index *uint) []Lable {
-	var labels []Lable
+func genImport(node ast.Import, index *uint) []Label {
+	var labels []Label
 	for _, i := range node.Imports {
-		labels = append(labels, CreateLable(*index, "link "+i))
+		labels = append(labels, CreateLabel(*index, "link "+i))
 		*index++
 	}
 
 	return labels
 }
 
-func genDecls(node ast.DeclStmt) {
+func genDecls(node ast.Decl, index *uint) Label {
+	switch n := node.(type) {
+	case ast.VarDecl:
+		return genVarDecl(n, index)
+	default:
+		Output.PrintErr("codgen", "Unknown node type '", reflect.TypeOf(n), "'")
+	}
+	return Label{}
+}
+
+func genVarDecl(node ast.VarDecl, index *uint) Label {
+	return CreateLabel(*index, fmt.Sprintf("vardecl %s %d", node.Name, node.VarType.Tkey))
 }

@@ -18,10 +18,11 @@
 
 package symboltable
 
-import "eplc/src/libepl/epllex"
-
+import (
+	"eplc/src/libepl/eplparse/Types"
+)
 /*
-	Basicly a linked list that holds all the symbols inside scopes
+	Basic  linked list that holds all the symbols inside scopes
 */
 
 type ScopeType string
@@ -50,9 +51,9 @@ type SymbolTable struct {
 	Next *SymbolTable
 } 
 
-//SymbolData stores the information abount symbol
+//SymbolData stores the information about symbol
 type SymbolData struct {
-	_type epllex.TokenType
+	SType Types.EplType
 	symbol string
 	scope ScopeType
 }
@@ -62,21 +63,30 @@ func New() SymbolTable {
 	return SymbolTable{Table: map[string]*SymbolData{}, Prev: nil, Next: nil}
 }
 
+func NewBasicSymbol(s string) *SymbolData {
+	return &SymbolData{symbol:s}
+}
+
+func NewSymbol(s string, t Types.EplType, scope ScopeType) *SymbolData {
+	return &SymbolData{t, s, scope}
+}
+
+
 //Add new symbol
 func (st *SymbolTable) Add(s *SymbolData) {
 	st.Table[s.symbol] = s
 }
 
-func (st *SymbolTable) AddType(symbol string, t epllex.TokenType) {
-	st.Table[symbol]._type = t
+func (st *SymbolTable) AddType(symbol string, t Types.EplType) {
+	st.Table[symbol].SType = t
 }
 
 func (st *SymbolTable) AddScope(symbol string, scope ScopeType) {
 	st.Table[symbol].scope = scope
 }
 
-func (st *SymbolTable) GetType(symbol string) epllex.TokenType {
-	return st.Table[symbol]._type
+func (st *SymbolTable) GetType(symbol string) Types.EplType {
+	return st.Table[symbol].SType
 }
 
 func (st *SymbolTable) GetScope(symbol string) ScopeType {

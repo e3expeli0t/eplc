@@ -27,24 +27,29 @@ import (
 	AST (or Abstract Syntax Tree) is whats the parser producing
 */
 
-type Node interface {
-	Start() uint
-}
 
 type VarStat string
+
+type (
+	Node interface {
+		Start() uint
+	}
+
+	Decl interface {
+		Node
+		DeclNode()
+	}
+)
+
 
 type (
 
 	Program struct {
 		Symbols symboltable.SymbolTable
 		Imports *Import
-		Decls []DeclStmt
+		Decls []Decl
 		Functions []Fnc
 		MainFunction *Fnc
-	}
-
-	DeclStmt interface {
-		Node
 	}
 
 	Fnc struct {
@@ -59,14 +64,12 @@ type (
 	}
 	
 	VarDecl struct {
-		DeclStmt
-		name string
-		varType Types.EplType
-		stat VarStat 
+		Name string
+		VarType Types.EplType
+		Stat VarStat
 	}
 
  	VarExplicitDecl struct {
- 		DeclStmt
 		VarDecl
 		value string
 	}
@@ -85,19 +88,12 @@ type (
 	}
 )
 
-func (Program) Start() uint {
+func (VarDecl) Start() uint {
 	panic("implement me")
 }
 
-func (b *Block) Start() {
-}
-func (v *VarDecl) Start() {
-}
-func (v *VarExplicitDecl) Start() {
-}
-func (i *Import) Start() uint {
-	return i.StartLoc
-}
-func (b *BoolExpr) Start() {
-}
+func (Program) Start() uint {return 0}
+func (b *Block) Start() uint{return 0xFAC} //Todo: Fix
+func (i *Import) Start() uint {return i.StartLoc}
+func (VarDecl) DeclNode() {}
 

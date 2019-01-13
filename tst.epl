@@ -1,5 +1,7 @@
 import os.internal;
 
+decl oogi uint; 
+
 @MainFunc
 fnc exec(command string, args []string): os.internal {
     if command.size < 1 {

@@ -6,14 +6,14 @@ import (
 	"strings"
 )
 
-func CreateLable(index uint, text string) Lable {
-	return Lable{index, text}
+func CreateLabel(index uint, text string) Label {
+	return Label{index, text}
 }
-type Lable struct {
+type Label struct {
 	index uint
 	text string
 }
-func (l *Lable) asString() string {
+func (l *Label) asString() string {
 	return fmt.Sprintf("L%d: %s\n", l.index, l.text)
 }
 
@@ -21,7 +21,7 @@ type Writer struct {
 	Fname string
 	targetFile *os.File
 	TargetName string
-	Labels []Lable
+	Labels []Label
 }
 
 func (w *Writer) InitializeWriter() {
@@ -37,8 +37,13 @@ func (w *Writer) WriteToTarget() {
 	}
 }
 
-func (w *Writer) UpdateLabels(labels []Lable) {
+func (w *Writer) UpdateLabels(labels []Label) {
 	for _, lb := range labels{
 		w.Labels = append(w.Labels, lb)
 	}
+}
+
+
+func (w *Writer) UpdateLabel(label Label) {
+	w.Labels = append(w.Labels, label)
 }
