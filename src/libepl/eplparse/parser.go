@@ -114,11 +114,9 @@ func (p *Parser) ParseProgram() ast.Node {
 		for p.match(epllex.DECL) {
 			decls = append(decls, p.ParseVarDecl(symboltable.GLOBAL))
 		}
-	} else {
-		p.report(fmt.Sprintf("Found %s", currentToken.Lexme))
 	}
 
-	return ast.Program{Imports: &imports, Decls:decls}
+	return ast.Program{Imports: &imports, Decls:decls, Symbols:p.ST}
 }
 
 func (p *Parser)ParseImport() ast.Import {

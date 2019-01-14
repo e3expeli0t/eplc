@@ -19,9 +19,9 @@
 package epllex
 
 import (
-	"eplc/src/libepl/epllex/Errors"
 	"bufio"
 	"bytes"
+	"eplc/src/libepl/epllex/Errors"
 	"io"
 	"unicode/utf8"
 )
@@ -276,11 +276,6 @@ func (l *Lexer) skipWhiteSpaces() {
 	ch := l.read()
 
 	for ch == '\n' || ch == '\t' || ch == '\r' || ch == ' ' {
-		if ch == '\n' {
-			prevOffset = l.LineOffset
-			l.LineOffset = 0
-			l.Line++
-		}
 		ch = l.read()
 	}
 	l.unread()
@@ -326,7 +321,13 @@ func (l *Lexer) read() rune {
 		l.ErrCount++
 	}
 
-	l.LineOffset++
+	if char == '\n' {
+		prevOffset = l.LineOffset
+		l.LineOffset = 0
+		l.Line++
+	} else {
+			l.LineOffset++
+	}
 	return char
 }
 
@@ -337,5 +338,5 @@ func (l *Lexer) unread() {
 	} else {
 		l.LineOffset--
 	}
-	l.Buffer.UnreadRune()
+	_ = l.Buffer.UnreadRune()
 }

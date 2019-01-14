@@ -1,6 +1,8 @@
 package eplccode
 
 import (
+	"encoding/json"
+	"eplc/src/libepl/eplparse/symboltable"
 	"fmt"
 	"os"
 	"strings"
@@ -46,4 +48,15 @@ func (w *Writer) UpdateLabels(labels []Label) {
 
 func (w *Writer) UpdateLabel(label Label) {
 	w.Labels = append(w.Labels, label)
+}
+
+func (w *Writer) produceST(st symboltable.SymbolTable) {
+	b, err := json.Marshal(st)
+
+	if (err != nil) {
+
+	} else {
+		file, _ := os.Create("SymbolTable.json")
+		_, _ = file.Write(b)
+	}
 }

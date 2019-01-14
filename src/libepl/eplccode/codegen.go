@@ -50,6 +50,7 @@ func GenerateAIR(source io.Reader, fname string) {
 			fmt.Println(decl)
 			writer.UpdateLabel(genDecls(decl, &index))
 		}
+		writer.produceST(n.Symbols)
 	default:
 		Output.PrintErr("codgen", "Unknown node type '", reflect.TypeOf(n), "'")
 	}
@@ -78,5 +79,5 @@ func genDecls(node ast.Decl, index *uint) Label {
 }
 
 func genVarDecl(node ast.VarDecl, index *uint) Label {
-	return CreateLabel(*index, fmt.Sprintf("vardecl %s %d", node.Name, node.VarType.Tkey))
+	return CreateLabel(*index, fmt.Sprintf("vardecl %s %x", node.Name, node.VarType.Tkey))
 }

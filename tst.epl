@@ -1,6 +1,6 @@
 import os.internal;
-
-decl oogi uint; 
+decl uint ;
+decl fnc exec(command string, args []string);
 
 @MainFunc
 fnc exec(command string, args []string): os.internal {
