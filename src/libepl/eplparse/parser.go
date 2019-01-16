@@ -116,7 +116,7 @@ func (p *Parser) ParseProgram() ast.Node {
 		}
 	}
 
-	return ast.Program{Imports: &imports, Decls:decls, Symbols:p.ST}
+	return &ast.Program{Imports: imports, Decls:decls, Symbols:p.ST}
 }
 
 func (p *Parser)ParseImport() ast.Import {
@@ -173,7 +173,7 @@ func (p *Parser) ParseVarDecl(scope symboltable.ScopeType) ast.Decl {
 	p.readNextToken()
 	p.ST.Add(symboltable.NewSymbol(id, Type, scope))
 
-	return ast.VarDecl{id, Type, ast.VarStat(stat)}
+	return &ast.VarDecl{id, Type, ast.VarStat(stat)}
 }
 
 func (p *Parser) match(t epllex.TokenType) bool{

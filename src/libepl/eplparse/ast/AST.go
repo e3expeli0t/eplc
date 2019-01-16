@@ -46,21 +46,21 @@ type (
 
 	Program struct {
 		Symbols symboltable.SymbolTable
-		Imports *Import
+		Imports Import
 		Decls []Decl
 		Functions []Fnc
 		MainFunction *Fnc
 	}
 
 	Fnc struct {
-		name  string
-		returnType 	Types.EplType
-		body *Block
+		Name  string
+		ReturnType 	Types.EplType
+		Body *Block
 	}
 
 	Block struct {
-		symbols symboltable.SymbolTable
-		nodes []Node
+		Symbols symboltable.SymbolTable
+		Nodes []Node
 	}
 	
 	VarDecl struct {
@@ -71,7 +71,7 @@ type (
 
  	VarExplicitDecl struct {
 		VarDecl
-		value string
+		Value string
 	}
 
 	Import struct {
@@ -92,8 +92,8 @@ func (VarDecl) Start() uint {
 	panic("implement me")
 }
 
-func (Program) Start() uint {return 0}
-func (b *Block) Start() uint{return 0xFAC} //Todo: Fix
+func (*Program) Start() uint {return 0}
+func (*Block) Start() uint{return 0xFAC} //Todo: Fix
 func (i *Import) Start() uint {return i.StartLoc}
-func (VarDecl) DeclNode() {}
+func (*VarDecl) DeclNode() {}
 

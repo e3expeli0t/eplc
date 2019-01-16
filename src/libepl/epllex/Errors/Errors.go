@@ -19,13 +19,17 @@
 package Errors
 
 import (
-	"fmt"
 	"eplc/src/libepl/Output"
+	"fmt"
 )
 
 //TokenError prints error msg with precise info about the token that cause the error
 func TokenError(line uint, lineOffset uint, token rune, filename string) {
 	Output.PrintErr("Lexical", fmt.Sprintf("%s:%d:%d: Could't resolve Token %#U", filename, line, lineOffset, token))
+}
+
+func ExpError(line uint, lineOffset uint, fname string, cline string , char rune) {
+	Output.LexicalPrint(fname, line, lineOffset, cline, "Couldn't resolve token", char)
 }
 
 //Prints lexical error msg and quits after that

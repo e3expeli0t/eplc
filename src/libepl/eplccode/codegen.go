@@ -30,31 +30,44 @@ import (
 )
 
 
+//todo: moe elegant way other then global var
+var filename string
+
 /*
 	GenerateAIR generates AIR (AVM IR) for optimization and machine
 	code generation by AVM
 */
 func GenerateAIR(source io.Reader, fname string) {
 	lexer := epllex.New(source, fname)
+	filename = fname
 	parser := eplparse.New(lexer)
 	file := parser.ParseProgram()
+	ast.Travel(file, generate)
+}
 
+func generate(n ast.Node) bool{
+
+	switch n := n.(type) {
+	case *ast.Program:
+		genProgram(n)
+		return true
+	default:
+		Output.PrintErr("codegen", "Unknown node type '", reflect.TypeOf(n), "' 	expected type ast.Program")
+		return false
+	}
+}
+
+func genProgram(program *ast.Program) {
 	var index uint = 0
-	writer := Writer{Fname:fname}
+	writer := Writer{Fname:filename}
 	writer.InitializeWriter()
 
-	switch n := file.(type) {
-	case ast.Program:
-		writer.UpdateLabels(genImport(*n.Imports, &index))
-		for _, decl := range n.Decls {
-			fmt.Println(decl)
-			writer.UpdateLabel(genDecls(decl, &index))
-		}
-		writer.produceST(n.Symbols)
-	default:
-		Output.PrintErr("codgen", "Unknown node type '", reflect.TypeOf(n), "'")
+	writer.UpdateLabels(genImport(program.Imports, &index))
+	for _, decl := range program.Decls {
+		fmt.Println(decl)
+		writer.UpdateLabel(genDecls(decl, &index))
 	}
-
+	writer.produceST(program.Symbols)
 	writer.WriteToTarget()
 }
 
@@ -70,7 +83,7 @@ func genImport(node ast.Import, index *uint) []Label {
 
 func genDecls(node ast.Decl, index *uint) Label {
 	switch n := node.(type) {
-	case ast.VarDecl:
+	case *ast.VarDecl:
 		return genVarDecl(n, index)
 	default:
 		Output.PrintErr("codgen", "Unknown node type '", reflect.TypeOf(n), "'")
@@ -78,6 +91,6 @@ func genDecls(node ast.Decl, index *uint) Label {
 	return Label{}
 }
 
-func genVarDecl(node ast.VarDecl, index *uint) Label {
+func genVarDecl(node *ast.VarDecl, index *uint) Label {
 	return CreateLabel(*index, fmt.Sprintf("vardecl %s %x", node.Name, node.VarType.Tkey))
 }

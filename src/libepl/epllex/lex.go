@@ -22,11 +22,14 @@ import (
 	"bufio"
 	"bytes"
 	"eplc/src/libepl/epllex/Errors"
+	"fmt"
 	"io"
 	"unicode/utf8"
 )
 
+
 var prevOffset uint = 0
+
 /*
 	Lexer. the job of the lexer is to break the input stream into
 	meaningful parts that later will be used by the parser and the IR generator
@@ -181,7 +184,8 @@ func (l *Lexer) Next() Token {
 		case '"':
 			return l.matchBy('"')
 		}
-		Errors.TokenError(l.Line, l.LineOffset, ch, l.Filename)
+		//Errors.TokenError(l.Line, l.LineOffset, ch, l.Filename)
+		Errors.ExpError(l.Line, l.LineOffset, l.Filename, l.getLine(), ch)
 		l.ErrCount++
 
 		if l.ErrCount > 5 {
@@ -309,6 +313,36 @@ func (l *Lexer) readLine() {
 	l.unread()
 }
 
+
+func (l *Lexer) getLine() string {
+	prevLexer := l.getMachineState()
+	line := ""
+
+	for l.LineOffset > 0 {
+		l.unread()
+	}
+
+	for l.Line == prevLexer.Line {
+		line += string(l.read())
+	}
+
+	l.setMachineState(prevLexer)
+
+	return line
+}
+
+func (l *Lexer) getMachineState() Lexer {
+	return Lexer{l.Buffer, l.Filename, l.Line, l.LineOffset, l.ErrCount}
+}
+
+func (l *Lexer) setMachineState(lex Lexer) {
+	l.Line = lex.Line
+	l.LineOffset = lex.LineOffset
+	l.ErrCount = lex.ErrCount
+	l.Filename = lex.Filename
+	l.Buffer = lex.Buffer
+}
+
 func (l *Lexer) read() rune {
 	char, _, err := l.Buffer.ReadRune()
 
@@ -325,6 +359,7 @@ func (l *Lexer) read() rune {
 		prevOffset = l.LineOffset
 		l.LineOffset = 0
 		l.Line++
+		fmt.Println("Found new line. line =",l.Line, "line offset =", l.LineOffset)
 	} else {
 			l.LineOffset++
 	}

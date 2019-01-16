@@ -1,6 +1,7 @@
 import os.internal;
-decl uint ;
-decl fnc exec(command string, args []string);
+//commant1/*commant2*/
+
+decl hello poopio
 
 @MainFunc
 fnc exec(command string, args []string): os.internal {
