@@ -19,8 +19,8 @@
 package main
 
 import (
-	"eplc/src/libepl"
 	"eplc/src/libepl/Output"
+	"eplc/src/libeplc"
 	"fmt"
 	"io"
 	"os"
@@ -38,7 +38,6 @@ func main() {
 
 	args := os.Args[1:]
 	file := args[0]
-	Output.PrintStartMSG()
 
 	var reader io.Reader
 	reader, err := os.Open(file)
@@ -47,5 +46,6 @@ func main() {
 		Output.PrintFatalErr("eplc", fmt.Sprintf("file: '%s' don't exists", file))
 	}
 
-	libepl.Compile(reader, file)
+	//For tests
+	libeplc.Compile(reader, file)
 }

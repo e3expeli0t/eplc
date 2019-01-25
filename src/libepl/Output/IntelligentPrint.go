@@ -82,7 +82,7 @@ func (e *LexicalErrorDescriptor) LexicalMarker() string {
 
 func LexerIntelligentError(err LexicalErrorDescriptor) {
 	fmt.Print(color.BGreen("Error:")+err.basicInfoPrinter())
-	fmt.Println(color.BGreen(err.errorMSG)+"\n")
+	fmt.Print(color.BGreen(err.errorMSG)+"\n")
 	fmt.Println(err.LexicalMarker())
 }
 

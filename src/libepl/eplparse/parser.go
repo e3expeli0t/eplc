@@ -53,6 +53,14 @@ type Parser struct {
 	ST    symboltable.SymbolTable
 }
 
+//--------------------------------------------------------------------------------------
+//Helper functions
+
+
+func (p *Parser) expect(ex string, fnd string) {
+	p.report(fmt.Sprintf("expected %s found %s ", ex, fnd))
+}
+
 func (p *Parser) report(msg string)  {
 	errors.ParsingError(p.Lexer.Filename, p.Lexer.Line, p.Lexer.LineOffset, msg)
 }
@@ -116,8 +124,12 @@ func (p *Parser) ParseProgram() ast.Node {
 		}
 	}
 
-	return &ast.Program{Imports: imports, Decls:decls, Symbols:p.ST}
+	return &ast.Program{Imports: &imports, Decls: &decls, Symbols: &p.ST}
 }
+
+
+//----------------------------------------------------------------------------------------------------------------------
+//Statements
 
 func (p *Parser)ParseImport() ast.Import {
 
@@ -148,13 +160,13 @@ func (p *Parser) ParseVarDecl(scope symboltable.ScopeType) ast.Decl {
 		stat = "unfixed"
 		p.readNextToken()
 	} else {
-		p.report(fmt.Sprintf("Found %s expected ID or fixed tokens", currentToken.Lexme))
+		p.expect("identifier or 'fixed' tokens", currentToken.Lexme)
 	}
 
 	if p.match(epllex.ID) {
 		id = currentToken.Lexme
 	} else {
-		p.report(fmt.Sprintf("found %s expected ID", currentToken.Lexme))
+		p.expect("identifier token", currentToken.Lexme)
 	}
 	p.readNextToken()
 
@@ -167,14 +179,42 @@ func (p *Parser) ParseVarDecl(scope symboltable.ScopeType) ast.Decl {
 	p.readNextToken()
 
 	if !p.match(epllex.SEMICOLON) {
-		p.readNextToken()
+		if p.match(epllex.ASSIGN) {
+			p.ParseExpression()
+		} else {
+			p.expect("';'", currentToken.Lexme)
+		}
 	}
 
 	p.readNextToken()
 	p.ST.Add(symboltable.NewSymbol(id, Type, scope))
 
-	return &ast.VarDecl{id, Type, ast.VarStat(stat)}
+	return &ast.VarDecl{id, &Type, ast.VarStat(stat)}
 }
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+//Expressions
+
+/*
+	Possible starts are:
+		ID
+		(
+		-
+		+
+
+ */
+
+func (p *Parser) ParseExpression() ast.Expression {
+	p.readNextToken()
+	if p.match(epllex.ID) && p.match_n(epllex.SEMICOLON){
+		return nil
+	}
+
+	return nil
+}
+
 
 func (p *Parser) match(t epllex.TokenType) bool{
 	return currentToken.Ttype == t 

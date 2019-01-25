@@ -22,7 +22,6 @@ import (
 	"bufio"
 	"bytes"
 	"eplc/src/libepl/epllex/Errors"
-	"fmt"
 	"io"
 	"unicode/utf8"
 )
@@ -359,7 +358,6 @@ func (l *Lexer) read() rune {
 		prevOffset = l.LineOffset
 		l.LineOffset = 0
 		l.Line++
-		fmt.Println("Found new line. line =",l.Line, "line offset =", l.LineOffset)
 	} else {
 			l.LineOffset++
 	}

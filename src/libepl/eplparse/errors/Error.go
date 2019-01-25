@@ -6,5 +6,5 @@ import (
 )
 
 func ParsingError(filename string, line uint, lineOffset uint, errorMsg string) {
-	Output.PrintFatalErr("Syntatic", fmt.Sprintf("%s:%d:%d: Syntax error: %s", filename, line, lineOffset, errorMsg))
+	Output.PrintFatalErr(fmt.Sprintf("at %s:%d:%d: Syntax error: %s", filename, line, lineOffset, errorMsg))
 }

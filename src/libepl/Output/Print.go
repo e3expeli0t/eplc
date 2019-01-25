@@ -24,26 +24,18 @@ import (
 	"os"
 )
 
-const startmsg = "Starting aplc v0.0.1:"
-
 func PrintLog(log ...interface{}) {
 	fmt.Print(color.BLightGreen("[*] "))
 	fmt.Println(log...)
 }
 
-func PrintFatalErr(seg string, msg...interface{}) {
-	fmt.Print( "<"+seg+"> ", color.BLightRed("Fatal: "))
-	fmt.Print(msg...)
-	fmt.Println()
-	fmt.Println(color.BLightBlue("Quiting!!"))
+func PrintFatalErr(msg...interface{}) {
+	fmt.Print( color.BLightRed("Fatal: "))
+	fmt.Println(msg...)
 	os.Exit(-1)
 }
-func PrintErr(seg string, msg...interface{}) {
-	fmt.Print("<"+seg+"> ", color.Bold("Error: "))
+func PrintErr(msg...interface{}) {
+	fmt.Print(color.BLightGreen("Error: "))
 	fmt.Print(msg...)
 	fmt.Println()
-}
-
-func PrintStartMSG() {
-	fmt.Println(color.LightBlue(startmsg))
 }

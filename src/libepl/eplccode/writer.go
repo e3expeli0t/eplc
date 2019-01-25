@@ -8,15 +8,17 @@ import (
 	"strings"
 )
 
-func CreateLabel(index uint, text string) Label {
-	return Label{index, text}
+func CreateLabel(index uint, command string, argOne string, argTwo string) Label {
+	return Label{index, command, argOne, argTwo}
 }
 type Label struct {
 	index uint
-	text string
+	command string
+	argOne string
+	argTwo string
 }
 func (l *Label) asString() string {
-	return fmt.Sprintf("L%d: %s\n", l.index, l.text)
+	return fmt.Sprintf("L%d: %s %s, %s\n", l.index, l.command, l.argOne, l.argTwo)
 }
 
 type Writer struct {
@@ -50,10 +52,10 @@ func (w *Writer) UpdateLabel(label Label) {
 	w.Labels = append(w.Labels, label)
 }
 
-func (w *Writer) produceST(st symboltable.SymbolTable) {
+func (w *Writer) produceST(st *symboltable.SymbolTable) {
 	b, err := json.Marshal(st)
 
-	if (err != nil) {
+	if err != nil {
 
 	} else {
 		file, _ := os.Create("SymbolTable.json")

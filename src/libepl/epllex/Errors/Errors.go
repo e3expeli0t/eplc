@@ -25,7 +25,7 @@ import (
 
 //TokenError prints error msg with precise info about the token that cause the error
 func TokenError(line uint, lineOffset uint, token rune, filename string) {
-	Output.PrintErr("Lexical", fmt.Sprintf("%s:%d:%d: Could't resolve Token %#U", filename, line, lineOffset, token))
+	Output.PrintErr(fmt.Sprintf(" in %s:%d:%d: Could't resolve Token %#U", filename, line, lineOffset, token))
 }
 
 func ExpError(line uint, lineOffset uint, fname string, cline string , char rune) {
@@ -34,14 +34,14 @@ func ExpError(line uint, lineOffset uint, fname string, cline string , char rune
 
 //Prints lexical error msg and quits after that
 func FatalLexical(msg ...interface{}) {
-	Output.PrintFatalErr("Lexical", msg...)
+	Output.PrintFatalErr(msg...)
 }
 
 func EncodingError(line uint, lineOffset uint, filename string, char rune) {
-	Output.PrintErr("Lexical", fmt.Sprintf("%s:%d:%d: Encoding error %#U", filename, line, lineOffset, char))
+	Output.PrintErr(fmt.Sprintf(" in %s:%d:%d: Encoding error %#U", filename, line, lineOffset, char))
 }
 
 //Lexical prints lexical error msg without quiting
 func Lexical(msg ...interface{}) {
-	Output.PrintErr("Lexical", msg...)
+	Output.PrintErr(msg...)
 }
