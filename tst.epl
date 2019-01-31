@@ -1,7 +1,7 @@
 import os.internal;
 //commant1/*commant2*/
 
-decl hello poopio
+decl adiv double;
 
 @MainFunc
 fnc exec(command string, args []string): os.internal {

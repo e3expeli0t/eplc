@@ -37,7 +37,8 @@ func (w *Writer) InitializeWriter() {
 
 func (w *Writer) WriteToTarget() {
 	for _, lb := range w.Labels {
-		_, _ = w.targetFile.WriteString(lb.asString())
+		e, _ := w.targetFile.WriteString(lb.asString())
+		fmt.Println(e)
 	}
 }
 

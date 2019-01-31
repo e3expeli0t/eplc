@@ -53,15 +53,15 @@ type Parser struct {
 	ST    symboltable.SymbolTable
 }
 
+//Todo: change expect so that the function checks if the expected token is coming (if not print err)
 //--------------------------------------------------------------------------------------
 //Helper functions
-
 
 func (p *Parser) expect(ex string, fnd string) {
 	p.report(fmt.Sprintf("expected %s found %s ", ex, fnd))
 }
 
-func (p *Parser) report(msg string)  {
+func (p *Parser) report(msg string) {
 	errors.ParsingError(p.Lexer.Filename, p.Lexer.Line, p.Lexer.LineOffset, msg)
 }
 
@@ -92,9 +92,8 @@ func (p *Parser) NextScope() {
 	//TODO: Make the method go to the first scope in case the next scope is nil
 }
 
-
 //Construct new AST from the token stream
-func (p *Parser) Construct(){
+func (p *Parser) Construct() {
 	p.readNextToken()
 	var tmp = currentToken
 
@@ -113,6 +112,7 @@ func (p *Parser) ParseProgram() ast.Node {
 
 	var imports ast.Import
 	var decls []ast.Decl
+	var fncs []ast.Fnc
 
 	if p.match(epllex.IMPORT) {
 		imports = p.ParseImport()
@@ -120,22 +120,26 @@ func (p *Parser) ParseProgram() ast.Node {
 
 	if p.match(epllex.DECL) {
 		for p.match(epllex.DECL) {
-			decls = append(decls, p.ParseVarDecl(symboltable.GLOBAL))
+			decls = append(decls, p.ParseVarDecl(symboltable.GLOBAL, false))
 		}
 	}
 
-	return &ast.Program{Imports: &imports, Decls: &decls, Symbols: &p.ST}
+	if p.match(epllex.FNC) {
+		for p.match(epllex.FNC) {
+			fncs = append(fncs, p.ParesFnc())
+		}
+	}
+
+	return &ast.Program{Imports: &imports, GlobalDecls: &decls, Symbols: &p.ST, Functions: &fncs}
 }
-
-
 //----------------------------------------------------------------------------------------------------------------------
 //Statements
 
-func (p *Parser)ParseImport() ast.Import {
+func (p *Parser) ParseImport() ast.Import {
 
 	var importList []string
 	start := currentToken.StartLine
-	
+
 	for !p.match(epllex.SEMICOLON) {
 		if p.match(epllex.ID) {
 			importList = append(importList, currentToken.Lexme)
@@ -144,11 +148,73 @@ func (p *Parser)ParseImport() ast.Import {
 	}
 
 	p.readNextToken()
-	return ast.Import{start,importList}
+	return ast.Import{start, importList}
 }
 
 
-func (p *Parser) ParseVarDecl(scope symboltable.ScopeType) ast.Decl {
+func (p *Parser) ParesFnc() ast.Fnc {
+	p.readNextToken()
+	p.NewScope()
+
+	var name string
+	var params *[]ast.Decl
+	var returnType *Types.EplType
+
+
+	if p.match(epllex.ID) {
+		name = currentToken.Lexme
+		p.readNextToken()
+	} else {
+		p.expect("Ident", currentToken.Lexme)
+	}
+
+	if p.match(epllex.LPAR) {
+		p.readNextToken()
+		params = p.ParseParamList()
+	}
+
+	if p.match(epllex.RETURN_IND) {
+		p.readNextToken()
+
+		if Types.IsValidBasicType(currentToken) {
+			returnType = Types.ResolveType(currentToken)
+		} else {
+			returnType = Types.MakeType(currentToken.Lexme)
+		}
+	}
+	p.readNextToken()
+
+	if p.match(epllex.LBRACE) {
+		//parse block
+	} else if p.match(epllex.SEMICOLON) {
+		p.readNextToken()
+	} else {
+		p.expect("'{' or ';'", currentToken.Lexme)
+	}
+
+	//p.ST.Add(symboltable.)
+
+	return ast.Fnc{Name:name, ReturnType: returnType, Params:params}
+}
+
+
+func (p *Parser) ParseParamList() *[]ast.Decl {
+	params := []ast.Decl{}
+
+	for p.match(epllex.COMMA) || !p.match(epllex.RPAR) {
+		params = append(params, p.ParseVarDecl(symboltable.FUNCTION, true))
+	}
+
+	return &params
+}
+
+func (p *Parser) ParseBlock(function bool) {
+	if !function {
+		p.NewScope()
+	}
+}
+
+func (p *Parser) ParseVarDecl(scope symboltable.ScopeType, function bool) ast.Decl {
 	var stat string
 	var id string
 	var Type Types.EplType
@@ -156,11 +222,11 @@ func (p *Parser) ParseVarDecl(scope symboltable.ScopeType) ast.Decl {
 	if p.match_n(epllex.FIXED) {
 		stat = "fixed"
 		p.readNextToken()
-	} else if p.match_n(epllex.ID){
+	} else if p.match_n(epllex.ID) {
 		stat = "unfixed"
 		p.readNextToken()
 	} else {
-		p.expect("identifier or 'fixed' tokens", currentToken.Lexme)
+		p.expect("Ident or 'fixed' tokens", currentToken.Lexme)
 	}
 
 	if p.match(epllex.ID) {
@@ -173,7 +239,7 @@ func (p *Parser) ParseVarDecl(scope symboltable.ScopeType) ast.Decl {
 	if Types.IsValidBasicType(currentToken) {
 		Type = *Types.ResolveType(currentToken)
 	} else {
-		Type = *Types.MakeType(stat+currentToken.Lexme)
+		Type = *Types.MakeType(stat + currentToken.Lexme)
 	}
 
 	p.readNextToken()
@@ -181,6 +247,11 @@ func (p *Parser) ParseVarDecl(scope symboltable.ScopeType) ast.Decl {
 	if !p.match(epllex.SEMICOLON) {
 		if p.match(epllex.ASSIGN) {
 			p.ParseExpression()
+		} else if function {
+			if !p.match(epllex.COMMA) || !p.match(epllex.RPAR) {
+				p.expect("',' or ')'", currentToken.Lexme)
+			}
+			p.readNextToken()
 		} else {
 			p.expect("';'", currentToken.Lexme)
 		}
@@ -191,8 +262,6 @@ func (p *Parser) ParseVarDecl(scope symboltable.ScopeType) ast.Decl {
 
 	return &ast.VarDecl{id, &Type, ast.VarStat(stat)}
 }
-
-
 
 //----------------------------------------------------------------------------------------------------------------------
 //Expressions
@@ -206,18 +275,74 @@ func (p *Parser) ParseVarDecl(scope symboltable.ScopeType) ast.Decl {
 
  */
 
+var UnaryStart = []epllex.TokenType{epllex.MINUS, epllex.PLUS}
+var BinaryStart = []epllex.TokenType{epllex.ID, epllex.LPAR}
+
 func (p *Parser) ParseExpression() ast.Expression {
-	p.readNextToken()
-	if p.match(epllex.ID) && p.match_n(epllex.SEMICOLON){
-		return nil
+	if p.match(epllex.SEMICOLON) {
+		p.readNextToken()
+		return ast.EmptyExpr{}
+	} else if p.match(epllex.ID) && p.match_n(epllex.SEMICOLON) {
+		ident := p.ParseIdent()
+		p.readNextToken() // skip semicolon
+		return ident
+	} else if p.matchTokens(UnaryStart) {
+		return p.ParseUnaryOp()
+	} else if p.matchTokens(BinaryStart) {
+
 	}
 
 	return nil
 }
 
+func (p *Parser) ParseIdent() ast.Ident {
+	if p.match(epllex.ID) {
+		p.readNextToken()
+		return ast.Ident{Name: currentToken.Lexme}
+	} else {
+		p.expect("Ident", currentToken.Lexme)
+	}
 
-func (p *Parser) match(t epllex.TokenType) bool{
-	return currentToken.Ttype == t 
+	return ast.Ident{}
+}
+
+func (p *Parser) ParseUnaryOp() ast.Expression {
+	switch currentToken.Ttype {
+	case epllex.PLUS:
+		p.readNextToken()
+		if p.match(epllex.ID) && p.match_n(epllex.SEMICOLON) {
+			ident := p.ParseIdent()
+			p.readNextToken()
+			return ast.UnaryPlus{ident}
+		}
+	case epllex.MINUS:
+		p.readNextToken()
+		if p.match(epllex.ID) && p.match_n(epllex.SEMICOLON) {
+			ident := p.ParseIdent()
+			p.readNextToken()
+			return ast.UnaryMinus{ident}
+		}
+	}
+
+	p.expect("'+' or '-' tokens", currentToken.Lexme)
+	return ast.EmptyExpr{}
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+//State Machine control and support functions
+
+func (p *Parser) matchTokens(tokens []epllex.TokenType) bool {
+	for _, token := range tokens {
+		if p.match(token) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (p *Parser) match(t epllex.TokenType) bool {
+	return currentToken.Ttype == t
 }
 
 func (p *Parser) match_n(t epllex.TokenType) bool {

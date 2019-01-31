@@ -27,7 +27,6 @@ import (
 	AST (or Abstract Syntax Tree) is whats the parser producing
 */
 
-
 type VarStat string
 
 type (
@@ -49,47 +48,44 @@ type (
 		Statement
 		ExprNode()
 	}
-
-
 )
 
 //Todo: replace all string names in symbol table references
 type (
-
 	Program struct {
-		Symbols *symboltable.SymbolTable
-		Imports *Import
-		Decls *[]Decl
-		Functions *[]Fnc
+		Symbols      *symboltable.SymbolTable
+		Imports      *Import
+		GlobalDecls  *[]Decl
+		Functions    *[]Fnc
 		MainFunction *Fnc
 	}
 
 	Fnc struct {
-		Name  string
-		ReturnType 	*Types.EplType
-		Body *Block
+		Name       string
+		ReturnType *Types.EplType
+		Params     *[]Decl
+		Body       *Block
 	}
 
 	Block struct {
 		Symbols *symboltable.SymbolTable
-		Nodes *[]Node
-	}
-	
-	VarDecl struct {
-		Name string
-		VarType *Types.EplType
-		Stat *VarStat
+		Nodes   *[]Node
 	}
 
- 	VarExplicitDecl struct {
+	VarDecl struct {
+		Name    string
+		VarType *Types.EplType
+		Stat    VarStat
+	}
+
+	VarExplicitDecl struct {
 		VarDecl
 		Value *Expression
 	}
 
-
 	Import struct {
 		StartLoc uint
-		Imports []string
+		Imports  []string
 	}
 
 	AssignStmt struct {
@@ -97,34 +93,115 @@ type (
 		Value *Expression
 	}
 
-
 	IfStmt struct {
 		Condition *BoolExpr
-		Code *Block
-		Else *Block
+		Code      *Block
+		Else      *Block
 	}
 
 	ElseStmt struct {
 		Code *Block
 	}
-
-	BoolExpr struct {}
 )
 
-func (VarDecl) StmtNode() {
+func (Fnc) DeclNode() {}
+
+func (Fnc) Start() uint {
 	panic("implement me")
 }
+
+func (Fnc) StmtNode() {}
+
+func (VarDecl) StmtNode() {}
 
 func (VarDecl) Start() uint {
+	return 0;
+}
+
+func (*Program) Start() uint { return 0 }
+func (*Block) Start() uint   { return 0xFAC } //Todo: Fix
+func (*IfStmt) Start() uint  { return 0 }
+
+func (i *Import) Start() uint { return i.StartLoc }
+func (*VarDecl) DeclNode()    {}
+
+func (*VarExplicitDecl) DeclNode() {}
+func (*IfStmt) StmtNode()          {}
+
+//----------------------------------------------------------------------------------------------------------------------
+//Expressions
+
+type (
+	//Expr is binary tree representation of expressions
+	Expr struct {
+		ls *Expression
+		rs *Expression
+	}
+
+	Ident struct {
+		Name string
+	}
+
+	EmptyExpr struct{}
+
+	BoolExpr struct{}
+
+	BinaryMul struct {
+		Ls Expression
+		Rs Expression
+	}
+
+	BinaryDiv struct {
+		Ls Expression
+		Rs Expression
+	}
+
+	BinaryAdd struct {
+		Ls Expression
+		Rs Expression
+	}
+
+	BinarySub struct {
+		Ls Expression
+		Rs Expression
+	}
+
+	UnaryPlus struct {
+		Rs Expression
+	}
+
+	UnaryMinus struct {
+		Rs Expression
+	}
+)
+
+func (UnaryPlus) ExprNode() {
 	panic("implement me")
 }
 
-func (*Program) Start() uint {return 0}
-func (*Block) Start() uint{return 0xFAC} //Todo: Fix
-func (*IfStmt) Start() uint {return 0}
+func (UnaryPlus) Start() uint {
+	panic("implement me")
+}
 
-func (i *Import) Start() uint {return i.StartLoc}
-func (*VarDecl) DeclNode() {}
+func (UnaryPlus) StmtNode() {
+	panic("implement me")
+}
 
-func (*VarExplicitDecl) DeclNode() {}
-func (*IfStmt) StmtNode() {}
+func (UnaryMinus) ExprNode() {}
+func (UnaryMinus) Start() uint {
+	panic("implement me")
+}
+
+func (UnaryMinus) StmtNode() {}
+
+func (EmptyExpr) Start() uint {
+	panic("implement me")
+}
+func (EmptyExpr) StmtNode() {}
+func (EmptyExpr) ExprNode() {}
+
+func (Ident) Start() uint {
+	panic("implement me")
+}
+func (Ident) StmtNode() {}
+func (Ident) ExprNode() {}

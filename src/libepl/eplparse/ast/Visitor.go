@@ -14,11 +14,11 @@ func Walk(v Visitor, node Node) {
 	case Decl:
 		Walk(v, n)
 	case *Block:
-		for _,sn := range n.Nodes {
+		for _,sn := range *n.Nodes {
 			Walk(v, sn)
 		}
 	case *Program:
-		for _, decl := range n.Decls {
+		for _, decl := range *n.GlobalDecls {
 			Walk(v, decl)
 		}
 

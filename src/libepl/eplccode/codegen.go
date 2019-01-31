@@ -62,7 +62,7 @@ func genProgram(program *ast.Program) {
 	writer.InitializeWriter()
 
 	writer.UpdateLabels(genImport(program.Imports, &index))
-	for _, decl := range *program.Decls {
+	for _, decl := range *program.GlobalDecls {
 		fmt.Println(decl)
 		writer.UpdateLabel(genDecls(decl, &index))
 	}
@@ -107,6 +107,7 @@ func genDecls(node ast.Decl, index *uint) Label {
 func genAssignStmt(varname string, expression *ast.Expression, index *uint) []Label {
 	var labeles []Label
 	labeles = append(labeles, genJump(*index+2, index))
+	*index++
 	*index++
 	labeles = append(labeles, genMove("$[resReg]", varname, index))
 	*index++
