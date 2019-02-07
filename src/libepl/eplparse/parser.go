@@ -120,6 +120,7 @@ func (p *Parser) ParseProgramFile() ast.Node {
 	}
 
 	if p.match(epllex.DECL) {
+		p.readNextToken()
 		for p.match(epllex.DECL) {
 			decls = append(decls, p.ParseVarDecl(symboltable.GLOBAL, false))
 		}
@@ -217,7 +218,6 @@ func (p *Parser) ParseBlock(function bool) {
 }
 
 func (p *Parser) ParseVarDecl(scope symboltable.ScopeType, function bool) ast.Decl {
-	p.readNextToken()
 	var stat string
 	var id string
 	var Type Types.EplType

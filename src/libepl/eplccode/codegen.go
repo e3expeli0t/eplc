@@ -91,6 +91,7 @@ func genDecls(node ast.Decl, index *uint) Label {
 		var labels []Label
 		labels = append(labels, genVarDecl(&ast.VarDecl{n.Name, n.VarType,n.Stat}, index))
 		labels = append(labels, genAssignStmt(n.Name, n.Value, index)...)
+
 	default:
 		Output.PrintErr("Unknown node type '", reflect.TypeOf(n), "'")
 	}
