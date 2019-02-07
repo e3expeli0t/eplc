@@ -1,7 +1,6 @@
 package Output
 
 import (
-	"__tmp_/eplc/src/libepl/Output"
 	"eplc/src/libepl/Output/color"
 	"fmt"
 	"strings"
@@ -106,5 +105,5 @@ func ParserIntelligentError(err ErrorDescriptor) {
 	fmt.Print(color.BGreen("Error:")+err.basicInfoPrinter())
 	fmt.Println(color.BGreen(err.ErrorMSG)+"\n")
 	fmt.Println(err.TokenMarker())
-	Output.PrintFatalErr("Syntatic", "To many errors")
+	PrintFatalErr("Syntatic", "To many errors")
 }

@@ -315,9 +315,17 @@ func (l *Lexer) readLine() {
 }
 
 
+//Todo: create efficient getline function
+//comment: this function is extremely inefficient and should be fixed. als
 func (l *Lexer) GetLine() string {
 	prevLexer := l.getMachineState()
 	line := l.currentLine
+
+
+	for l.Line == prevLexer.Line {
+		line += string(l.read())
+	}
+
 	l.setMachineState(prevLexer)
 
 	return line

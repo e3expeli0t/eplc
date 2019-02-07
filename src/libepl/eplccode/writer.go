@@ -29,7 +29,6 @@ type Writer struct {
 }
 
 func (w *Writer) InitializeWriter() {
-	fmt.Println(w.Fname)
 	w.TargetName = strings.Split(w.Fname, ".")[0]+".bin"
 	 file, _ := os.Create(w.TargetName)
 

@@ -61,7 +61,6 @@ func genProgram(program *ast.ProgramFile) {
 
 	writer.UpdateLabels(genImport(program.Imports, &index))
 	for _, decl := range *program.GlobalDecls {
-		fmt.Println(decl)
 		writer.UpdateLabel(genDecls(decl, &index))
 	}
 	writer.produceST(program.Symbols)

@@ -59,7 +59,6 @@ type Parser struct {
 //Helper functions
 
 func (p *Parser) expect(ex string, fnd string) {
-	fmt.Println(lookahead)
 	p.report(fmt.Sprintf("expected %s found %s ", ex, fnd))
 }
 
