@@ -27,19 +27,21 @@ import (
 )
 
 
-var prevOffset uint = 0
-
 /*
 	Lexer. the job of the lexer is to break the input stream into
 	meaningful parts that later will be used by the parser and the IR generator
 	The lexer is Deterministic finite state machine (Deterministic finite automata)
 */
+
 type Lexer struct {
 	Buffer     *bufio.Reader
 	Filename   string
 	Line       uint
 	LineOffset uint
 	ErrCount   uint
+	//Don't export this fields
+	prevOffset uint
+	currentLine string
 }
 
 //New Lexer
@@ -184,7 +186,7 @@ func (l *Lexer) Next() Token {
 			return l.matchBy('"')
 		}
 		//Errors.TokenError(l.Line, l.LineOffset, ch, l.Filename)
-		Errors.ExpError(l.Line, l.LineOffset, l.Filename, l.getLine(), ch)
+		Errors.ExpError(l.Line, l.LineOffset, l.Filename, l.GetLine(), ch)
 		l.ErrCount++
 
 		if l.ErrCount > 5 {
@@ -313,25 +315,16 @@ func (l *Lexer) readLine() {
 }
 
 
-func (l *Lexer) getLine() string {
+func (l *Lexer) GetLine() string {
 	prevLexer := l.getMachineState()
-	line := ""
-
-	for l.LineOffset > 0 {
-		l.unread()
-	}
-
-	for l.Line == prevLexer.Line {
-		line += string(l.read())
-	}
-
+	line := l.currentLine
 	l.setMachineState(prevLexer)
 
 	return line
 }
 
 func (l *Lexer) getMachineState() Lexer {
-	return Lexer{l.Buffer, l.Filename, l.Line, l.LineOffset, l.ErrCount}
+	return Lexer{l.Buffer, l.Filename, l.Line, l.LineOffset, l.ErrCount, l.prevOffset, l.currentLine}
 }
 
 func (l *Lexer) setMachineState(lex Lexer) {
@@ -355,11 +348,13 @@ func (l *Lexer) read() rune {
 	}
 
 	if char == '\n' {
-		prevOffset = l.LineOffset
+		l.prevOffset = l.LineOffset
 		l.LineOffset = 0
 		l.Line++
+		l.currentLine = ""
 	} else {
 			l.LineOffset++
+			l.currentLine += string(char)
 	}
 	return char
 }
@@ -367,9 +362,10 @@ func (l *Lexer) read() rune {
 func (l *Lexer) unread() {
 	if l.LineOffset == 0 {
 		l.Line--
-		l.LineOffset = prevOffset
+		l.LineOffset = l.prevOffset
 	} else {
 		l.LineOffset--
+		l.currentLine = l.currentLine[:len(l.currentLine)-1]
 	}
 	_ = l.Buffer.UnreadRune()
 }

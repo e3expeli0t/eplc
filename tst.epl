@@ -1,10 +1,10 @@
 import os.internal;
 //commant1/*commant2*/
 
-decl adiv double;
 
-@MainFunc
-fnc exec(command string, args []string): os.internal {
+decl fixed op uint;
+
+fnc exec(command uint, args uint ): None {
     if command.size < 1 {
         self.out.put("Wooot");
     }

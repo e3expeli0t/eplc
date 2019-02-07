@@ -52,7 +52,8 @@ type (
 
 //Todo: replace all string names in symbol table references
 type (
-	Program struct {
+	ProgramFile struct {
+		FileName     string
 		Symbols      *symboltable.SymbolTable
 		Imports      *Import
 		GlobalDecls  *[]Decl
@@ -118,9 +119,9 @@ func (VarDecl) Start() uint {
 	return 0;
 }
 
-func (*Program) Start() uint { return 0 }
-func (*Block) Start() uint   { return 0xFAC } //Todo: Fix
-func (*IfStmt) Start() uint  { return 0 }
+func (*ProgramFile) Start() uint { return 0 }
+func (*Block) Start() uint       { return 0xFAC } //Todo: Fix
+func (*IfStmt) Start() uint      { return 0 }
 
 func (i *Import) Start() uint { return i.StartLoc }
 func (*VarDecl) DeclNode()    {}

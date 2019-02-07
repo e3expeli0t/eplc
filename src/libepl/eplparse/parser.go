@@ -33,6 +33,7 @@ import (
 var (
 	currentToken epllex.Token
 	lookahead    epllex.Token
+	errCount 	 uint = 0
 )
 
 //New carete new parser struct
@@ -58,11 +59,12 @@ type Parser struct {
 //Helper functions
 
 func (p *Parser) expect(ex string, fnd string) {
+	fmt.Println(lookahead)
 	p.report(fmt.Sprintf("expected %s found %s ", ex, fnd))
 }
 
 func (p *Parser) report(msg string) {
-	errors.ParsingError(p.Lexer.Filename, p.Lexer.Line, p.Lexer.LineOffset, msg)
+	errors.ParsingError(p.Lexer.Filename, p.Lexer.Line, p.Lexer.LineOffset, msg, p.Lexer.GetLine(), currentToken)
 }
 
 func (p *Parser) NewScope() {
@@ -106,7 +108,7 @@ func (p *Parser) Construct() {
 
 }
 
-func (p *Parser) ParseProgram() ast.Node {
+func (p *Parser) ParseProgramFile() ast.Node {
 	p.readNextToken()
 	p.NewScope()
 
@@ -130,7 +132,8 @@ func (p *Parser) ParseProgram() ast.Node {
 		}
 	}
 
-	return &ast.Program{Imports: &imports, GlobalDecls: &decls, Symbols: &p.ST, Functions: &fncs}
+
+	return &ast.ProgramFile{Imports: &imports, GlobalDecls: &decls, Symbols: &p.ST, Functions: &fncs, FileName: p.Lexer.Filename}
 }
 //----------------------------------------------------------------------------------------------------------------------
 //Statements
@@ -215,14 +218,15 @@ func (p *Parser) ParseBlock(function bool) {
 }
 
 func (p *Parser) ParseVarDecl(scope symboltable.ScopeType, function bool) ast.Decl {
+	p.readNextToken()
 	var stat string
 	var id string
 	var Type Types.EplType
 
-	if p.match_n(epllex.FIXED) {
+	if p.match(epllex.FIXED) {
 		stat = "fixed"
 		p.readNextToken()
-	} else if p.match_n(epllex.ID) {
+	} else if p.match(epllex.ID) {
 		stat = "unfixed"
 		p.readNextToken()
 	} else {

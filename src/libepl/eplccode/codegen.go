@@ -31,8 +31,6 @@ import (
 
 
 //todo: Make this more efficient
-var filename string
-
 /*
 	GenerateAIR generates AIR (AVM IR) for optimization and machine
 	code generation by AVM
@@ -40,25 +38,25 @@ var filename string
 func GenerateAIR(source io.Reader, fname string) {
 	lexer := epllex.New(source, fname)
 	parser := eplparse.New(lexer)
-	file := parser.ParseProgram()
+	file := parser.ParseProgramFile()
 	generate(file)
 }
 
-func generate(n ast.Node) bool{
+func generate(n ast.Node) bool {
 
 	switch n := n.(type) {
-	case *ast.Program:
+	case *ast.ProgramFile:
 		genProgram(n)
 		return true
 	default:
-		Output.PrintErr("Unknown node type '", reflect.TypeOf(n), "' 	expected type ast.Program")
+		Output.PrintErr("Unknown node type '", reflect.TypeOf(n), "' 	expected type ast.ProgramFile")
 		return false
 	}
 }
 
-func genProgram(program *ast.Program) {
+func genProgram(program *ast.ProgramFile) {
 	var index uint = 0
-	writer := Writer{Fname:filename}
+	writer := Writer{Fname:program.FileName}
 	writer.InitializeWriter()
 
 	writer.UpdateLabels(genImport(program.Imports, &index))

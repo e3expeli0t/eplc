@@ -17,7 +17,7 @@ func Walk(v Visitor, node Node) {
 		for _,sn := range *n.Nodes {
 			Walk(v, sn)
 		}
-	case *Program:
+	case *ProgramFile:
 		for _, decl := range *n.GlobalDecls {
 			Walk(v, decl)
 		}

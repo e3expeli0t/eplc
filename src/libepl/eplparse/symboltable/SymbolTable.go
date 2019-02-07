@@ -51,14 +51,14 @@ type SymbolTable struct {
 	Next *SymbolTable
 } 
 
-//SymbolData stores the information about symbol
+//SymbolData stores the information about symbols
 type SymbolData struct {
 	SType Types.EplType
 	symbol string
 	scope ScopeType
 }
 
-//New create new empty SymbolTable
+//New creates new empty SymbolTable
 func New() SymbolTable {
 	return SymbolTable{Table: map[string]*SymbolData{}, Prev: nil, Next: nil}
 }
