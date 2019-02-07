@@ -1,18 +1,18 @@
 # eplc compiler 
 eplc is a compiler frontend for the epl programming language
 
-#Project status
+# Project status
 * build: fail
 
-#build
+# build
 * git clone https://e3expeli0t@bitbucket.org/lsplct/eplc.git
 * cd eplc
 * make build
 
-#run 
+# run 
 * eplc <filename>
 
-#make commands
+# make commands
 |command|description|
 |--|--|
 |sync|syncs the local branch with the online branch|
@@ -24,7 +24,7 @@ eplc is a compiler frontend for the epl programming language
 |list|list all eplc binaries installed on the system|
 |install|install eplc|
 
-#patches
+# patches
 from now on all the changes in the patch will be listed in the `patachs.md` file
 future patches will be in the  `future.md`
 every code patch if he is written in go, is formatted by gofmt 
