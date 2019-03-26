@@ -1,6 +1,6 @@
-#The epl programming language
+# The epl programming language
 
-##Contents:
+## Contents:
 1. introduction
 2. language semantics
 3. special types 
@@ -12,12 +12,12 @@
 9. packages and libraries
 10. What next?
 
-#Introduction:
+# Introduction:
 
 Epl is multi paradigmatic systems programming language . That focuses on easy complex software systems
 production and security. The language is easy to learn and code.
 
-#Language semantics:
+# Language semantics:
 
 1. Variables and types
 2. Functions
@@ -30,14 +30,14 @@ production and security. The language is easy to learn and code.
 9. AIR
 10. Next updates
 
-##Variables and types:
-###types:
+## Variables and types:
+### types:
 
 Types are names for differ data types. For example if we want to represent an
 Integer we will use the data type 'int' and if we want to represent a floating
 point number we will use the type 'float'.
 
-###List of types and their meaning:
+### List of types and their meaning:
 
 * int – system dependent sized integer
 * int8 – 8 bit integer
@@ -51,30 +51,24 @@ point number we will use the type 'float'.
 * long – 128 bits integer
 * float – system dependent sized floating point number
 
-###Variables:
+### Variables:
 Variable is a name that have a certain value of certain type.
 To declare variable we use the saved word 'decl' followed by the variable name
 and is type. For example to declare a variable of the type int we write:
 
-```
-#!epl
-
+```eplc
 decl a int;
 ```
 
 to initialize an already declared variable we write:
 
-```
-#!epl
-
+```eplc
 a = value;
 ```
 were value is an integer.
 to declare variable and initialize him we write:
 
-```
-#!epl
-
+```eplc
 a type = value;
 ```
 
@@ -84,9 +78,7 @@ that the variable is holding
 ####arithmatics:
 we can add subtract multiply and devide variable for example:
 
-```
-#!epl
-
+```eplc
 a int = 9;
 b int = (a*2)-2/2+3
 ```
@@ -96,9 +88,7 @@ after that we initialize b to have the value of (9*2) - 1 +3 i.e 20.
 
 Epl is also supports the modulo (aka reminder) operator (%). Which can be used like
 that (a is variable with the type int and the value 8) 
-```
-#!epl
-
+```eplc
 b int = a % 2;
 ```
 (the value of b is 0
@@ -108,20 +98,14 @@ because a is devided by 2)
 A function is a grouped sequence of operations that can be called over and over.
 To declare a function we use the reserved word fnc.
 Example:
-
-```
-#!epl
-
+```eplc
 fnc hello_world();
 ```
 
 here we declare a function that’s called hello_world(). To use ( aka implement ) the
 function after we declared her we write:
 
-```
-#!epl
-
-
+```eplc
 fnc hello_world(): void {
     out.put("Hello World");
 }
@@ -132,17 +116,13 @@ later) out.
 To import a group we will use the reserved word import.
 Example:
 
-```
-#!epl
-
-Import out;
+```eplc
+import out;
 
 ```
 The complete code:
 
-```
-#!epl
-
+```eplc
 import out;
 
 @MainFunc
@@ -181,9 +161,7 @@ value of the type int.
 the sum of x and y is x+y. To return a value we use the keyword return.
 The complete code:
 
-```
-#!epl
-
+```eplc
 import out;
 
 fnc sum (x int, y int): int {
@@ -191,7 +169,7 @@ fnc sum (x int, y int): int {
 }
 ```
 
-###Main function:
+### Main function:
 In order for epl to recognize the start function of a program. We call the start
 function main . But some times we don’t wont to do that. So epl implements
 something that called compiler flags ( this topic will be coverd in much more detail in
@@ -199,13 +177,12 @@ the rest of this article) to call a compiler flag we use the symbol @ flowed by 
 name of the flag. For example @MainFunc which will tell the compiler that the
 function is the main function.
 
-##If-else:
+## If-else:
 If and else statements checks if Boolean operation is returning true or false
 
 Example:
 
-```
-#!epl
+```eplc
 
 if (232 > 90)
 {
@@ -220,17 +197,16 @@ else
 
 The stmt prints Wowww 232 is bigger then 90.
 
-##Loops:
+## Loops:
 Loops are a way fo a programmer to write code that will execute n times without having to write n times that peace of code. For example suppose 
 we want to write program thats calculate the factorial of a number n,
 we can't write 1*2*3*4*...*n so we need to use loop. in epl there are
 4 kinds of loops. move, repeat, repeat-until and until.
 
-###move
+### move
 The move loop look like this:
 
-```
-#!epl
+```eplc
 move x in range n {
     out.put(x);
 }
@@ -239,12 +215,11 @@ which will print all the numbers from 1 to n. the  ```in```  keywords means that
 to any number that the range iterator returns.
 
 
-##repaet
+## repaet
 The repeat loop is infinite loop.
 example:
 
-```
-#!epl
+```eplc
 repeat {
     out.put("This will never stop");
 }
@@ -254,9 +229,7 @@ We can put braces after the keyword ``repeat`` and we can put inside them a loop
 in the scope of the loop).
 For example: 
 
-```
-
-#!epl
+```eplc
 repeat (i int = 0) {
 
     out.put("i equal to ", i);
@@ -265,23 +238,20 @@ repeat (i int = 0) {
 
 the compiler will generated code that increased i every time the loop start over
 
-##until-repeat
+## until-repeat
 until-repeat loops are in the form of:
 
-```
-#!epl
-
+```eplc
 repeat(i int = 0) {
     out.put("This will print only 5 times");
 } until (i < 5);
 ```
 which will print "this will print only 5 times" for 5 times
 
-###until
+### until
 Until loops are in the form of:
 
-```
-#!epl
+```epl
 until (2 == 3) {
     out.put("As long as math exists this will never stoop printing");
 }
@@ -290,7 +260,7 @@ until (2 == 3) {
 Which means that the loop will continue to execute until certain condition happens
 (This is the equivalent of while loops in c-like languages)
 
-#Cflags
+# Cflags
 Cflag are uncompiles epl commands that will tell the compiler about certain changes that you did in your code. After the parser finished is job the aliases engine is calld and he will configure the AIR code generator for this changes. In the bootstrap version the support of compiler flags is limited to thows that are listed here:
 
 | flag  | description |
