@@ -62,6 +62,7 @@ func genProgram(program *ast.ProgramFile) {
 	writer.UpdateLabels(genImport(program.Imports, &index))
 	for _, decl := range *program.GlobalDecls {
 		writer.UpdateLabel(genDecls(decl, &index))
+		fmt.Println("Added new decl")
 	}
 	writer.produceST(program.Symbols)
 	writer.WriteToTarget()
@@ -91,7 +92,6 @@ func genDecls(node ast.Decl, index *uint) Label {
 		var labels []Label
 		labels = append(labels, genVarDecl(&ast.VarDecl{n.Name, n.VarType,n.Stat}, index))
 		labels = append(labels, genAssignStmt(n.Name, n.Value, index)...)
-
 	default:
 		Output.PrintErr("Unknown node type '", reflect.TypeOf(n), "'")
 	}
