@@ -24,13 +24,13 @@ import (
 	"eplc/src/libepl/eplparse"
 	"eplc/src/libepl/eplparse/ast"
 	"fmt"
-
 	"io"
 	"reflect"
 )
 
 
 //todo: Make this more efficient
+//todo: Automated jump locations allocation
 /*
 	GenerateAIR generates AIR (AVM IR) for optimization and machine
 	code generation by AVM
@@ -43,9 +43,9 @@ func GenerateAIR(source io.Reader, fname string) {
 }
 
 func generate(n ast.Node) bool {
-
 	switch n := n.(type) {
 	case *ast.ProgramFile:
+		Output.PrintLog("Generating AIR")
 		genProgram(n)
 		return true
 	default:
@@ -61,9 +61,14 @@ func genProgram(program *ast.ProgramFile) {
 
 	writer.UpdateLabels(genImport(program.Imports, &index))
 	for _, decl := range *program.GlobalDecls {
-		writer.UpdateLabel(genDecls(decl, &index))
-		fmt.Println("Added new decl")
+		writer.UpdateLabels(genDecls(decl, &index))
+		Output.PrintLog("decl generated")
 	}
+	for _, fnc := range *program.Functions {
+		writer.UpdateLabels(genDecls(fnc, &index))
+		fmt.Println("Added new Function decl")
+	}
+
 	writer.produceST(program.Symbols)
 	writer.WriteToTarget()
 }
@@ -81,23 +86,50 @@ func genImport(node *ast.Import, index *uint) []Label {
 	return labels
 }
 
+func genBlock(index *uint, block *ast.Block) []Label {
+	var labels []Label
+	labels = append(labels,CreateLabel(*index, "$!!", "$[#]", "$[#]" ))
+	return labels
+}
+//----------------------------------------------------------------------------------------------------------------------
+//Decls
 /*
 	Generate vardecl statements
  */
-func genDecls(node ast.Decl, index *uint) Label {
+func genDecls(node ast.Decl, index *uint) []Label {
 	switch n := node.(type) {
 	case *ast.VarDecl:
-		return genVarDecl(n, index)
+		return []Label{genVarDecl(n, index)}
 	case *ast.VarExplicitDecl:
 		var labels []Label
 		labels = append(labels, genVarDecl(&ast.VarDecl{n.Name, n.VarType,n.Stat}, index))
 		labels = append(labels, genAssignStmt(n.Name, n.Value, index)...)
+		return labels
+	case *ast.Fnc:
+		return genFncDecl(n , index)
 	default:
 		Output.PrintErr("Unknown node type '", reflect.TypeOf(n), "'")
 	}
-	return Label{}
+	return []Label{}
 }
 
+func genFncDecl(node *ast.Fnc, index *uint) []Label {
+	var labels []Label
+	labels = append(labels, CreateLabel(*index, "fncdecl", node.Name, node.ReturnType.Tname))
+	*index++
+	labels = append(labels, genJump(*index+2, index))
+	labels = append(labels, genBlock(index, node.Body)...)
+	labels = append(labels, genParamList(index, DeclsDeepConvert(node.Params))...)
+
+	return labels
+}
+
+func genVarDecl(node *ast.VarDecl, index *uint) Label {
+	return CreateLabel(*index, "vardecl", node.Name, node.VarType.Tname)
+}
+
+//-----------------------------------------------------------------------------------------------------------------------
+//Statements
 
 /*
 	Jump to runtimeResolve Location and move resReg to the variable
@@ -115,10 +147,6 @@ func genAssignStmt(varname string, expression *ast.Expression, index *uint) []La
 	return labeles
 }
 
-func genVarDecl(node *ast.VarDecl, index *uint) Label {
-	return CreateLabel(*index, "vardecl", node.Name, node.VarType.Tname)
-}
-
 func genExpression(expression *ast.Expression, index *uint) Label {
 	return CreateLabel(*index, "runtimeResolve", asString(*index), "")
 }
@@ -134,9 +162,37 @@ func genMove(loc string, dest string, index *uint) Label {
 	return CreateLabel(*index, "move", loc, dest)
 }
 
+//----------------------------------------------------------------------------------------------------------------------
+//Helpers
+
+func genParamList(index *uint, list *[]ast.VarDecl) []Label {
+	var labels []Label
+
+	for _, param := range *list {
+		labels = append(labels, CreateLabel(*index, "DeclParam", param.Name, param.VarType.Tname))
+		*index++
+	}
+
+	return labels
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 // Support functions
+
+func DeclsDeepConvert(decls *[]ast.Decl) *[]ast.VarDecl {
+	var converted []ast.VarDecl
+
+	for _, decl := range *decls {
+		switch n := decl.(type) {
+		case *ast.VarDecl:
+			converted = append(converted, *n)
+		default:
+			break
+		}
+	}
+
+	return &converted
+}
 
 func asString(n uint) string {
 	return fmt.Sprintf("%d", n)
