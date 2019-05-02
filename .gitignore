@@ -2,6 +2,8 @@
 test.epl
 aplc*
 eplc-*
+.vscode
+.bin
 header
 count.out
 devel_logs.txt

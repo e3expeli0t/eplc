@@ -115,23 +115,28 @@ func (p *Parser) ParseProgramFile() ast.Node {
 	var decls []ast.Decl
 	var fncs []ast.Fnc
 
+	Output.PrintLog("Parsing imports")
 	if p.match(epllex.IMPORT) {
 		imports = p.ParseImport()
 	}
 
+	Output.PrintLog("Parsing global variables")
 	if p.match(epllex.DECL) {
 		for p.match(epllex.DECL) {
-			decls = append(decls, p.ParseVarDecl(symboltable.GLOBAL, false))
+			decls = append(decls, p.ParseVarDecl(symboltable.GLOBAL))
 		}
 	}
+
+	Output.PrintLog("Parsing functions")
 
 	if p.match(epllex.FNC) {
+		Output.PrintLog("[*] Parsing functions")
 		for p.match(epllex.FNC) {
-			fncs = append(fncs, p.ParesFnc())
+			fncs = append(fncs, p.ParseFnc())
 		}
 	}
 
-
+	Output.PrintLog("Completed")
 	return &ast.ProgramFile{Imports: &imports, GlobalDecls: &decls, Symbols: &p.ST, Functions: &fncs, FileName: p.Lexer.Filename}
 }
 //----------------------------------------------------------------------------------------------------------------------
@@ -154,9 +159,11 @@ func (p *Parser) ParseImport() ast.Import {
 }
 
 
-func (p *Parser) ParesFnc() ast.Fnc {
-	p.readNextToken()
+func (p *Parser) ParseFnc() ast.Fnc {
 	p.NewScope()
+	if p.match(epllex.FNC) {
+		p.readNextToken() //Skipping the fnc keyword
+	}
 
 	var name string
 	var params *[]ast.Decl
@@ -165,14 +172,16 @@ func (p *Parser) ParesFnc() ast.Fnc {
 
 	if p.match(epllex.ID) {
 		name = currentToken.Lexme
+		fmt.Println("name:", name, "next:",lookahead)
 		p.readNextToken()
 	} else {
 		p.expect("Ident", currentToken.Lexme)
 	}
 
 	if p.match(epllex.LPAR) {
-		p.readNextToken()
 		params = p.ParseParamList()
+	} else {
+		p.expect("(", currentToken.Lexme)
 	}
 
 	if p.match(epllex.RETURN_IND) {
@@ -232,11 +241,44 @@ func (p *Parser) ParesFnc() ast.Fnc {
 
 
 func (p *Parser) ParseParamList() *[]ast.Decl {
-	params := []ast.Decl{}
+	//todo: add symbol table support , fix function
+	p.readNextToken() // Skip the LPAR token
+	var params []ast.Decl
+	var stat string
+	var id string
+	var Type Types.EplType
 
 	for p.match(epllex.COMMA) || !p.match(epllex.RPAR) {
-		params = append(params, p.ParseVarDecl(symboltable.FUNCTION, true))
+		if p.match(epllex.FIXED) {
+			stat = "fixed"
+			p.readNextToken()
+		} else if p.match(epllex.ID) {
+			stat = "unfixed"
+		} else {
+			p.expect("Ident or 'fixed' tokens", currentToken.Lexme)
+		}
+
+		if p.match(epllex.ID) {
+			id = currentToken.Lexme
+			p.readNextToken()
+		} else {
+			p.expect("identifier token", currentToken.Lexme)
+		}
+
+		if Types.IsValidBasicType(currentToken) {
+			Type = *Types.ResolveType(currentToken)
+		} else {
+			Type = *Types.MakeType(stat + ":"+currentToken.Lexme)
+		}
+
+		p.readNextToken() //skip the type
+
+		params = append(params, &ast.VarDecl{Name: id, VarType: &Type, Stat: ast.VarStat(stat)})
+		if p.match(epllex.RPAR) {
+			break
+		}
 	}
+	p.readNextToken() // skip the rpar token
 
 	return &params
 }
@@ -247,8 +289,11 @@ func (p *Parser) ParseBlock(function bool) {
 	}
 }
 
-func (p *Parser) ParseVarDecl(scope symboltable.ScopeType, function bool) ast.Decl {
-	p.readNextToken()
+func (p *Parser) ParseVarDecl(scope symboltable.ScopeType) ast.Decl {
+	if p.match(epllex.DECL) { //skip the decl keyword if found
+		p.readNextToken()
+	}
+
 	var stat string
 	var id string
 	var Type Types.EplType
@@ -258,43 +303,37 @@ func (p *Parser) ParseVarDecl(scope symboltable.ScopeType, function bool) ast.De
 		p.readNextToken()
 	} else if p.match(epllex.ID) {
 		stat = "unfixed"
-		p.readNextToken()
 	} else {
 		p.expect("Ident or 'fixed' tokens", currentToken.Lexme)
 	}
 
 	if p.match(epllex.ID) {
 		id = currentToken.Lexme
+		p.readNextToken()
 	} else {
 		p.expect("identifier token", currentToken.Lexme)
 	}
-	p.readNextToken()
 
 	if Types.IsValidBasicType(currentToken) {
 		Type = *Types.ResolveType(currentToken)
 	} else {
-		Type = *Types.MakeType(stat + currentToken.Lexme)
+		Type = *Types.MakeType(stat + ":"+currentToken.Lexme)
 	}
 
-	p.readNextToken()
+	p.readNextToken() //skip the type
 
 	if !p.match(epllex.SEMICOLON) {
 		if p.match(epllex.ASSIGN) {
 			p.ParseExpression()
-		} else if function {
-			if !p.match(epllex.COMMA) || !p.match(epllex.RPAR) {
-				p.expect("',' or ')'", currentToken.Lexme)
-			}
-			p.readNextToken()
 		} else {
 			p.expect("';'", currentToken.Lexme)
 		}
+	} else {
+		p.readNextToken() //todo: skip the semicolon
 	}
-
-	p.readNextToken()
 	p.ST.Add(symboltable.NewSymbol(id, Type, scope))
 
-	return &ast.VarDecl{id, &Type, ast.VarStat(stat)}
+	return &ast.VarDecl{Name: id, VarType: &Type, Stat: ast.VarStat(stat)}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
