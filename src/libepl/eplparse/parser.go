@@ -179,6 +179,37 @@ func (p *Parser) ParesFnc() ast.Fnc {
 		p.readNextToken()
 
 		if Types.IsValidBasicType(currentToken) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 			returnType = Types.ResolveType(currentToken)
 		} else {
 			returnType = Types.MakeType(currentToken.Lexme)
