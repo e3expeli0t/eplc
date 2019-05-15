@@ -1,1 +1,6 @@
 language: go
+  - master
+
+before_install:
+  - sudo apt-get update
+  - apt-get install go-dep
