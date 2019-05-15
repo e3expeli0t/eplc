@@ -19,8 +19,8 @@
 package Output
 
 import (
-	"fmt"
 	"eplc/src/libepl/Output/color"
+	"fmt"
 	"os"
 )
 

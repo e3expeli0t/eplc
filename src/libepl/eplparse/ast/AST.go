@@ -14,7 +14,7 @@
 *
 *	You should have received a copy of the GNU General Public License
 *	along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package ast
 
@@ -55,7 +55,7 @@ type (
 	ProgramFile struct {
 		FileName     string
 		Symbols      *symboltable.SymbolTable
-		Imports      *Import
+		Imports      *[]Import
 		GlobalDecls  *[]Decl
 		Functions    *[]Fnc
 		MainFunction *Fnc
@@ -116,7 +116,7 @@ func (Fnc) StmtNode() {}
 func (VarDecl) StmtNode() {}
 
 func (VarDecl) Start() uint {
-	return 0;
+	return 0
 }
 
 func (*ProgramFile) Start() uint { return 0 }
@@ -145,7 +145,8 @@ type (
 
 	EmptyExpr struct{}
 
-	BoolExpr struct{}
+	BoolExpr struct {
+	}
 
 	BinaryMul struct {
 		Ls Expression
@@ -174,26 +175,75 @@ type (
 	UnaryMinus struct {
 		Rs Expression
 	}
+
+	FunctionCall struct {
+		PackagePath []Ident
+		Arguments   []Ident
+		ReturnType  Types.EplType //todo: Version 0.2+
+	}
+
+	Singular struct {
+		Symbol Ident
+	}
 )
 
-func (UnaryPlus) ExprNode() {
+func (Singular) Start() uint {
 	panic("implement me")
 }
+
+func (Singular) StmtNode() {
+	panic("implement me")
+}
+
+func (Singular) ExprNode() {
+	panic("implement me")
+}
+
+func (FunctionCall) Start() uint {
+	panic("implement me")
+}
+
+func (FunctionCall) StmtNode() {
+	panic("implement me")
+}
+
+func (FunctionCall) ExprNode() {
+	panic("implement me")
+}
+
+func (BinarySub) Start() uint {
+	panic("implement me")
+}
+func (BinarySub) StmtNode() {}
+func (BinarySub) ExprNode() {}
+
+func (BinaryAdd) Start() uint {
+	panic("implement me")
+}
+func (BinaryAdd) StmtNode() {}
+func (BinaryAdd) ExprNode() {}
+
+func (BinaryDiv) Start() uint {
+	panic("implement me")
+}
+func (BinaryDiv) StmtNode() {}
+func (BinaryDiv) ExprNode() {}
+
+func (BinaryMul) Start() uint {
+	panic("implement me")
+}
+func (BinaryMul) StmtNode() {}
+func (BinaryMul) ExprNode() {}
 
 func (UnaryPlus) Start() uint {
 	panic("implement me")
 }
+func (UnaryPlus) ExprNode() {}
+func (UnaryPlus) StmtNode() {}
 
-func (UnaryPlus) StmtNode() {
-	panic("implement me")
-}
-
-func (UnaryMinus) ExprNode() {}
-func (UnaryMinus) Start() uint {
-	panic("implement me")
-}
-
-func (UnaryMinus) StmtNode() {}
+func (UnaryMinus) ExprNode()   {}
+func (UnaryMinus) Start() uint {}
+func (UnaryMinus) StmtNode()   {}
 
 func (EmptyExpr) Start() uint {
 	panic("implement me")

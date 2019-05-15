@@ -1,0 +1,14 @@
+import os.system;
+import linker.selfExec;
+
+decl oopsi uint;
+decl fixed oopsi Proc;
+decl main SystemProc;
+decl exitFlag boolean;
+
+fnc exec(command uint, command string, args string): Proc {
+}
+
+fnc Main(): None {
+    exec(0, "ls", ".");
+}

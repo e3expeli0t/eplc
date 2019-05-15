@@ -18,9 +18,6 @@ build:
 	@echo Checking dependencies...
 	dep ensure $(dep_args)
 	
-	@echo Running tests...
-	go test -v eplc/src/libepl/epllex -cover 
-	
 	@echo Building eplc...
 	go build -i -v -o eplc-$(version) src/eplc.go
 	@mkdir target

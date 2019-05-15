@@ -59,7 +59,7 @@ func genProgram(program *ast.ProgramFile) {
 	writer := Writer{Fname:program.FileName}
 	writer.InitializeWriter()
 
-	writer.UpdateLabels(genImport(program.Imports, &index))
+	writer.UpdateLabels(genImport(*program.Imports, &index))
 	for _, decl := range *program.GlobalDecls {
 		writer.UpdateLabels(genDecls(decl, &index))
 		Output.PrintLog("decl generated")
@@ -67,6 +67,11 @@ func genProgram(program *ast.ProgramFile) {
 	for _, fnc := range *program.Functions {
 		writer.UpdateLabels(genDecls(fnc, &index))
 		fmt.Println("Added new Function decl")
+	}
+	if *program.MainFunction != (ast.Fnc{}) {
+		writer.UpdateLabels(genDecls(program.MainFunction, &index))
+	} else {
+		Output.PrintFatalErr("Couldn't find main function")
 	}
 
 	writer.produceST(program.Symbols)
@@ -76,11 +81,13 @@ func genProgram(program *ast.ProgramFile) {
 /*
 	Generates link command to link external libraries to the program
  */
-func genImport(node *ast.Import, index *uint) []Label {
+func genImport(node []ast.Import, index *uint) []Label {
 	var labels []Label
-	for _, i := range node.Imports {
-		labels = append(labels, CreateLabel(*index, "link", i, ""))
-		*index++
+	for _, i := range node {
+		for _, lib := range i.Imports {
+			labels = append(labels, CreateLabel(*index, "link", lib, ""))
+			*index++
+		}
 	}
 
 	return labels
@@ -88,7 +95,7 @@ func genImport(node *ast.Import, index *uint) []Label {
 
 func genBlock(index *uint, block *ast.Block) []Label {
 	var labels []Label
-	labels = append(labels,CreateLabel(*index, "$!!", "$[#]", "$[#]" ))
+	labels = append(labels,CreateLabel(*index, "$!!", "$[#]", "$[#]" )) //Empty command
 	return labels
 }
 //----------------------------------------------------------------------------------------------------------------------
@@ -105,8 +112,10 @@ func genDecls(node ast.Decl, index *uint) []Label {
 		labels = append(labels, genVarDecl(&ast.VarDecl{n.Name, n.VarType,n.Stat}, index))
 		labels = append(labels, genAssignStmt(n.Name, n.Value, index)...)
 		return labels
+	case ast.Fnc:
+		return genFncDecl(&n , index)
 	case *ast.Fnc:
-		return genFncDecl(n , index)
+		return genFncDecl(n, index)
 	default:
 		Output.PrintErr("Unknown node type '", reflect.TypeOf(n), "'")
 	}
@@ -117,9 +126,10 @@ func genFncDecl(node *ast.Fnc, index *uint) []Label {
 	var labels []Label
 	labels = append(labels, CreateLabel(*index, "fncdecl", node.Name, node.ReturnType.Tname))
 	*index++
-	labels = append(labels, genJump(*index+2, index))
-	labels = append(labels, genBlock(index, node.Body)...)
 	labels = append(labels, genParamList(index, DeclsDeepConvert(node.Params))...)
+	labels = append(labels, genJump(*index+2, index))
+	*index++
+	labels = append(labels, genBlock(index, node.Body)...)
 
 	return labels
 }

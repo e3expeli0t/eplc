@@ -111,13 +111,14 @@ func (p *Parser) ParseProgramFile() ast.Node {
 	p.readNextToken()
 	p.NewScope()
 
-	var imports ast.Import
+	var imports []ast.Import
 	var decls []ast.Decl
 	var fncs []ast.Fnc
+	var MainFunction ast.Fnc
 
 	Output.PrintLog("Parsing imports")
-	if p.match(epllex.IMPORT) {
-		imports = p.ParseImport()
+	for p.match(epllex.IMPORT) {
+		imports = append(imports, p.ParseImport())
 	}
 
 	Output.PrintLog("Parsing global variables")
@@ -132,30 +133,37 @@ func (p *Parser) ParseProgramFile() ast.Node {
 	if p.match(epllex.FNC) {
 		Output.PrintLog("[*] Parsing functions")
 		for p.match(epllex.FNC) {
-			fncs = append(fncs, p.ParseFnc())
+			fnc := p.ParseFnc()
+
+			//todo: Should change in eplc v0.2 to support cflags
+			if fnc.Name == "Main" {
+				MainFunction = fnc
+				continue
+			}
+			fncs = append(fncs, fnc)
 		}
 	}
 
 	Output.PrintLog("Completed")
-	return &ast.ProgramFile{Imports: &imports, GlobalDecls: &decls, Symbols: &p.ST, Functions: &fncs, FileName: p.Lexer.Filename}
+	return &ast.ProgramFile{Imports: &imports, GlobalDecls: &decls, Symbols: &p.ST, Functions: &fncs, FileName: p.Lexer.Filename, MainFunction: &MainFunction}
 }
 //----------------------------------------------------------------------------------------------------------------------
 //Statements
 
 func (p *Parser) ParseImport() ast.Import {
 
-	var importList []string
+	var importPath []string
 	start := currentToken.StartLine
 
 	for !p.match(epllex.SEMICOLON) {
 		if p.match(epllex.ID) {
-			importList = append(importList, currentToken.Lexme)
+			importPath = append(importPath, currentToken.Lexme)
 		}
-		p.readNextToken()
+		p.readNextToken() //SKIP THE DOT
 	}
 
-	p.readNextToken()
-	return ast.Import{start, importList}
+	p.readNextToken() // SKIP THE SEMICOLON
+	return ast.Import{StartLoc: start, Imports: importPath}
 }
 
 
@@ -188,37 +196,6 @@ func (p *Parser) ParseFnc() ast.Fnc {
 		p.readNextToken()
 
 		if Types.IsValidBasicType(currentToken) {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 			returnType = Types.ResolveType(currentToken)
 		} else {
 			returnType = Types.MakeType(currentToken.Lexme)
@@ -277,6 +254,7 @@ func (p *Parser) ParseParamList() *[]ast.Decl {
 		if p.match(epllex.RPAR) {
 			break
 		}
+		p.readNextToken()//skip the comma
 	}
 	p.readNextToken() // skip the rpar token
 
@@ -286,6 +264,10 @@ func (p *Parser) ParseParamList() *[]ast.Decl {
 func (p *Parser) ParseBlock(function bool) {
 	if !function {
 		p.NewScope()
+	}
+
+	if p.match(epllex.LBRACE) {
+		p.readNextToken()
 	}
 }
 
@@ -362,10 +344,24 @@ func (p *Parser) ParseExpression() ast.Expression {
 	} else if p.matchTokens(UnaryStart) {
 		return p.ParseUnaryOp()
 	} else if p.matchTokens(BinaryStart) {
-
+		return p.ParseBinaryOp()
+	} else if p.match(epllex.ID) {
+		if p.match_n(epllex.LPAR) || p.match_n(epllex.COMMA) {
+			return p.ParseFunctionCall()
+		} else if p.match_n(epllex.SEMICOLON){
+			return p.ParseSingularExpr()
+		} else {
+			p.expect("function call or empty expression", currentToken.Lexme)
+		}
+	} else {
+		p.expect("Ident semicolon unary or binary expression ", currentToken.Lexme)
 	}
-
 	return nil
+}
+func (p *Parser) ParseSingularExpr() ast.Singular {
+	ident := p.ParseIdent()
+	p.readNextToken() //Skip the semicolon
+	return ast.Singular{Symbol: ident}
 }
 
 func (p *Parser) ParseIdent() ast.Ident {
@@ -379,6 +375,59 @@ func (p *Parser) ParseIdent() ast.Ident {
 	return ast.Ident{}
 }
 
+func (p *Parser) ParseFunctionCall() ast.FunctionCall {
+	var params []ast.Ident
+	var importPath []ast.Ident
+
+	for p.match(epllex.COMMA) && !p.match(epllex.RPAR) {
+		importPath = append(importPath, p.ParseIdent())
+		p.readNextToken()
+	}
+
+	if p.match(epllex.LPAR) {
+		p.readNextToken()
+		for p.match(epllex.COMMA) && !p.match(epllex.RPAR) {
+			params = append(params, p.ParseIdent())
+		}
+	} else {
+		p.expect("(", currentToken.Lexme)
+	}
+
+	return ast.FunctionCall{PackagePath: importPath, Arguments: params}
+}
+
+func (p *Parser) ParseBinaryOp() ast.Expression {
+	switch currentToken.Ttype {
+	case epllex.LPAR:
+		p.readNextToken()
+		return p.ParseBinaryOp()
+	case epllex.RPAR:
+		p.readNextToken()
+		return p.ParseBinaryOp()
+	}
+
+	if p.matchTokens(UnaryStart) {
+		leftExp := p.ParseExpression()
+
+		p.readNextToken() //read the operation token
+		op := currentToken.Ttype
+
+		rightExp := p.ParseExpression()
+
+		switch op {
+		case epllex.MULT:
+			return ast.BinaryMul{Ls: leftExp, Rs: rightExp}
+		case epllex.MINUS:
+			return ast.BinarySub{Ls: leftExp, Rs: rightExp}
+		case epllex.DEV:
+			//todo: rename token and ast names v0.1.1
+			return ast.BinaryDiv{Ls: leftExp, Rs: rightExp}
+		case epllex.PLUS:
+			return ast.BinaryAdd{Ls: leftExp, Rs: rightExp}
+		}
+	}
+}
+
 func (p *Parser) ParseUnaryOp() ast.Expression {
 	switch currentToken.Ttype {
 	case epllex.PLUS:
@@ -386,14 +435,14 @@ func (p *Parser) ParseUnaryOp() ast.Expression {
 		if p.match(epllex.ID) && p.match_n(epllex.SEMICOLON) {
 			ident := p.ParseIdent()
 			p.readNextToken()
-			return ast.UnaryPlus{ident}
+			return ast.UnaryPlus{Rs: ident}
 		}
 	case epllex.MINUS:
 		p.readNextToken()
 		if p.match(epllex.ID) && p.match_n(epllex.SEMICOLON) {
 			ident := p.ParseIdent()
 			p.readNextToken()
-			return ast.UnaryMinus{ident}
+			return ast.UnaryMinus{Rs: ident}
 		}
 	}
 
@@ -401,6 +450,16 @@ func (p *Parser) ParseUnaryOp() ast.Expression {
 	return ast.EmptyExpr{}
 }
 
+//----------------------------------------------------------------------------------------------------------------------
+//Statements
+
+func (p *Parser) ParseIf() ast.IfStmt {
+	if p.match(epllex.IF) {
+		p.readNextToken()
+	}
+	p.NewScope()
+
+}
 //----------------------------------------------------------------------------------------------------------------------
 //State Machine control and support functions
 

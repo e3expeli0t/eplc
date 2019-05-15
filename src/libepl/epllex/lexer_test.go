@@ -19,8 +19,8 @@
 package epllex
 
 import (
-	"testing"
 	"strings"
+	"testing"
 )
 
 
