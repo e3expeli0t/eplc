@@ -2,4 +2,4 @@ language: go
 
 before_install:
   - sudo apt-get update
-  - apt-get install go-dep
+  - sudo apt-get install go-dep
