@@ -1,5 +1,4 @@
 language: go
 
 before_install:
-  - sudo apt-get update
-  - apt-get install go-dep
+    - go get -u github.com/golang/dep/cmd/dep
