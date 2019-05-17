@@ -75,7 +75,7 @@ a type = value;
 were type is the type of the data that the variable is holding and value is the data
 that the variable is holding
 
-####arithmatics:
+#### arithmatics:
 we can add subtract multiply and devide variable for example:
 
 ```eplc
@@ -94,7 +94,7 @@ b int = a % 2;
 (the value of b is 0
 because a is devided by 2)
 
-##Functions:
+## Functions:
 A function is a grouped sequence of operations that can be called over and over.
 To declare a function we use the reserved word fnc.
 Example:
@@ -144,7 +144,7 @@ fnc func(a int, b int);
 
 We can use the variable a and inside the function func.
 
-###Functions return types:
+### Functions return types:
 As in variables function can also have values, in this case the value of the function is
 the value that the function returns. For example suppose we want to create a
 function that’s computes the sum of to numbers x and y. To create such a function
