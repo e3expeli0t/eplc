@@ -1,9 +1,6 @@
 # eplc compiler 
 eplc is a compiler frontend for the epl programming language
 
-# Project status
-* build status: builable 
-
 # build
 * git clone https://github.com/e3expeli0t/eplc
 * cd eplc
