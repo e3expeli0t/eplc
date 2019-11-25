@@ -1,3 +1,5 @@
+# NOTE: The project right now is under rethinking and redesign stages and it is not buildable nor runnable
+
 # eplc compiler 
 eplc is a compiler frontend for the epl programming language
 
@@ -32,7 +34,7 @@ every code patch if he is written in go, is formatted by gofmt
 The project code will not be at any stage a production code.
 This project is simply a large amout of tests, ideas and experiments that I do
 while i'm learning the basics of PLT
-also the project writing will note progress fast mainly because I don't have a lot of time to work on it
+also the project writing will not progress fast mainly because I don't have a lot of time to work on it
 
 # The language architecture
 
