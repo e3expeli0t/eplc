@@ -19,4 +19,7 @@
 * fix error handling bugs
 
 ## eplparse 0.1.0
-### The module is stil under development
+### The module is stil under devel
+* added support for all language constructs exept expression 
+* the code is very very ugly
+* experimental version of eplparse

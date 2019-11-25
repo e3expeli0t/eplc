@@ -34,8 +34,14 @@ type (
 		Start() uint
 	}
 
-	Statement interface {
+
+	Expression interface {
 		Node
+		ExprNode()
+	}
+
+	Statement interface {
+		Expression
 		StmtNode()
 	}
 
@@ -43,10 +49,9 @@ type (
 		Statement
 		DeclNode()
 	}
-
-	Expression interface {
-		Statement
-		ExprNode()
+	BoolExpr interface {
+		Expression
+		BoolExprNode()
 	}
 )
 
@@ -70,7 +75,7 @@ type (
 
 	Block struct {
 		Symbols *symboltable.SymbolTable
-		Nodes   *[]Node
+		ExprList   *[]Expression
 	}
 
 	VarDecl struct {
@@ -90,7 +95,7 @@ type (
 	}
 
 	AssignStmt struct {
-		Owner string
+		Owner Ident
 		Value *Expression
 	}
 
@@ -104,6 +109,30 @@ type (
 		Code *Block
 	}
 )
+
+func (AssignStmt) Start() uint {
+	panic("implement me")
+}
+
+func (Fnc) ExprNode() {
+	panic("implement me")
+}
+
+func (ElseStmt) Start() uint {
+	panic("implement me")
+}
+
+func (ElseStmt) ExprNode() {
+	panic("implement me")
+}
+
+func (ElseStmt) StmtNode() {
+	panic("implement me")
+}
+
+func (VarDecl) ExprNode() {
+	panic("implement me")
+}
 
 func (Fnc) DeclNode() {}
 
@@ -119,16 +148,18 @@ func (VarDecl) Start() uint {
 	return 0
 }
 
-func (*ProgramFile) Start() uint { return 0 }
-func (*Block) Start() uint       { return 0xFAC } //Todo: Fix
-func (*IfStmt) Start() uint      { return 0 }
+func (ProgramFile) Start() uint { return 0 }
+func (Block) Start() uint       { return 0xFAC } //Todo: Fix
+func (IfStmt) Start() uint      { return 0 }
 
 func (i *Import) Start() uint { return i.StartLoc }
-func (*VarDecl) DeclNode()    {}
+func (VarDecl) DeclNode()    {}
 
-func (*VarExplicitDecl) DeclNode() {}
-func (*IfStmt) StmtNode()          {}
-
+func (VarExplicitDecl) DeclNode() {}
+func (IfStmt) StmtNode()          {}
+func (IfStmt) ExprNode() {
+	panic("implement me")
+}
 //----------------------------------------------------------------------------------------------------------------------
 //Expressions
 
@@ -145,7 +176,34 @@ type (
 
 	EmptyExpr struct{}
 
-	BoolExpr struct {
+
+	BoolNot struct {
+		Expr *BoolExpr
+	}
+
+	BoolEquals struct {
+		Le *BoolExpr
+		Re *BoolExpr
+	}
+
+	BoolGreaterThen struct {
+		Le *BoolExpr
+		Re *BoolExpr
+	}
+
+	BoolGreatEquals struct {
+		Le *BoolExpr
+		Re *BoolExpr
+	}
+
+	BoolLowerThen struct {
+		Le *BoolExpr
+		Re *BoolExpr
+	}
+
+	BoolLowerThenEqual struct {
+		Le *BoolExpr
+		Re *BoolExpr
 	}
 
 	BinaryMul struct {
@@ -186,6 +244,79 @@ type (
 		Symbol Ident
 	}
 )
+
+func (BoolGreaterThen) Start() uint {
+	panic("implement me")
+}
+
+func (BoolGreaterThen) ExprNode() {
+	panic("implement me")
+}
+
+func (BoolGreaterThen) BoolExprNode() {
+	panic("implement me")
+}
+
+func (BoolEquals) Start() uint {
+	panic("implement me")
+}
+
+func (BoolEquals) ExprNode() {
+	panic("implement me")
+}
+
+func (BoolEquals) BoolExprNode() {
+	panic("implement me")
+}
+
+func (BoolGreatEquals) Start() uint {
+	panic("implement me")
+}
+
+func (BoolGreatEquals) ExprNode() {
+	panic("implement me")
+}
+
+func (BoolGreatEquals) BoolExprNode() {
+	panic("implement me")
+}
+
+func (BoolNot) Start() uint {
+	panic("implement me")
+}
+
+func (BoolNot) ExprNode() {
+	panic("implement me")
+}
+
+func (BoolNot) BoolExprNode() {
+	panic("implement me")
+}
+
+func (BoolLowerThen) Start() uint {
+	panic("implement me")
+}
+
+func (BoolLowerThen) ExprNode() {
+	panic("implement me")
+}
+
+func (BoolLowerThen) BoolExprNode() {
+	panic("implement me")
+}
+
+func (BoolLowerThenEqual) Start() uint {
+	panic("implement me")
+}
+
+
+func (BoolLowerThenEqual) ExprNode() {
+	panic("implement me")
+}
+
+func (BoolLowerThenEqual) BoolExprNode() {
+	panic("implement me")
+}
 
 func (Singular) Start() uint {
 	panic("implement me")
@@ -242,7 +373,9 @@ func (UnaryPlus) ExprNode() {}
 func (UnaryPlus) StmtNode() {}
 
 func (UnaryMinus) ExprNode()   {}
-func (UnaryMinus) Start() uint {}
+func (UnaryMinus) Start() uint {
+	panic("Good")
+}
 func (UnaryMinus) StmtNode()   {}
 
 func (EmptyExpr) Start() uint {

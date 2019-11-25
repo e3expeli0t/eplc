@@ -16,3 +16,6 @@ parser_tools
 parser-tools
 tools
 *~
+runtime_devel
+rtv*
+*.ertdump

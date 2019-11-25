@@ -9,6 +9,6 @@ decl exitFlag boolean;
 fnc exec(command uint, command string, args string): Proc {
 }
 
-fnc Main(): None {
+fnc Main(){
     exec(0, "ls", ".");
 }

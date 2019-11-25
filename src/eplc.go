@@ -22,7 +22,6 @@ import (
 	"eplc/src/libepl/Output"
 	"eplc/src/libeplc"
 	"fmt"
-	"io"
 	"os"
 	//"github.com/pkg/profile"
 )
@@ -39,7 +38,7 @@ func main() {
 	args := os.Args[1:]
 	file := args[0]
 
-	var reader io.Reader
+
 	reader, err := os.Open(file)
 
 	if err != nil {

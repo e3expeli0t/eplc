@@ -14,7 +14,7 @@ func Walk(v Visitor, node Node) {
 	case Decl:
 		Walk(v, n)
 	case *Block:
-		for _,sn := range *n.Nodes {
+		for _,sn := range *n.ExprList {
 			Walk(v, sn)
 		}
 	case *ProgramFile:
