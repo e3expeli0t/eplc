@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.com/e3expeli0t/eplc.png)](https://travis-ci.com/e3expeli0t/eplc)
-
 # eplc compiler 
 eplc is a compiler frontend for the epl programming language
 
