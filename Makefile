@@ -47,9 +47,8 @@ clean:
 	@echo Removing Support targets...
 	@cd tools/Support/epldbg/; make clean
 	@#remove in the feature
-	@rm -rf test.air
-	@rm -rf test.bin
-	@rm -rf SymbolTable.json
+	@rm -rf *.air
+	@rm -rf *.bin
 devel_tests:
 	dep ensure $(dep_args)
 	go test -v eplc/src/libepl/epllex -covermode=count -coverprofile=count.out fmt
