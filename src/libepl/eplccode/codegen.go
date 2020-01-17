@@ -28,7 +28,6 @@ import (
 	"reflect"
 )
 
-
 //todo: Make this more efficient
 //todo: Automated jump locations allocation
 /*
@@ -56,8 +55,10 @@ func generate(n ast.Node) bool {
 
 func genProgram(program *ast.ProgramFile) {
 	var index uint = 0
-	writer := Writer{Fname:program.FileName}
+	writer := Writer{Fname: program.FileName}
 	writer.InitializeWriter()
+
+	Output.PrintLog(program.FileName, program.Imports)
 
 	writer.UpdateLabels(genImport(*program.Imports, &index))
 	for _, decl := range *program.GlobalDecls {
@@ -75,12 +76,13 @@ func genProgram(program *ast.ProgramFile) {
 	}
 
 	writer.produceST(program.Symbols)
+	writer.produceAST(program)
 	writer.WriteToTarget()
 }
 
 /*
 	Generates link command to link external libraries to the program
- */
+*/
 func genImport(node []ast.Import, index *uint) []Label {
 	var labels []Label
 	for _, i := range node {
@@ -95,25 +97,26 @@ func genImport(node []ast.Import, index *uint) []Label {
 
 func genBlock(index *uint, block *ast.Block) []Label {
 	var labels []Label
-	labels = append(labels,CreateLabel(*index, "$!!", "$[#]", "$[#]" )) //Empty command
+	labels = append(labels, CreateLabel(*index, "$!!", "$[#]", "$[#]")) //Empty command
 	return labels
 }
+
 //----------------------------------------------------------------------------------------------------------------------
 //Decls
 /*
 	Generate vardecl statements
- */
+*/
 func genDecls(node ast.Decl, index *uint) []Label {
 	switch n := node.(type) {
 	case *ast.VarDecl:
 		return []Label{genVarDecl(n, index)}
 	case *ast.VarExplicitDecl:
 		var labels []Label
-		labels = append(labels, genVarDecl(&ast.VarDecl{n.Name, n.VarType,n.Stat}, index))
+		labels = append(labels, genVarDecl(&ast.VarDecl{n.Name, n.VarType, n.Stat}, index))
 		labels = append(labels, genAssignStmt(n.Name, n.Value, index)...)
 		return labels
 	case ast.Fnc:
-		return genFncDecl(&n , index)
+		return genFncDecl(&n, index)
 	case *ast.Fnc:
 		return genFncDecl(n, index)
 	default:
@@ -143,7 +146,7 @@ func genVarDecl(node *ast.VarDecl, index *uint) Label {
 
 /*
 	Jump to runtimeResolve Location and move resReg to the variable
- */
+*/
 func genAssignStmt(varname string, expression *ast.Expression, index *uint) []Label {
 	var labeles []Label
 	labeles = append(labeles, genJump(*index+2, index))
@@ -160,9 +163,9 @@ func genAssignStmt(varname string, expression *ast.Expression, index *uint) []La
 func genExpression(expression *ast.Expression, index *uint) Label {
 	return CreateLabel(*index, "runtimeResolve", asString(*index), "")
 }
+
 //----------------------------------------------------------------------------------------------------------------------
 //Simple IS
-
 
 func genJump(loc uint, index *uint) Label {
 	return CreateLabel(*index, "jump", asString(loc), "")

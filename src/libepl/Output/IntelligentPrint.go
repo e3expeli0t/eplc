@@ -6,18 +6,17 @@ import (
 	"strings"
 )
 
-
 type LexicalErrorDescriptor struct {
-	fname string
-	line uint
-	lineOffset uint
+	fname       string
+	line        uint
+	lineOffset  uint
 	currentLine string
-	errorMSG string
-	ch rune
+	errorMSG    string
+	ch          rune
 }
 
 //Todo: Make this more elegant
-func LexicalPrint(fname string, line uint,  lineOffset uint, currentLine string, errorMSG string, ch rune) {
+func LexicalPrint(fname string, line uint, lineOffset uint, currentLine string, errorMSG string, ch rune) {
 	ed := LexicalErrorDescriptor{fname, line, lineOffset,
 		currentLine, errorMSG, ch}
 	LexerIntelligentError(ed)
@@ -32,21 +31,21 @@ type ErrorDescriptor struct {
 	Token       string
 }
 
-func (e *ErrorDescriptor) basicInfoPrinter() string{
+func (e *ErrorDescriptor) basicInfoPrinter() string {
 	return color.BGreen(fmt.Sprintf(":%s:%d:%d: ", e.Fname, e.Line, e.LineOffset))
 }
 
-func (e *LexicalErrorDescriptor) basicInfoPrinter() string{
+func (e *LexicalErrorDescriptor) basicInfoPrinter() string {
 	return color.BGreen(fmt.Sprintf(":%s:%d:%d: ", e.fname, e.line, e.lineOffset))
 }
 
-func prints(s string , n int) string{
+func prints(s string, n int) string {
 	return strings.Repeat(s, n)
 }
 
 //Todo: make it support Cflags (there token don't have the @ char)
 func (e *ErrorDescriptor) TokenMarker() string {
-	str := e.CurrentLine +"\n"
+	str := e.CurrentLine + "\n"
 
 	for _, token := range strings.Split(str, " ") {
 		if token == "" {
@@ -66,7 +65,7 @@ func (e *ErrorDescriptor) TokenMarker() string {
 				str += prints(color.BLightPurple("~"), len(token))
 			}
 		} else {
-			str += prints(color.BLightPurple("~"), len(token)+1)// It works for some reason
+			str += prints(color.BLightPurple("~"), len(token)+1) // It works for some reason
 		}
 	}
 
@@ -78,9 +77,9 @@ func (e *ErrorDescriptor) TokenMarker() string {
 }
 
 func (e *LexicalErrorDescriptor) LexicalMarker() string {
-	str := e.currentLine+"\n"
+	str := e.currentLine + "\n"
 
-	for _, token := range e.currentLine{
+	for _, token := range e.currentLine {
 		if token != e.ch {
 			str += prints(color.BLightPurple("~"), 1)
 		} else {
@@ -96,14 +95,14 @@ func (e *LexicalErrorDescriptor) LexicalMarker() string {
 }
 
 func LexerIntelligentError(err LexicalErrorDescriptor) {
-	fmt.Print(color.BGreen("Error:")+err.basicInfoPrinter())
-	fmt.Print(color.BGreen(err.errorMSG)+"\n")
+	fmt.Print(color.BGreen("Error:") + err.basicInfoPrinter())
+	fmt.Print(color.BGreen(err.errorMSG) + "\n")
 	fmt.Println(err.LexicalMarker())
 }
 
 func ParserIntelligentError(err ErrorDescriptor) {
-	fmt.Print(color.BGreen("Error:")+err.basicInfoPrinter())
-	fmt.Println(color.BGreen(err.ErrorMSG)+"\n")
+	fmt.Print(color.BGreen("Error:") + err.basicInfoPrinter())
+	fmt.Println(color.BGreen(err.ErrorMSG) + "\n")
 	fmt.Println(err.TokenMarker())
 	PrintFatalErr("Syntatic", "To many errors")
 }

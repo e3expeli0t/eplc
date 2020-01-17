@@ -33,7 +33,7 @@ func Walk(v Visitor, node ast.Node) {
 	case *ast.ProgramFile:
 		walkImports(v, n.Imports)
 		walkDecls(v, n.GlobalDecls)
-		
+
 		for _, i := range *n.Functions {
 			Walk(v, &i)
 		}

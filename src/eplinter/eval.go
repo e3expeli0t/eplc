@@ -9,18 +9,18 @@ import (
 type ExecType uint
 
 const (
-	COMPILE 	ExecType = iota
-	PARSE		ExecType = iota
+	COMPILE     ExecType = iota
+	PARSE       ExecType = iota
 	SYNTAXCHECK ExecType = iota
-	EXECUTE		ExecType = iota
+	EXECUTE     ExecType = iota
 )
 
 type ExecUnit struct {
 	CurrentExCommand Command
-	ExType ExecType
-	Parser *eplparse.Parser
-	Lexer *epllex.Lexer
-	Ast   *ast.Node
+	ExType           ExecType
+	Parser           *eplparse.Parser
+	Lexer            *epllex.Lexer
+	Ast              *ast.Node
 }
 
 //todo: Add full independent language parsing (which will lead to python like language)

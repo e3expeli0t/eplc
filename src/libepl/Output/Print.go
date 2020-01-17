@@ -14,7 +14,7 @@
 *
 *	You should have received a copy of the GNU General Public License
 *	along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package Output
 
@@ -24,17 +24,26 @@ import (
 	"os"
 )
 
+const EPLC_VERSION = "0.1.1"
+
+func PrintVersion() {
+	fmt.Print(color.BBlue("****\t"))
+	fmt.Print(color.BCyan("eplc version: "))
+	fmt.Print(color.BLightPurple(EPLC_VERSION))
+	fmt.Println(color.BBlue(" ---- Development version\t****"))
+}
+
 func PrintLog(log ...interface{}) {
 	fmt.Print(color.BLightGreen("[*] "))
 	fmt.Println(log...)
 }
 
-func PrintFatalErr(msg...interface{}) {
-	fmt.Print( color.BLightRed("Fatal: "))
+func PrintFatalErr(msg ...interface{}) {
+	fmt.Print(color.BLightRed("Fatal: "))
 	fmt.Println(msg...)
 	os.Exit(-1)
 }
-func PrintErr(msg...interface{}) {
+func PrintErr(msg ...interface{}) {
 	fmt.Print(color.BLightGreen("Error: "))
 	fmt.Print(msg...)
 	fmt.Println()

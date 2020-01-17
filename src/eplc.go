@@ -38,13 +38,13 @@ func main() {
 	args := os.Args[1:]
 	file := args[0]
 
-
 	reader, err := os.Open(file)
 
 	if err != nil {
 		Output.PrintFatalErr("eplc", fmt.Sprintf("file: '%s' don't exists", file))
 	}
 
+	Output.PrintVersion()
 	//For tests
 	libeplc.Compile(reader, file)
 }

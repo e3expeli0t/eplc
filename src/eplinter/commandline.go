@@ -9,7 +9,7 @@ import (
 
 type Command struct {
 	commandText string
-	commandRes uint
+	commandRes  uint
 }
 
 func makeCommand(cnt string) Command {
@@ -18,7 +18,6 @@ func makeCommand(cnt string) Command {
 
 type Session struct {
 	PrevCommands []Command
-
 
 	Pt string
 }
@@ -30,7 +29,7 @@ func NewSession() Session {
 	}
 	lex := epllex.New(reader, "base file")
 	parser := eplparse.New(lex)
-	return Session{PrevCommands: []Command{}, Parser: &parser, Lexer: &lex, Pt:"epl->"}
+	return Session{PrevCommands: []Command{}, Parser: &parser, Lexer: &lex, Pt: "epl->"}
 }
 
 func (ses *Session) loop() {
@@ -45,9 +44,8 @@ func (ses *Session) loop() {
 	for currentCommand.commandText != "exit" {
 		fmt.Print(ses.Pt)
 		_, _ = fmt.Scanln(&userInput)
-		currentCommand =  makeCommand(userInput)
+		currentCommand = makeCommand(userInput)
 		ses.PrevCommands = append(ses.PrevCommands, currentCommand)
-
 
 	}
 }

@@ -7,7 +7,7 @@ import (
 
 type EplType struct {
 	Tname string //name as text (ex: Int)
-	Tkey uint64 //Id for the Type
+	Tkey  uint64 //Id for the Type
 }
 
 func (et *EplType) ToBasic() BasicType {
@@ -15,13 +15,14 @@ func (et *EplType) ToBasic() BasicType {
 }
 
 type BasicType EplType
+
 //Todo: change this to more efficient way
 func BasicTypes() (ta []BasicType) {
 
-	names := []string {"uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64",
-		"float", "float8", "float16", "float32", "float64", "cmx", "cmx64", }
+	names := []string{"uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64",
+		"float", "float8", "float16", "float32", "float64", "cmx", "cmx64",}
 
-	for _, n :=range names {
+	for _, n := range names {
 		ta = append(ta, (MakeType(n)).ToBasic())
 	}
 
@@ -46,8 +47,7 @@ func ResolveType(token epllex.Token) *EplType {
 	return &EplType{token.Lexme, genKey(token.Lexme)}
 }
 
-
 func genKey(n string) uint64 {
-	data,_ := strconv.ParseUint(n, 10, 0)
+	data, _ := strconv.ParseUint(n, 10, 0)
 	return data ^ 0x45504C54595045
 }

@@ -32,7 +32,7 @@ import (
 var (
 	currentToken epllex.Token
 	lookahead    epllex.Token
-	errCount 	 uint = 0
+	errCount     uint = 0
 )
 
 //New carete new parser struct
@@ -49,8 +49,9 @@ func New(lx epllex.Lexer) Parser {
 	In the future  i'm planning to implement LR(0) parser
 */
 type Parser struct {
-	Lexer epllex.Lexer
-	ST    symboltable.SymbolTable
+	Lexer  epllex.Lexer
+	ST     symboltable.SymbolTable
+	Errors errors.InternalParserError
 }
 
 //Todo: change expect so that the function checks if the expected token is coming (if not print err)
@@ -62,7 +63,7 @@ func (p *Parser) expect(ex string, fnd string) {
 }
 
 func (p *Parser) report(msg string) {
-	errors.ParsingError(p.Lexer.Filename, p.Lexer.Line, p.Lexer.LineOffset, msg, p.Lexer.GetLine(), currentToken)
+	p.Errors.ParsingError(p.Lexer.Filename, p.Lexer.Line, p.Lexer.LineOffset, msg, p.Lexer.GetLine(), currentToken)
 }
 
 func (p *Parser) NewScope() {
@@ -101,25 +102,25 @@ func (p *Parser) ParseProgramFile() ast.Node {
 	var fncs []ast.Fnc
 	var MainFunction ast.Fnc
 
-	Output.PrintLog("Parsing imports")
 	for p.match(epllex.IMPORT) {
+		Output.PrintLog("Parsing imports")
 		imports = append(imports, p.ParseImport())
 	}
 
-	Output.PrintLog("Parsing global variables")
 	if p.match(epllex.DECL) {
+		Output.PrintLog("Parsing global variables")
 		for p.match(epllex.DECL) {
 			decls = append(decls, p.ParseVarDecl(symboltable.GLOBAL))
 		}
 	}
 
 	Output.PrintLog("Parsing functions")
-
 	if p.match(epllex.FNC) {
 		Output.PrintLog("[*] Parsing functions")
 		for p.match(epllex.FNC) {
 			fnc := p.ParseFnc()
 			//todo: Should change in eplc v0.2 to support cflags
+			Output.PrintLog("Found: ", fnc.Name)
 			if fnc.Name == "Main" {
 				Output.PrintLog("Found Main function")
 				MainFunction = fnc
@@ -129,9 +130,13 @@ func (p *Parser) ParseProgramFile() ast.Node {
 		}
 	}
 
+	//check if any errors occurred
+	p.Errors.IsValidFile()
+
 	Output.PrintLog("Completed")
 	return &ast.ProgramFile{Imports: &imports, GlobalDecls: &decls, Symbols: &p.ST, Functions: &fncs, FileName: p.Lexer.Filename, MainFunction: &MainFunction}
 }
+
 //----------------------------------------------------------------------------------------------------------------------
 //Statements
 
@@ -165,7 +170,7 @@ func (p *Parser) ParseFnc() ast.Fnc {
 
 	if p.match(epllex.ID) {
 		name = currentToken.Lexme
-		fmt.Println("name:", name, "next:",lookahead)
+		fmt.Println("name:", name, "next:", lookahead)
 		p.readNextToken()
 	} else {
 		p.expect("Ident", currentToken.Lexme)
@@ -185,10 +190,10 @@ func (p *Parser) ParseFnc() ast.Fnc {
 		} else {
 			returnType = Types.MakeType(currentToken.Lexme)
 		}
+		p.readNextToken() // skip type
 	} else {
 		returnType = Types.MakeType("None")
 	}
-	p.readNextToken()
 
 	if p.match(epllex.LBRACE) {
 		code = p.ParseBlock(true)
@@ -200,9 +205,8 @@ func (p *Parser) ParseFnc() ast.Fnc {
 
 	//p.ST.Add(symboltable.)
 
-	return ast.Fnc{Name:name, ReturnType: returnType, Params:params, Body:code}
+	return ast.Fnc{Name: name, ReturnType: returnType, Params: params, Body: code}
 }
-
 
 func (p *Parser) ParseParamList() *[]ast.Decl {
 	//todo: add symbol table support , fix function
@@ -232,37 +236,73 @@ func (p *Parser) ParseParamList() *[]ast.Decl {
 		if Types.IsValidBasicType(currentToken) {
 			Type = *Types.ResolveType(currentToken)
 		} else {
-			Type = *Types.MakeType(stat + ":"+currentToken.Lexme)
+			Type = *Types.MakeType(stat + ":" + currentToken.Lexme)
 		}
 
 		p.readNextToken() //skip the type
+
 		p.ST.Add(symboltable.NewSymbol(id, Type, symboltable.FUNCTION))
 		params = append(params, &ast.VarDecl{Name: id, VarType: &Type, Stat: ast.VarStat(stat)})
+
 		if p.match(epllex.RPAR) {
 			break
 		}
-		p.readNextToken()//skip the comma
+		p.readNextToken() //skip the comma
 	}
 	p.readNextToken() // skip the rpar token
 
 	return &params
 }
 
+/*
+	todo: implement:
+			loops
+			VarExplicitDecl
+*/
 func (p *Parser) ParseBlock(function bool) *ast.Block {
+	var scope symboltable.ScopeType
+
 	if !function {
 		p.NewScope()
+		scope = symboltable.BLOCK
+	} else {
+		scope = symboltable.FUNCTION
 	}
 
 	//skipping block contents for testing prep
-	if p.match(epllex.RBRACE) {
-		p.readNextToken()
-	}
 
-	for  !p.match(epllex.LBRACE) && !p.match(epllex.RBRACE) {
-		p.readNextToken()
-	}
-
+	// if found {
 	if p.match(epllex.LBRACE) {
+		p.readNextToken()
+	}
+
+	var contents []ast.Expression
+
+	// as long as there is not } or EOF
+	for !p.match(epllex.RBRACE) && !p.match(epllex.EOF){
+		switch currentToken.Ttype {
+		case epllex.LPAR:
+			//todo: fix all related ast problems
+			contents = append(contents, *p.ParseBlock(false))
+		case epllex.IF:
+			contents = append(contents, p.ParseIf())
+		case epllex.DECL:
+			contents = append(contents, p.ParseVarDecl(scope))
+		default:
+			if p.match(epllex.ID){
+				if p.match_n(epllex.ASSIGN) {
+					contents = append(contents, p.ParseAssignStmt())
+				} else if p.match_n(epllex.SEMICOLON) {
+					contents = append(contents, p.ParseSingularExpr())
+				} else {
+					contents = append(contents, p.ParseExpression())
+				}
+			}
+
+		}
+	}
+
+	if p.match(epllex.RBRACE) {
 		p.readNextToken()
 	} else {
 		p.expect("}", currentToken.Lexme)
@@ -298,7 +338,7 @@ func (p *Parser) ParseVarDecl(scope symboltable.ScopeType) ast.Decl {
 	if Types.IsValidBasicType(currentToken) {
 		Type = *Types.ResolveType(currentToken)
 	} else {
-		Type = *Types.MakeType(stat + ":"+currentToken.Lexme)
+		Type = *Types.MakeType(stat + ":" + currentToken.Lexme)
 	}
 
 	p.readNextToken() //skip the type
@@ -321,17 +361,18 @@ func (p *Parser) ParseVarDecl(scope symboltable.ScopeType) ast.Decl {
 //Expressions
 
 /*
+Design note:
 	Possible starts are:
 		ID
 		(
 		-
 		+
 
- */
+*/
 
-var UnaryStart = []epllex.TokenType{epllex.MINUS, epllex.PLUS}
-var BinaryStart = []epllex.TokenType{epllex.ID, epllex.LPAR}
-var BInaryEnd = []epllex.TokenType{epllex.RPAR, epllex.ID}
+var UnaryStart = []epllex.TokenType{epllex.SUB, epllex.ADD}
+var BinaryStart = []epllex.TokenType{epllex.ID, epllex.LPAR, epllex.NUM}
+var BinaryEnd = []epllex.TokenType{epllex.RPAR, epllex.ID, epllex.NUM}
 
 //Singular := Ident";"
 func (p *Parser) ParseSingularExpr() ast.Singular {
@@ -343,7 +384,7 @@ func (p *Parser) ParseSingularExpr() ast.Singular {
 //Ident := ID (Basic string Token)
 func (p *Parser) ParseIdent() ast.Ident {
 	if p.match(epllex.ID) {
-		p.readNextToken()
+		p.readNextToken() //todo: logic dont make scense
 		return ast.Ident{Name: currentToken.Lexme}
 	} else {
 		p.expect("Ident", currentToken.Lexme)
@@ -377,25 +418,97 @@ func (p *Parser) ParseFunctionCall() ast.FunctionCall {
 
 	return ast.FunctionCall{PackagePath: importPath, Arguments: params}
 }
+/*
+Design note:
+Expression := UnaryExpr Expression | UnaryExpr | Expression op Expression | ID | Singular | FunctionCall | e
 
-//Expression := UnaryExpr Expression | UnaryExpr | Expression op Expression | ID | Singular | FunctionCall | e
-//Note: we parse the expressions using precedence climbing
-func (p *Parser) ParseExpression () ast.Expression {
-	var expr ast.Expression
-	expr := p.expression(0)
-
-	if !p.matchTokens(BInaryEnd) {
-		p.expect("ID or ) ", currentToken.Lexme)
+Notes:
+*	we parse the expressions using precedence climbing
+*	credit to https://github.com/richardjennings/prattparser/
+*	credit to https://www.engr.mun.ca/~theo/Misc/exp_parsing.htm
+*	credit to https://github.com/golang/go
+*/
+func (p *Parser) ParseExpression() ast.Expression {
+	exprs := p.expr(0)
+	if !p.matchNTokens(BinaryEnd) {
+		p.expect("')', ';', ident or number ", currentToken.Lexme)
+		p.readNextToken()
 	}
-	p.readNextToken()
-	return expr
-}
-func (p *Parser) expression(prec uint) ast.Expression{
 
+	return exprs
 }
 
-func (p *Parser) opClimber() ast.Expression {
+func (p *Parser) expr(rbp int) ast.Expression {
+	var left ast.Expression
 
+	left = p.nud(currentToken)
+
+	for p.isBinary(left) && currentToken.Precedence() > rbp {
+		//Left-Denotation: a simple binary expression
+		if currentToken.IsLeftAssociative() {
+			switch currentToken.Ttype {
+			case epllex.ADD:
+				left = ast.BinaryAdd{
+					Ls: left,
+					Rs: p.expr(currentToken.Precedence()),
+				}
+			case epllex.SUB:
+				left = ast.BinarySub{
+					Ls: left,
+					Rs: p.expr(currentToken.Precedence()),
+				}
+
+			case epllex.MULT:
+				left = ast.BinaryMul{
+					Ls: left,
+					Rs: p.expr(currentToken.Precedence()),
+				}
+			case epllex.DIV:
+				left = ast.BinaryDiv{
+					Ls: left,
+					Rs: p.expr(currentToken.Precedence()),
+				}
+			}
+			p.readNextToken()
+		}
+	}
+	return left
+}
+
+//Null-Denotation: a simple unary expression
+func (p *Parser) nud(t epllex.Token) ast.Expression {
+
+	var left ast.Expression
+
+	switch t.Ttype {
+	case epllex.LPAR:
+		p.readNextToken() //skip paren
+		left = p.expr(0)
+
+		// if there is not a ) symbol after expression
+		if !p.match(epllex.RPAR) {
+			p.expect(")", currentToken.Lexme)
+		}
+
+		p.readNextToken() //skip RPAR
+	default:
+		if t.IsUnary() {
+			if t.Ttype == epllex.ADD {
+				p.readNextToken()
+				left = ast.UnaryPlus{Rs: p.expr(epllex.HighPrec)}
+			} else if t.Ttype == epllex.SUB {
+				p.readNextToken()
+				left = ast.UnaryMinus{Rs: p.expr(epllex.HighPrec)}
+			}
+		} else if t.IsScalar() {
+			p.readNextToken()
+			return ast.Number{Value: t.Lexme}
+		} else if t.IsIdent() {
+			return ast.Singular{Symbol: p.ParseIdent()}
+		}
+	}
+
+	return left
 }
 
 func (p *Parser) ParseBoolExpr() ast.BoolExpr {
@@ -405,6 +518,7 @@ func (p *Parser) ParseBoolExpr() ast.BoolExpr {
 //----------------------------------------------------------------------------------------------------------------------
 //Statements
 
+//Design note:
 //If is an expression that return None
 // IfStmt := "if" boolExpr block
 func (p *Parser) ParseIf() ast.Statement {
@@ -426,12 +540,11 @@ func (p *Parser) ParseIf() ast.Statement {
 
 	if p.match(epllex.ELSE) {
 		elseCode := p.ParseBlock(false)
-		return ast.IfStmt{Code:code,Else: elseCode, Condition: &condition}
+		return ast.IfStmt{Code: code, Else: elseCode, Condition: &condition}
 	}
 
 	return ast.EmptyExpr{}
 }
-
 
 func (p *Parser) ParseElse() ast.Statement {
 	if p.match(epllex.ELSE) {
@@ -442,14 +555,52 @@ func (p *Parser) ParseElse() ast.Statement {
 		return p.ParseIf()
 	}
 
-
 	code := p.ParseBlock(false)
 
 	return ast.ElseStmt{Code: code}
 }
 
+//Design note:
+// the language does not allow expressions like : expr =  expr therefore the assign is a statement
+func (p *Parser) ParseAssignStmt() ast.AssignStmt {
+	var Owner ast.Ident
+	var Value ast.Expression
+
+	if p.match(epllex.ID) {
+		Owner = p.ParseIdent()
+	} else {
+		p.expect("Ident", currentToken.Lexme)
+	}
+
+	if p.match(epllex.ASSIGN) {
+		p.readNextToken()
+	} else {
+		p.expect("=", currentToken.Lexme)
+	}
+
+	if p.matchTokens(BinaryStart) || p.matchTokens(UnaryStart)  {
+		Value = p.ParseExpression()
+	} else {
+		p.expect("'(', '+', '-' or Ident", currentToken.Lexme)
+	}
+
+	return ast.AssignStmt{
+		Owner: Owner,
+		Value: &Value,
+	}
+}
+
 //----------------------------------------------------------------------------------------------------------------------
 //State Machine control and support functions
+
+func (p *Parser) isBinary(exp ast.Expression) bool {
+	switch exp.(type) {
+	case ast.BinaryAdd, ast.BinaryDiv, ast.BinaryMul, ast.BinarySub:
+		return true
+	}
+
+	return false
+}
 
 func (p *Parser) matchTokens(tokens []epllex.TokenType) bool {
 	for _, token := range tokens {
@@ -460,6 +611,8 @@ func (p *Parser) matchTokens(tokens []epllex.TokenType) bool {
 
 	return false
 }
+
+//Design note:
 // check if the lookahead equal to one of the list elem's
 func (p *Parser) matchNTokens(tokens []epllex.TokenType) bool {
 	for _, token := range tokens {

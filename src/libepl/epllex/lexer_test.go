@@ -14,7 +14,7 @@
 *
 *	You should have received a copy of the GNU General Public License
 *	along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package epllex
 
@@ -23,7 +23,6 @@ import (
 	"testing"
 )
 
-
 func checkType(lexme string, tt TokenType, startLine uint, startOffset uint) bool {
 	lx := New(strings.NewReader(lexme), "test_lexer.epl")
 	tk := lx.Next()
@@ -31,12 +30,11 @@ func checkType(lexme string, tt TokenType, startLine uint, startOffset uint) boo
 	return tk.StartLine == startLine && tk.StartOffset == startOffset && tk.Ttype == tt
 }
 
-
 func TestLexer(t *testing.T) {
 	table := []struct {
-		inToken string
-		outType TokenType
-		startLine uint
+		inToken     string
+		outType     TokenType
+		startLine   uint
 		startOffset uint
 	}{
 		{"23", NUM, 0, 0},
@@ -44,7 +42,7 @@ func TestLexer(t *testing.T) {
 		{"HELLO3433", ID, 0, 0},
 		{"h", ID, 0, 0},
 		{"@MainFunc", CFLAG, 0, 0},
-		{"//comment\n/*More comment*/",EOF, 0, 0},
+		{"//comment\n/*More comment*/", EOF, 0, 0},
 		{"\n\n\"string\"", STRINGLITERAL, 2, 0},
 		{"\n'string'", STRINGLITERAL, 1, 0},
 		{"if", IF, 0, 0},
@@ -60,9 +58,9 @@ func TestLexer(t *testing.T) {
 		{"type", TYPE, 0, 0},
 		{"struct", STRUCT, 0, 0},
 		{"fnc", FNC, 0, 0},
-		{"+", PLUS, 0, 0},
-		{"-", MINUS, 0, 0},
-		{"/", DEV, 0, 0},
+		{"+", ADD, 0, 0},
+		{"-", SUB, 0, 0},
+		{"/", DIV, 0, 0},
 		{"*", MULT, 0, 0},
 		{"{", LBRACE, 0, 0},
 		{"}", RBRACE, 0, 0},
@@ -113,7 +111,7 @@ func TestLexer(t *testing.T) {
 		{"string", STRING, 0, 0},
 	}
 
-	for _, tst := range table{
+	for _, tst := range table {
 		if !checkType(tst.inToken, tst.outType, tst.startLine, tst.startOffset) {
 			t.Errorf("[!] Couldn't match token '%s' to type %d", tst.inToken, tst.outType)
 			break

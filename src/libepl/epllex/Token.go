@@ -14,7 +14,7 @@
 *
 *	You should have received a copy of the GNU General Public License
 *	along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package epllex
 
@@ -22,16 +22,60 @@ import (
 	"bytes"
 )
 
+//todo: remove to inside the lexer struct
 var (
 	reserved = map[string]TokenType{}
 )
 
 ///Token struct
 type Token struct {
-	Lexme string
-	Ttype TokenType
-	StartLine uint
+	Lexme       string
+	Ttype       TokenType
+	StartLine   uint
 	StartOffset uint
+}
+
+const (
+	LowPrec  = 0
+	HighPrec = 5
+)
+
+//todo: add equal prec and parsing
+func (t *Token) Precedence() int {
+	switch t.Ttype {
+	case OR:
+		return 1
+	case AND:
+		return 2
+	case EQ, NEQ, GT, GE, LT, LE:
+		return 3
+	case ADD, SUB:
+		return 4
+	case MULT, DIV:
+		return 5
+	}
+
+	return LowPrec
+}
+
+func (t *Token) IsScalar() bool {
+	return t.Ttype == NUM
+}
+
+func (t *Token) IsIdent() bool {
+	return t.Ttype == ID
+}
+
+func (t *Token) IsUnary() bool {
+	return t.Ttype == ADD || t.Ttype == SUB
+}
+
+func (t *Token) IsLeftAssociative() bool {
+	switch t.Ttype {
+	case MULT, ADD, SUB, DIV:
+		return true
+	}
+	return false
 }
 
 func isLetter(ch rune) bool {
@@ -42,6 +86,7 @@ func isNum(ch rune) bool {
 	return ch >= '0' && ch <= '9'
 }
 
+//these are all the reserved names
 func reserve() {
 	reserved["repeat"] = REPEAT
 	reserved["until"] = UNTIL
@@ -92,5 +137,5 @@ func resolveType(buffer bytes.Buffer, startLine uint, startOffset uint) Token {
 		return Token{Ttype: val, Lexme: buffer.String()}
 	}
 
-	return Token{Ttype: ID, Lexme: buffer.String(), StartLine:startLine, StartOffset:startOffset}
+	return Token{Ttype: ID, Lexme: buffer.String(), StartLine: startLine, StartOffset: startOffset}
 }

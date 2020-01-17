@@ -14,7 +14,7 @@
 *
 *	You should have received a copy of the GNU General Public License
 *	along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package Errors
 
@@ -28,7 +28,7 @@ func TokenError(line uint, lineOffset uint, token rune, filename string) {
 	Output.PrintErr(fmt.Sprintf(" in %s:%d:%d: Could't resolve Token %#U", filename, line, lineOffset, token))
 }
 
-func ExpError(line uint, lineOffset uint, fname string, cline string , char rune) {
+func ExpError(line uint, lineOffset uint, fname string, cline string, char rune) {
 	Output.LexicalPrint(fname, line, lineOffset, cline, "Couldn't resolve token", char)
 }
 

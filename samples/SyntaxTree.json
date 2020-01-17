@@ -1,0 +1,249 @@
+{
+	"FileName": "samples/test.epl",
+	"Symbols": {
+		"Table": {},
+		"Prev": {
+			"Table": {
+				"args": {
+					"SType": {
+						"Tname": "unfixed:string",
+						"Tkey": 19510062155911237
+					}
+				},
+				"command": {
+					"SType": {
+						"Tname": "unfixed:string",
+						"Tkey": 19510062155911237
+					}
+				}
+			},
+			"Prev": {
+				"Table": {
+					"exitFlag": {
+						"SType": {
+							"Tname": "unfixed:boolean",
+							"Tkey": 19510062155911237
+						}
+					},
+					"main": {
+						"SType": {
+							"Tname": "unfixed:SystemProc",
+							"Tkey": 19510062155911237
+						}
+					},
+					"oopsi": {
+						"SType": {
+							"Tname": "fixed:Proc",
+							"Tkey": 19510062155911237
+						}
+					}
+				},
+				"Prev": {
+					"Table": {},
+					"Prev": null,
+					"Next": null
+				},
+				"Next": null
+			},
+			"Next": null
+		},
+		"Next": null
+	},
+	"Imports": [
+		{
+			"StartLoc": 0,
+			"Imports": [
+				"os",
+				"system"
+			]
+		},
+		{
+			"StartLoc": 0,
+			"Imports": [
+				"linker",
+				"selfExec"
+			]
+		}
+	],
+	"GlobalDecls": [
+		{
+			"Name": "oopsi",
+			"VarType": {
+				"Tname": "uint",
+				"Tkey": 19510062155911237
+			},
+			"Stat": "unfixed"
+		},
+		{
+			"Name": "oopsi",
+			"VarType": {
+				"Tname": "fixed:Proc",
+				"Tkey": 19510062155911237
+			},
+			"Stat": "fixed"
+		},
+		{
+			"Name": "main",
+			"VarType": {
+				"Tname": "unfixed:SystemProc",
+				"Tkey": 19510062155911237
+			},
+			"Stat": "unfixed"
+		},
+		{
+			"Name": "exitFlag",
+			"VarType": {
+				"Tname": "unfixed:boolean",
+				"Tkey": 19510062155911237
+			},
+			"Stat": "unfixed"
+		}
+	],
+	"Functions": [
+		{
+			"Name": "exec",
+			"ReturnType": {
+				"Tname": "Proc",
+				"Tkey": 19510062155911237
+			},
+			"Params": [
+				{
+					"Name": "command",
+					"VarType": {
+						"Tname": "unfixed:string",
+						"Tkey": 19510062155911237
+					},
+					"Stat": "unfixed"
+				},
+				{
+					"Name": "command",
+					"VarType": {
+						"Tname": "unfixed:string",
+						"Tkey": 19510062155911237
+					},
+					"Stat": "unfixed"
+				},
+				{
+					"Name": "args",
+					"VarType": {
+						"Tname": "unfixed:string",
+						"Tkey": 19510062155911237
+					},
+					"Stat": "unfixed"
+				}
+			],
+			"Body": {
+				"Symbols": {
+					"Table": {},
+					"Prev": {
+						"Table": {
+							"args": {
+								"SType": {
+									"Tname": "unfixed:string",
+									"Tkey": 19510062155911237
+								}
+							},
+							"command": {
+								"SType": {
+									"Tname": "unfixed:string",
+									"Tkey": 19510062155911237
+								}
+							}
+						},
+						"Prev": {
+							"Table": {
+								"exitFlag": {
+									"SType": {
+										"Tname": "unfixed:boolean",
+										"Tkey": 19510062155911237
+									}
+								},
+								"main": {
+									"SType": {
+										"Tname": "unfixed:SystemProc",
+										"Tkey": 19510062155911237
+									}
+								},
+								"oopsi": {
+									"SType": {
+										"Tname": "fixed:Proc",
+										"Tkey": 19510062155911237
+									}
+								}
+							},
+							"Prev": {
+								"Table": {},
+								"Prev": null,
+								"Next": null
+							},
+							"Next": null
+						},
+						"Next": null
+					},
+					"Next": null
+				},
+				"ExprList": null
+			}
+		}
+	],
+	"MainFunction": {
+		"Name": "Main",
+		"ReturnType": {
+			"Tname": "None",
+			"Tkey": 19510062155911237
+		},
+		"Params": null,
+		"Body": {
+			"Symbols": {
+				"Table": {},
+				"Prev": {
+					"Table": {
+						"args": {
+							"SType": {
+								"Tname": "unfixed:string",
+								"Tkey": 19510062155911237
+							}
+						},
+						"command": {
+							"SType": {
+								"Tname": "unfixed:string",
+								"Tkey": 19510062155911237
+							}
+						}
+					},
+					"Prev": {
+						"Table": {
+							"exitFlag": {
+								"SType": {
+									"Tname": "unfixed:boolean",
+									"Tkey": 19510062155911237
+								}
+							},
+							"main": {
+								"SType": {
+									"Tname": "unfixed:SystemProc",
+									"Tkey": 19510062155911237
+								}
+							},
+							"oopsi": {
+								"SType": {
+									"Tname": "fixed:Proc",
+									"Tkey": 19510062155911237
+								}
+							}
+						},
+						"Prev": {
+							"Table": {},
+							"Prev": null,
+							"Next": null
+						},
+						"Next": null
+					},
+					"Next": null
+				},
+				"Next": null
+			},
+			"ExprList": null
+		}
+	}
+}

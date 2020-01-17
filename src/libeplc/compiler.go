@@ -14,7 +14,7 @@
 *
 *	You should have received a copy of the GNU General Public License
 *	along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package libeplc
 
@@ -22,6 +22,7 @@ import (
 	"eplc/src/libepl/eplccode"
 	"io"
 )
-func Compile(source io.Reader, fname string) { 
+
+func Compile(source io.Reader, fname string) {
 	eplccode.GenerateAIR(source, fname)
 }

@@ -14,7 +14,7 @@
 *
 *	You should have received a copy of the GNU General Public License
 *	along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package epllex
 
@@ -26,8 +26,8 @@ import (
 	"unicode/utf8"
 )
 
-
 /*
+Design note:
 	Lexer. the job of the lexer is to break the input stream into
 	meaningful parts that later will be used by the parser and the IR generator
 	The lexer is Deterministic finite state machine (Deterministic finite automata)
@@ -40,7 +40,7 @@ type Lexer struct {
 	LineOffset uint
 	ErrCount   uint
 	//Don't export this fields
-	prevOffset uint
+	prevOffset  uint
 	currentLine string
 }
 
@@ -78,8 +78,6 @@ func (l *Lexer) Next() Token {
 		case '@':
 			//Read the string that followed the @ char and return it as compiler flag
 			return l.scanID(true)
-		case '!':
-			return Token{Ttype: NOT, Lexme: "!", StartOffset: startOffset, StartLine: startLine}
 		case ';':
 			return Token{Ttype: SEMICOLON, Lexme: ";", StartOffset: startOffset, StartLine: startLine}
 		case '.':
@@ -100,6 +98,12 @@ func (l *Lexer) Next() Token {
 			return Token{Ttype: LPAR, Lexme: "(", StartOffset: startOffset, StartLine: startLine}
 		case ')':
 			return Token{Ttype: RPAR, Lexme: ")", StartOffset: startOffset, StartLine: startLine}
+		case '!':
+			if ch := l.read(); ch == '=' {
+				return Token{Lexme: "!=", Ttype: NEQ, StartLine: startLine, StartOffset: startOffset}
+			}
+			l.unread()
+			return Token{Ttype: NOT, Lexme: "!", StartOffset: startOffset, StartLine: startLine}
 		case '|':
 			if ch = l.read(); ch == '|' {
 				return Token{Ttype: OR, Lexme: "||", StartOffset: startOffset, StartLine: startLine}
@@ -120,7 +124,7 @@ func (l *Lexer) Next() Token {
 			}
 			l.unread()
 
-			return Token{Ttype: PLUS, Lexme: "+", StartOffset: startOffset, StartLine: startLine}
+			return Token{Ttype: ADD, Lexme: "+", StartOffset: startOffset, StartLine: startLine}
 
 		case '-':
 			if ch = l.read(); ch == '=' {
@@ -128,7 +132,7 @@ func (l *Lexer) Next() Token {
 			}
 			l.unread()
 
-			return Token{Ttype: MINUS, Lexme: "-", StartOffset: startOffset, StartLine: startLine}
+			return Token{Ttype: SUB, Lexme: "-", StartOffset: startOffset, StartLine: startLine}
 		case '*':
 			if ch = l.read(); ch == '=' {
 				return Token{Ttype: MULTEQUAL, Lexme: "*=", StartOffset: startOffset, StartLine: startLine}
@@ -149,7 +153,7 @@ func (l *Lexer) Next() Token {
 			}
 			l.unread()
 
-			return Token{Ttype: DEV, Lexme: "/", StartOffset: startOffset, StartLine: startLine}
+			return Token{Ttype: DIV, Lexme: "/", StartOffset: startOffset, StartLine: startLine}
 		case '>':
 			if ch = l.read(); ch == '=' {
 				return Token{Ttype: GE, Lexme: ">=", StartOffset: startOffset, StartLine: startLine}
@@ -185,7 +189,7 @@ func (l *Lexer) Next() Token {
 		case '"':
 			return l.matchBy('"')
 		}
-		//Errors.TokenError(l.Line, l.LineOffset, ch, l.Filename)
+		//ErrCount.TokenError(l.Line, l.LineOffset, ch, l.Filename)
 		Errors.ExpError(l.Line, l.LineOffset, l.Filename, l.GetLine(), ch)
 		l.ErrCount++
 
@@ -263,10 +267,10 @@ func (l *Lexer) scanID(cf bool) Token {
 	}
 
 	/*
-	if l.ST.Get(buf.String()) != (SymbolData{}) {
-		return Token{buf.String(), ID}
-	}
-*/
+		if l.ST.Get(buf.String()) != (SymbolData{}) {
+			return Token{buf.String(), ID}
+		}
+	*/
 	tmp := resolveType(buf, startLine, startOffset)
 	/*
 		if tmp.Ttype == ID {
@@ -314,13 +318,11 @@ func (l *Lexer) readLine() {
 	l.unread()
 }
 
-
 //Todo: create efficient getline function
 //comment: this function is extremely inefficient and should be fixed. als
 func (l *Lexer) GetLine() string {
 	prevLexer := l.getMachineState()
 	line := l.currentLine
-
 
 	for l.Line == prevLexer.Line {
 		line += string(l.read())
@@ -361,8 +363,8 @@ func (l *Lexer) read() rune {
 		l.Line++
 		l.currentLine = ""
 	} else {
-			l.LineOffset++
-			l.currentLine += string(char)
+		l.LineOffset++
+		l.currentLine += string(char)
 	}
 	return char
 }
@@ -373,7 +375,11 @@ func (l *Lexer) unread() {
 		l.LineOffset = l.prevOffset
 	} else {
 		l.LineOffset--
-		l.currentLine = l.currentLine[:len(l.currentLine)-1]
+		if len(l.currentLine) > 0 {
+			l.currentLine = l.currentLine[:len(l.currentLine)-1]
+		} else {
+			l.currentLine = "" //empty line
+		}
 	}
 	_ = l.Buffer.UnreadRune()
 }

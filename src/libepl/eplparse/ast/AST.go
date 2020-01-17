@@ -34,12 +34,12 @@ type (
 		Start() uint
 	}
 
-
 	Expression interface {
 		Node
 		ExprNode()
 	}
 
+	//Design note: experimental: every statement is an expression that return void
 	Statement interface {
 		Expression
 		StmtNode()
@@ -56,6 +56,7 @@ type (
 )
 
 //Todo: replace all string names in symbol table references
+//Todo: loops
 type (
 	ProgramFile struct {
 		FileName     string
@@ -74,8 +75,8 @@ type (
 	}
 
 	Block struct {
-		Symbols *symboltable.SymbolTable
-		ExprList   *[]Expression
+		Symbols  *symboltable.SymbolTable
+		ExprList *[]Expression
 	}
 
 	VarDecl struct {
@@ -84,6 +85,7 @@ type (
 		Stat    VarStat
 	}
 
+	//todo: IMPL in parser
 	VarExplicitDecl struct {
 		VarDecl
 		Value *Expression
@@ -110,7 +112,14 @@ type (
 	}
 )
 
+func (b Block) ExprNode() {
+	panic("implement me")
+}
+
 func (AssignStmt) Start() uint {
+	panic("implement me")
+}
+func (s AssignStmt) ExprNode() {
 	panic("implement me")
 }
 
@@ -153,29 +162,23 @@ func (Block) Start() uint       { return 0xFAC } //Todo: Fix
 func (IfStmt) Start() uint      { return 0 }
 
 func (i *Import) Start() uint { return i.StartLoc }
-func (VarDecl) DeclNode()    {}
+func (VarDecl) DeclNode()     {}
 
 func (VarExplicitDecl) DeclNode() {}
 func (IfStmt) StmtNode()          {}
 func (IfStmt) ExprNode() {
 	panic("implement me")
 }
+
 //----------------------------------------------------------------------------------------------------------------------
 //Expressions
 
 type (
-	//Expr is binary tree representation of expressions
-	Expr struct {
-		ls *Expression
-		rs *Expression
-	}
-
 	Ident struct {
 		Name string
 	}
 
 	EmptyExpr struct{}
-
 
 	BoolNot struct {
 		Expr *BoolExpr
@@ -243,7 +246,20 @@ type (
 	Singular struct {
 		Symbol Ident
 	}
+
+	//Represent number such as 5562 or 2
+	Number struct {
+		Value string
+	}
 )
+
+func (n Number) Start() uint {
+	panic("implement me")
+}
+
+func (n Number) ExprNode() {
+	panic("implement me")
+}
 
 func (BoolGreaterThen) Start() uint {
 	panic("implement me")
@@ -309,7 +325,6 @@ func (BoolLowerThenEqual) Start() uint {
 	panic("implement me")
 }
 
-
 func (BoolLowerThenEqual) ExprNode() {
 	panic("implement me")
 }
@@ -372,11 +387,11 @@ func (UnaryPlus) Start() uint {
 func (UnaryPlus) ExprNode() {}
 func (UnaryPlus) StmtNode() {}
 
-func (UnaryMinus) ExprNode()   {}
+func (UnaryMinus) ExprNode() {}
 func (UnaryMinus) Start() uint {
 	panic("Good")
 }
-func (UnaryMinus) StmtNode()   {}
+func (UnaryMinus) StmtNode() {}
 
 func (EmptyExpr) Start() uint {
 	panic("implement me")

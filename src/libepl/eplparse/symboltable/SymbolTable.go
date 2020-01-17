@@ -14,13 +14,14 @@
 *
 *	You should have received a copy of the GNU General Public License
 *	along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package symboltable
 
 import (
 	"eplc/src/libepl/eplparse/Types"
 )
+
 /*
 	Basic  linked list that holds all the symbols inside scopes
 */
@@ -32,11 +33,11 @@ const (
 	BLOCK ScopeType = "@@@@BLOCK@@@@"
 
 	/*
-		FUNCTION Scope is the scope thats starts right after function 
+		FUNCTION Scope is the scope thats starts right after function
 		declaration (includes the arguments)
 	*/
 	FUNCTION ScopeType = "@@@@FUNCTION@@@@"
-	
+
 	//GLOBAL Scope is every symbol that wase declare out side of the function (include the functions itself)
 	GLOBAL ScopeType = "@@@@GLOBAL@@@@"
 )
@@ -47,15 +48,15 @@ const (
 */
 type SymbolTable struct {
 	Table map[string]*SymbolData
-	Prev *SymbolTable
-	Next *SymbolTable
-} 
+	Prev  *SymbolTable
+	Next  *SymbolTable
+}
 
 //SymbolData stores the information about symbols
 type SymbolData struct {
-	SType Types.EplType
+	SType  Types.EplType
 	symbol string
-	scope ScopeType
+	scope  ScopeType
 }
 
 //New creates new empty SymbolTable
@@ -64,13 +65,12 @@ func New() SymbolTable {
 }
 
 func NewBasicSymbol(s string) *SymbolData {
-	return &SymbolData{symbol:s}
+	return &SymbolData{symbol: s}
 }
 
 func NewSymbol(s string, t Types.EplType, scope ScopeType) *SymbolData {
 	return &SymbolData{t, s, scope}
 }
-
 
 //Add new symbol
 func (st *SymbolTable) Add(s *SymbolData) {
@@ -100,4 +100,4 @@ func (st *SymbolTable) Get(symbol string) SymbolData {
 	}
 
 	return SymbolData{}
-} 
+}

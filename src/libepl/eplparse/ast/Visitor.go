@@ -4,7 +4,6 @@ type Visitor interface {
 	Visit(n Node) Visitor
 }
 
-
 func Walk(v Visitor, node Node) {
 	if v := v.Visit(node); v == nil {
 		return
@@ -14,7 +13,7 @@ func Walk(v Visitor, node Node) {
 	case Decl:
 		Walk(v, n)
 	case *Block:
-		for _,sn := range *n.ExprList {
+		for _, sn := range *n.ExprList {
 			Walk(v, sn)
 		}
 	case *ProgramFile:
@@ -27,14 +26,12 @@ func Walk(v Visitor, node Node) {
 
 type Traveler func(Node) bool
 
-
 func (f Traveler) Visit(node Node) Visitor {
 	if f(node) {
 		return f
 	}
 	return nil
 }
-
 
 func Travel(node Node, f func(Node) bool) {
 	Walk(Traveler(f), node)
