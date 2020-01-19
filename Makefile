@@ -1,7 +1,7 @@
 version=0.1.1
 branch=devel
 msg=bug fixing
-exec=test.epl
+exec=samples/test.epl
 check_defined = \
     $(strip $(foreach 1,$1, \
         $(call __check_defined,$1,$(strip $(value 2)))))
@@ -46,9 +46,6 @@ clean:
 	@sudo rm -rf /bin/eplc-$(version)
 	@echo Removing Support targets...
 	@cd tools/Support/epldbg/; make clean
-	@#remove in the feature
-	@rm -rf *.air
-	@rm -rf *.bin
 devel_tests:
 	dep ensure $(dep_args)
 	go test -v eplc/src/libepl/epllex -covermode=count -coverprofile=count.out fmt

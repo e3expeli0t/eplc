@@ -32,7 +32,6 @@ import (
 var (
 	currentToken epllex.Token
 	lookahead    epllex.Token
-	errCount     uint = 0
 )
 
 //New carete new parser struct
@@ -269,8 +268,6 @@ func (p *Parser) ParseBlock(function bool) *ast.Block {
 		scope = symboltable.FUNCTION
 	}
 
-	//skipping block contents for testing prep
-
 	// if found {
 	if p.match(epllex.LBRACE) {
 		p.readNextToken()
@@ -297,8 +294,9 @@ func (p *Parser) ParseBlock(function bool) *ast.Block {
 				} else {
 					contents = append(contents, p.ParseExpression())
 				}
+			} else {
+				break // invalid block structure
 			}
-
 		}
 	}
 
@@ -377,15 +375,21 @@ var BinaryEnd = []epllex.TokenType{epllex.RPAR, epllex.ID, epllex.NUM}
 //Singular := Ident";"
 func (p *Parser) ParseSingularExpr() ast.Singular {
 	ident := p.ParseIdent()
-	p.readNextToken() //Skip the semicolon
+	if p.match(epllex.SEMICOLON) {
+		p.readNextToken() //Skip the semicolon
+	} else {
+		p.expect("';'", currentToken.Lexme)
+	}
+
 	return ast.Singular{Symbol: ident}
 }
 
 //Ident := ID (Basic string Token)
 func (p *Parser) ParseIdent() ast.Ident {
 	if p.match(epllex.ID) {
-		p.readNextToken() //todo: logic dont make scense
-		return ast.Ident{Name: currentToken.Lexme}
+		tmp := ast.Ident{Name: currentToken.Lexme}
+		p.readNextToken()
+		return tmp
 	} else {
 		p.expect("Ident", currentToken.Lexme)
 	}
@@ -393,20 +397,25 @@ func (p *Parser) ParseIdent() ast.Ident {
 	return ast.Ident{}
 }
 
+//design note: the current token needs to be the first ident of the import path
 func (p *Parser) ParseFunctionCall() ast.FunctionCall {
+
 	var params []ast.Ident
 	var importPath []ast.Ident
 
+	// parse function like out.put("asdf")
 	for p.match(epllex.COMMA) && !p.match(epllex.RPAR) {
 		importPath = append(importPath, p.ParseIdent())
 		p.readNextToken()
 	}
 
 	if p.match(epllex.LPAR) {
+
 		p.readNextToken()
 		for p.match(epllex.COMMA) && !p.match(epllex.RPAR) {
 			params = append(params, p.ParseIdent())
 		}
+
 		if p.match(epllex.RPAR) {
 			p.readNextToken()
 		} else {
@@ -430,10 +439,12 @@ Notes:
 */
 func (p *Parser) ParseExpression() ast.Expression {
 	exprs := p.expr(0)
-	if !p.matchNTokens(BinaryEnd) {
-		p.expect("')', ';', ident or number ", currentToken.Lexme)
-		p.readNextToken()
+
+	// all expressions must end with semicolon
+	if !p.match(epllex.SEMICOLON) {
+		p.expect("';'", currentToken.Lexme)
 	}
+	p.readNextToken() // skip the semi
 
 	return exprs
 }
@@ -504,7 +515,13 @@ func (p *Parser) nud(t epllex.Token) ast.Expression {
 			p.readNextToken()
 			return ast.Number{Value: t.Lexme}
 		} else if t.IsIdent() {
-			return ast.Singular{Symbol: p.ParseIdent()}
+			if p.match_n(epllex.LPAR) || p.match_n(epllex.DOT) {
+				return p.ParseFunctionCall()
+			} else if p.match_n(epllex.SEMICOLON) {
+				return ast.Singular{Symbol: p.ParseIdent()}
+			} else {
+				p.expect("';' or ident", currentToken.Lexme)
+			}
 		}
 	}
 
