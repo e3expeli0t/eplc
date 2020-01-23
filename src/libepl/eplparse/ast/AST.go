@@ -104,58 +104,44 @@ type (
 	IfStmt struct {
 		Condition *BoolExpr
 		Code      *Block
-		Else      *Block
+		Else      *Statement // to support if-else-if
 	}
 
 	ElseStmt struct {
 		Code *Block
 	}
+
+
+	//todo: IMPL in v0.2++
+	MoveLoop struct {}
 )
 
-func (b Block) ExprNode() {
-	panic("implement me")
-}
+func (b Block) ExprNode() {}
 
 func (AssignStmt) Start() uint {
-	panic("implement me")
+	panic("Invalid call")
 }
-func (s AssignStmt) ExprNode() {
-	panic("implement me")
-}
-
-func (Fnc) ExprNode() {
-	panic("implement me")
-}
+func (AssignStmt) ExprNode() {}
 
 func (ElseStmt) Start() uint {
-	panic("implement me")
+	panic("Invalid call")
 }
 
-func (ElseStmt) ExprNode() {
-	panic("implement me")
-}
-
-func (ElseStmt) StmtNode() {
-	panic("implement me")
-}
-
-func (VarDecl) ExprNode() {
-	panic("implement me")
-}
-
-func (Fnc) DeclNode() {}
+func (ElseStmt) ExprNode() {}
+func (ElseStmt) StmtNode() {}
 
 func (Fnc) Start() uint {
-	panic("implement me")
+	panic("Invalid call")
 }
-
+func (Fnc) DeclNode() {}
+func (Fnc) ExprNode() {}
 func (Fnc) StmtNode() {}
 
-func (VarDecl) StmtNode() {}
-
-func (VarDecl) Start() uint {
+func (vd VarDecl) Start() uint {
 	return 0
 }
+func (VarDecl) StmtNode() {}
+func (VarDecl) ExprNode() {}
 
 func (ProgramFile) Start() uint { return 0 }
 func (Block) Start() uint       { return 0xFAC } //Todo: Fix
@@ -165,15 +151,14 @@ func (i *Import) Start() uint { return i.StartLoc }
 func (VarDecl) DeclNode()     {}
 
 func (VarExplicitDecl) DeclNode() {}
-func (IfStmt) StmtNode()          {}
-func (IfStmt) ExprNode() {
-	panic("implement me")
-}
+func (IfStmt) StmtNode(){}
+func (IfStmt) ExprNode() {}
 
 //----------------------------------------------------------------------------------------------------------------------
 //Expressions
 
 type (
+	//todo: change bool expressions to refs
 	Ident struct {
 		Name string
 	}
@@ -181,32 +166,47 @@ type (
 	EmptyExpr struct{}
 
 	BoolNot struct {
-		Expr *BoolExpr
+		Expr BoolExpr
+	}
+
+	BoolAnd struct {
+		Le BoolExpr
+		Re BoolExpr
+	}
+
+	BoolOr struct {
+		Le BoolExpr
+		Re BoolExpr
 	}
 
 	BoolEquals struct {
-		Le *BoolExpr
-		Re *BoolExpr
+		Le BoolExpr
+		Re BoolExpr
 	}
 
+	BoolNotEquals struct {
+		Le BoolExpr
+		Re BoolExpr
+	}
+	
 	BoolGreaterThen struct {
-		Le *BoolExpr
-		Re *BoolExpr
+		Le BoolExpr
+		Re BoolExpr
 	}
 
 	BoolGreatEquals struct {
-		Le *BoolExpr
-		Re *BoolExpr
+		Le BoolExpr
+		Re BoolExpr
 	}
 
 	BoolLowerThen struct {
-		Le *BoolExpr
-		Re *BoolExpr
+		Le BoolExpr
+		Re BoolExpr
 	}
 
 	BoolLowerThenEqual struct {
-		Le *BoolExpr
-		Re *BoolExpr
+		Le BoolExpr
+		Re BoolExpr
 	}
 
 	BinaryMul struct {
@@ -241,9 +241,12 @@ type (
 		PackagePath []Ident
 		Arguments   []Ident
 		ReturnType  Types.EplType //todo: Version 0.2+
+		FunctionName Ident
 	}
 
-	Singular struct {
+
+
+Singular struct {
 		Symbol Ident
 	}
 
@@ -251,156 +254,152 @@ type (
 	Number struct {
 		Value string
 	}
+
+	String struct {
+		Value string
+	}
+
+
 )
 
-func (n Number) Start() uint {
+
+func (b BoolOr) Start() uint {
 	panic("implement me")
 }
 
-func (n Number) ExprNode() {
+func (b BoolOr) ExprNode() {}
+func (b BoolOr) BoolExprNode() {}
+
+
+func (b BoolAnd) Start() uint {
 	panic("implement me")
 }
+
+func (b BoolAnd) ExprNode() {}
+func (b BoolAnd) BoolExprNode() {}
+
+func (b BoolNotEquals) Start() uint {
+	panic("Invalid call")
+}
+
+func (b BoolNotEquals) ExprNode() {}
+func (c BoolNotEquals) BoolExprNode() {}
+
+// both bool expr and expr because its can be boolean function
+func (c FunctionCall) BoolExprNode() {}
+
+func (s String) Start() uint {
+	panic("Invalid call")
+}
+
+func (s String) ExprNode() {}
+func (n Number) Start() uint {
+	panic("Invalid call")
+}
+
+func (n Number) ExprNode() {}
 
 func (BoolGreaterThen) Start() uint {
-	panic("implement me")
+	panic("Invalid call")
 }
 
-func (BoolGreaterThen) ExprNode() {
-	panic("implement me")
-}
-
-func (BoolGreaterThen) BoolExprNode() {
-	panic("implement me")
-}
+func (BoolGreaterThen) ExprNode() {}
+func (BoolGreaterThen) BoolExprNode() {}
 
 func (BoolEquals) Start() uint {
-	panic("implement me")
+	panic("Invalid call")
 }
 
-func (BoolEquals) ExprNode() {
-	panic("implement me")
-}
-
-func (BoolEquals) BoolExprNode() {
-	panic("implement me")
-}
+func (BoolEquals) ExprNode() {}
+func (BoolEquals) BoolExprNode() {}
 
 func (BoolGreatEquals) Start() uint {
-	panic("implement me")
+	panic("Invalid call")
 }
 
-func (BoolGreatEquals) ExprNode() {
-	panic("implement me")
-}
+func (BoolGreatEquals) ExprNode() {}
 
-func (BoolGreatEquals) BoolExprNode() {
-	panic("implement me")
-}
+func (BoolGreatEquals) BoolExprNode() {}
 
 func (BoolNot) Start() uint {
-	panic("implement me")
+	panic("Invalid call")
 }
 
-func (BoolNot) ExprNode() {
-	panic("implement me")
-}
-
-func (BoolNot) BoolExprNode() {
-	panic("implement me")
-}
+func (BoolNot) ExprNode() {}
+func (BoolNot) BoolExprNode() {}
 
 func (BoolLowerThen) Start() uint {
-	panic("implement me")
+	panic("Invalid call")
 }
 
-func (BoolLowerThen) ExprNode() {
-	panic("implement me")
-}
-
-func (BoolLowerThen) BoolExprNode() {
-	panic("implement me")
-}
+func (BoolLowerThen) ExprNode() {}
+func (BoolLowerThen) BoolExprNode() {}
 
 func (BoolLowerThenEqual) Start() uint {
-	panic("implement me")
+	panic("Invalid call")
 }
 
-func (BoolLowerThenEqual) ExprNode() {
-	panic("implement me")
-}
-
-func (BoolLowerThenEqual) BoolExprNode() {
-	panic("implement me")
-}
+func (BoolLowerThenEqual) ExprNode() {}
+func (BoolLowerThenEqual) BoolExprNode() {}
 
 func (Singular) Start() uint {
-	panic("implement me")
+	panic("Invalid call")
 }
 
-func (Singular) StmtNode() {
-	panic("implement me")
-}
-
-func (Singular) ExprNode() {
-	panic("implement me")
-}
+func (Singular) StmtNode() {}
+func (Singular) ExprNode() {}
 
 func (FunctionCall) Start() uint {
-	panic("implement me")
+	panic("Invalid call")
 }
 
-func (FunctionCall) StmtNode() {
-	panic("implement me")
-}
-
-func (FunctionCall) ExprNode() {
-	panic("implement me")
-}
+func (FunctionCall) StmtNode() {}
+func (FunctionCall) ExprNode() {}
 
 func (BinarySub) Start() uint {
-	panic("implement me")
+	panic("Invalid call")
 }
 func (BinarySub) StmtNode() {}
 func (BinarySub) ExprNode() {}
 
 func (BinaryAdd) Start() uint {
-	panic("implement me")
+	panic("Invalid call")
 }
 func (BinaryAdd) StmtNode() {}
 func (BinaryAdd) ExprNode() {}
 
 func (BinaryDiv) Start() uint {
-	panic("implement me")
+	panic("Invalid call")
 }
 func (BinaryDiv) StmtNode() {}
 func (BinaryDiv) ExprNode() {}
 
 func (BinaryMul) Start() uint {
-	panic("implement me")
+	panic("Invalid call")
 }
 func (BinaryMul) StmtNode() {}
 func (BinaryMul) ExprNode() {}
 
 func (UnaryPlus) Start() uint {
-	panic("implement me")
+	panic("Invalid call")
 }
 func (UnaryPlus) ExprNode() {}
 func (UnaryPlus) StmtNode() {}
 
-func (UnaryMinus) ExprNode() {}
 func (UnaryMinus) Start() uint {
-	panic("Good")
+	panic("Invalid call")
 }
+func (UnaryMinus) ExprNode() {}
 func (UnaryMinus) StmtNode() {}
 
 func (EmptyExpr) Start() uint {
-	panic("implement me")
+	panic("Invalid call")
 }
 func (EmptyExpr) StmtNode() {}
 func (EmptyExpr) ExprNode() {}
 
 func (Ident) Start() uint {
-	panic("implement me")
+	panic("Invalid call")
 }
 func (Ident) StmtNode() {}
 func (Ident) ExprNode() {}

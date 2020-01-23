@@ -103,17 +103,17 @@ func (l *Lexer) Next() Token {
 				return Token{Lexme: "!=", Ttype: NEQ, StartLine: startLine, StartOffset: startOffset}
 			}
 			l.unread()
-			return Token{Ttype: NOT, Lexme: "!", StartOffset: startOffset, StartLine: startLine}
+			return Token{Ttype: BOOL_NOT, Lexme: "!", StartOffset: startOffset, StartLine: startLine}
 		case '|':
 			if ch = l.read(); ch == '|' {
-				return Token{Ttype: OR, Lexme: "||", StartOffset: startOffset, StartLine: startLine}
+				return Token{Ttype: BOOL_OR, Lexme: "||", StartOffset: startOffset, StartLine: startLine}
 			}
 			l.unread()
 
 			return Token{Ttype: UNARYOR, Lexme: "|", StartOffset: startOffset, StartLine: startLine}
 		case '&':
 			if ch = l.read(); ch == '&' {
-				return Token{Ttype: AND, Lexme: "&&", StartOffset: startOffset, StartLine: startLine}
+				return Token{Ttype: BOOL_AND, Lexme: "&&", StartOffset: startOffset, StartLine: startLine}
 			}
 			l.unread()
 

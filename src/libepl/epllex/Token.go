@@ -36,16 +36,16 @@ type Token struct {
 }
 
 const (
-	LowPrec  = 0
-	HighPrec = 5
+	ExpLowPrec = 0
+	HighPrec   = 5
 )
 
 //todo: add equal prec and parsing
 func (t *Token) Precedence() int {
 	switch t.Ttype {
-	case OR:
+	case BOOL_OR:
 		return 1
-	case AND:
+	case BOOL_AND:
 		return 2
 	case EQ, NEQ, GT, GE, LT, LE:
 		return 3
@@ -53,17 +53,22 @@ func (t *Token) Precedence() int {
 		return 4
 	case MULT, DIV:
 		return 5
+		
 	}
 
-	return LowPrec
+	return ExpLowPrec
 }
 
 func (t *Token) IsScalar() bool {
-	return t.Ttype == NUM
+	return t.Ttype == NUM || t.Ttype == REAL
 }
 
 func (t *Token) IsIdent() bool {
 	return t.Ttype == ID
+}
+
+func ( t *Token) IsString() bool {
+	return t.Ttype == STRINGLITERAL
 }
 
 func (t *Token) IsUnary() bool {

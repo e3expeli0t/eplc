@@ -76,15 +76,15 @@ const (
 	DEVEQUAL   TokenType = iota // /=
 	ASSIGN     TokenType = iota // =
 
-	GT  TokenType = iota // >
-	EQ  TokenType = iota // ==
-	NEQ TokenType = iota // !=
-	GE  TokenType = iota // >=
-	LE  TokenType = iota // <=
-	LT  TokenType = iota // <
-	AND TokenType = iota // &&
-	OR  TokenType = iota // ||
-	NOT TokenType = iota // !
+	GT       TokenType = iota // >
+	EQ       TokenType = iota // ==
+	NEQ      TokenType = iota // !=
+	GE       TokenType = iota // >=
+	LE       TokenType = iota // <=
+	LT       TokenType = iota // <
+	BOOL_AND TokenType = iota // &&
+	BOOL_OR  TokenType = iota // ||
+	BOOL_NOT TokenType = iota // !
 
 	UNARYOR  TokenType = iota // |
 	UNARYAND TokenType = iota // &

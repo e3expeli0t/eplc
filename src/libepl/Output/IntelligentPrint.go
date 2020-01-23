@@ -94,15 +94,24 @@ func (e *LexicalErrorDescriptor) LexicalMarker() string {
 	return str
 }
 
+//todo: support multiple error printing ?
 func LexerIntelligentError(err LexicalErrorDescriptor) {
 	fmt.Print(color.BGreen("Error:") + err.basicInfoPrinter())
 	fmt.Print(color.BGreen(err.errorMSG) + "\n")
 	fmt.Println(err.LexicalMarker())
 }
 
+//todo: support multiple error printing ?
 func ParserIntelligentError(err ErrorDescriptor) {
 	fmt.Print(color.BGreen("Error:") + err.basicInfoPrinter())
 	fmt.Println(color.BGreen(err.ErrorMSG) + "\n")
 	fmt.Println(err.TokenMarker())
-	PrintFatalErr("Syntatic", "To many errors")
+	PrintFatalErr("SyntaxError", "To many errors")
+}
+
+func TypeIntelligentError(err ErrorDescriptor) {
+	fmt.Print(color.BGreen("Error:") + err.basicInfoPrinter())
+	fmt.Println(color.BGreen(err.ErrorMSG) + "\n")
+	fmt.Println(err.TokenMarker())
+	PrintFatalErr("TypeError", "To many errors")
 }

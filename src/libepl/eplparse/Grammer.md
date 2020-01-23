@@ -32,7 +32,7 @@ val' ::= [unary_ops]id | [unary_ops] number
 repeat_loop_var ::= "("id int = val`")"
 repeat` ::= "repeat" [repeat_loop_var]
 
-repeat ::= repeat` "{" expression "}"
+repeat ::= repeat ["("var_explicit_decl")"]` "{" expression "}"
 repeat_until ::= repeat` "{" expression "}" "until" bool_expr   
 until ::= "until" bool_expr "{" expression "}" 
 move ::= "move" id "in" func_call' "{" expression "}"
