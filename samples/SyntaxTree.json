@@ -15,6 +15,18 @@
 						"Tname": "unfixed:string",
 						"Tkey": 19510062155911237
 					}
+				},
+				"one": {
+					"SType": {
+						"Tname": "uint",
+						"Tkey": 19510062155911237
+					}
+				},
+				"two": {
+					"SType": {
+						"Tname": "uint",
+						"Tkey": 19510062155911237
+					}
 				}
 			},
 			"Prev": {
@@ -60,8 +72,11 @@
 		{
 			"StartLoc": 0,
 			"Imports": [
-				"linker",
-				"selfExec"
+				"internal",
+				"self",
+				"bio",
+				"out",
+				"put"
 			]
 		}
 	],
@@ -110,7 +125,7 @@
 				{
 					"Name": "command",
 					"VarType": {
-						"Tname": "unfixed:string",
+						"Tname": "uint",
 						"Tkey": 19510062155911237
 					},
 					"Stat": "unfixed"
@@ -134,55 +149,108 @@
 			],
 			"Body": {
 				"Symbols": {
-					"Table": {},
-					"Prev": {
-						"Table": {
-							"args": {
-								"SType": {
-									"Tname": "unfixed:string",
-									"Tkey": 19510062155911237
-								}
-							},
-							"command": {
-								"SType": {
-									"Tname": "unfixed:string",
-									"Tkey": 19510062155911237
-								}
+					"Table": {
+						"args": {
+							"SType": {
+								"Tname": "unfixed:string",
+								"Tkey": 19510062155911237
 							}
 						},
-						"Prev": {
-							"Table": {
-								"exitFlag": {
-									"SType": {
-										"Tname": "unfixed:boolean",
-										"Tkey": 19510062155911237
-									}
-								},
-								"main": {
-									"SType": {
-										"Tname": "unfixed:SystemProc",
-										"Tkey": 19510062155911237
-									}
-								},
-								"oopsi": {
-									"SType": {
-										"Tname": "fixed:Proc",
-										"Tkey": 19510062155911237
-									}
-								}
-							},
-							"Prev": {
-								"Table": {},
-								"Prev": null,
-								"Next": null
-							},
-							"Next": null
+						"command": {
+							"SType": {
+								"Tname": "unfixed:string",
+								"Tkey": 19510062155911237
+							}
 						},
-						"Next": null
+						"one": {
+							"SType": {
+								"Tname": "uint",
+								"Tkey": 19510062155911237
+							}
+						},
+						"two": {
+							"SType": {
+								"Tname": "uint",
+								"Tkey": 19510062155911237
+							}
+						}
 					},
+					"Prev": null,
 					"Next": null
 				},
-				"ExprList": null
+				"ExprList": [
+					{
+						"Name": "two",
+						"VarType": {
+							"Tname": "uint",
+							"Tkey": 19510062155911237
+						},
+						"Stat": "unfixed"
+					},
+					{
+						"Owner": {
+							"Name": "two"
+						},
+						"Value": {
+							"Value": "4"
+						}
+					},
+					{
+						"Name": "one",
+						"VarType": {
+							"Tname": "uint",
+							"Tkey": 19510062155911237
+						},
+						"Stat": "unfixed",
+						"Value": {
+							"Ls": {
+								"Name": "two"
+							},
+							"Rs": {
+								"Ls": {
+									"Value": "900"
+								},
+								"Rs": {
+									"Ls": {
+										"Ls": {
+											"Value": "355355434"
+										},
+										"Rs": {
+											"Ls": {
+												"Value": "899"
+											},
+											"Rs": {
+												"Value": "80087"
+											}
+										}
+									},
+									"Rs": {
+										"PackagePath": null,
+										"Arguments": null,
+										"ReturnType": {
+											"Tname": "",
+											"Tkey": 0
+										},
+										"FunctionName": {
+											"Name": "get"
+										}
+									}
+								}
+							}
+						}
+					},
+					{
+						"PackagePath": null,
+						"Arguments": null,
+						"ReturnType": {
+							"Tname": "",
+							"Tkey": 0
+						},
+						"FunctionName": {
+							"Name": "put"
+						}
+					}
+				]
 			}
 		}
 	],
@@ -196,54 +264,32 @@
 		"Body": {
 			"Symbols": {
 				"Table": {},
-				"Prev": {
-					"Table": {
-						"args": {
-							"SType": {
-								"Tname": "unfixed:string",
-								"Tkey": 19510062155911237
-							}
-						},
-						"command": {
-							"SType": {
-								"Tname": "unfixed:string",
-								"Tkey": 19510062155911237
-							}
-						}
-					},
-					"Prev": {
-						"Table": {
-							"exitFlag": {
-								"SType": {
-									"Tname": "unfixed:boolean",
-									"Tkey": 19510062155911237
-								}
-							},
-							"main": {
-								"SType": {
-									"Tname": "unfixed:SystemProc",
-									"Tkey": 19510062155911237
-								}
-							},
-							"oopsi": {
-								"SType": {
-									"Tname": "fixed:Proc",
-									"Tkey": 19510062155911237
-								}
-							}
-						},
-						"Prev": {
-							"Table": {},
-							"Prev": null,
-							"Next": null
-						},
-						"Next": null
-					},
-					"Next": null
-				},
+				"Prev": null,
 				"Next": null
 			},
-			"ExprList": null
+			"ExprList": [
+				{
+					"PackagePath": null,
+					"Arguments": [
+						{
+							"Value": "1"
+						},
+						{
+							"Value": "2"
+						},
+						{
+							"Value": "3"
+						}
+					],
+					"ReturnType": {
+						"Tname": "",
+						"Tkey": 0
+					},
+					"FunctionName": {
+						"Name": "exec"
+					}
+				}
+			]
 		}
 	}
 }

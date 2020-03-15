@@ -13,6 +13,18 @@
 					"Tname": "unfixed:string",
 					"Tkey": 19510062155911237
 				}
+			},
+			"one": {
+				"SType": {
+					"Tname": "uint",
+					"Tkey": 19510062155911237
+				}
+			},
+			"two": {
+				"SType": {
+					"Tname": "uint",
+					"Tkey": 19510062155911237
+				}
 			}
 		},
 		"Prev": {

@@ -9,8 +9,8 @@ import (
 
 
 type TypeSystem struct {
+	lexer epllex.Lexer
 	Fname string
-	currentLIne string
 	BasicTypes []BasicType
 	TypeMap map[string]EplType
 }
@@ -31,7 +31,8 @@ func (et *EplType) ToBasic() BasicType {
 type BasicType EplType
 
 //Todo: change this to more efficient way
-func (ts *TypeSystem) Initialize(fname string) {
+func (ts *TypeSystem) Initialize(lex epllex.Lexer) {
+	ts.TypeMap = make(map[string]EplType)
 
 	names := []string{"uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64",
 		"float", "float8", "float16", "float32", "float64", "cmx", "cmx64",}
@@ -39,7 +40,8 @@ func (ts *TypeSystem) Initialize(fname string) {
 	for _, n := range names {
 		ts.BasicTypes = append(ts.BasicTypes, (ts.MakeType(n)).ToBasic())
 	}
-	ts.Fname = fname
+	ts.Fname = lex.Filename
+	ts.lexer = lex
 }
 
 func (ts *TypeSystem) IsValidBasicType(token epllex.Token) bool {
@@ -100,7 +102,7 @@ func (ts *TypeSystem) ResolveValueType(token epllex.Token) *EplType {
 			fmt.Sprintf("Couldn't resolve type of '%s'", token.Lexme),
 			token,
 			ts.Fname,
-			ts.currentLIne,
+			ts.lexer.GetLine(),
 			)
 
 	}
@@ -112,8 +114,4 @@ func (ts *TypeSystem) ResolveValueType(token epllex.Token) *EplType {
 func (ts *TypeSystem) typeDefined(name string) bool {
 	_, ok := ts.TypeMap[name]
 	return ok
-}
-
-func (ts *TypeSystem) SetLine(line string)  {
-	ts.currentLIne = line
 }

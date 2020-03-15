@@ -4,18 +4,21 @@
 ![build_type=release]
 L0: link os, 
 L1: link system, 
-L2: link linker, 
-L3: link selfExec, 
-L4: vardecl oopsi, uint
-L4: vardecl oopsi, fixed:Proc
-L4: vardecl main, unfixed:SystemProc
-L4: vardecl exitFlag, unfixed:boolean
-L4: fncdecl exec, Proc
-L5: DeclParam command, unfixed:string
-L6: DeclParam command, unfixed:string
-L7: DeclParam args, unfixed:string
-L8: jump 10, 
-L9: $!! $[#], $[#]
-L9: fncdecl Main, None
-L10: jump 12, 
-L11: $!! $[#], $[#]
+L2: link internal, 
+L3: link self, 
+L4: link bio, 
+L5: link out, 
+L6: link put, 
+L7: vardecl oopsi, uint
+L7: vardecl oopsi, fixed:Proc
+L7: vardecl main, unfixed:SystemProc
+L7: vardecl exitFlag, unfixed:boolean
+L7: fncdecl exec, Proc
+L8: DeclParam command, uint
+L9: DeclParam command, unfixed:string
+L10: DeclParam args, unfixed:string
+L11: jump 13, 
+L12: $!! $[#], $[#]
+L12: fncdecl Main, None
+L13: jump 15, 
+L14: $!! $[#], $[#]

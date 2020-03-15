@@ -96,6 +96,7 @@ const (
 	TRUE  TokenType = iota //Boolean type
 	FALSE TokenType = iota // Boolean type
 
+	FOR    TokenType = iota // for
 	MOVE   TokenType = iota // move
 	UNTIL  TokenType = iota // until
 	REPEAT TokenType = iota // repeat

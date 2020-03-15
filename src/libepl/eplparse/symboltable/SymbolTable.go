@@ -72,6 +72,33 @@ func NewSymbol(s string, t Types.EplType, scope ScopeType) *SymbolData {
 	return &SymbolData{t, s, scope}
 }
 
+//returns the current Symbol Table without the prev
+func (st *SymbolTable) Strip() SymbolTable {
+	tmp := *st
+	tmp.Prev = nil
+	tmp.Next = nil
+
+	return tmp
+}
+
+func (st *SymbolTable) First() SymbolTable {
+	tmp := *st
+	for tmp.Prev != nil {
+		tmp = *tmp.Prev
+	}
+
+	return tmp
+}
+
+func (st *SymbolTable) Last() SymbolTable {
+	tmp := *st
+	for tmp.Next != nil {
+		tmp = *tmp.Next
+	}
+
+	return tmp
+}
+
 //Add new symbol
 func (st *SymbolTable) Add(s *SymbolData) {
 	st.Table[s.symbol] = s

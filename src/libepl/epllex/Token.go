@@ -59,6 +59,10 @@ func (t *Token) Precedence() int {
 	return ExpLowPrec
 }
 
+func (t *Token) IsBoolVal() bool {
+	return t.Ttype == FALSE || t.Ttype == TRUE
+}
+
 func (t *Token) IsScalar() bool {
 	return t.Ttype == NUM || t.Ttype == REAL
 }
@@ -87,25 +91,28 @@ func isLetter(ch rune) bool {
 	return ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z'
 }
 
+
 func isNum(ch rune) bool {
 	return ch >= '0' && ch <= '9'
 }
 
+
 //these are all the reserved names
 func reserve() {
+	reserved["for"] = FOR
 	reserved["repeat"] = REPEAT
 	reserved["until"] = UNTIL
 	reserved["define"] = DEFINE
 	reserved["fnc"] = FNC
 	reserved["if"] = IF
 	reserved["else"] = ELSE
-	reserved["in"] = IN
+	reserved["in"] = IN //todo: v0.5+
 	reserved["struct"] = STRUCT
-	reserved["static"] = STATIC
-	reserved["type"] = TYPE
+	reserved["static"] = STATIC // todo: v0.5+
+	reserved["type"] = TYPE     //todo: v0.5+
 	reserved["fixed"] = FIXED
 	reserved["decl"] = DECL
-	reserved["move"] = MOVE
+	reserved["move"] = MOVE //todo: once lists support will be added
 	reserved["bool"] = BOOL
 	reserved["int"] = INT
 	reserved["int8"] = INT8
@@ -124,7 +131,7 @@ func reserve() {
 	reserved["cmx64"] = CMX64
 	reserved["cmx"] = CMX
 	reserved["string"] = STRING
-	reserved["long"] = LONG
+	reserved["long"] = LONG // currently not used
 	reserved["bool"] = BOOL
 	reserved["import"] = IMPORT
 	reserved["true"] = TRUE

@@ -111,10 +111,86 @@ type (
 		Code *Block
 	}
 
-
 	//todo: IMPL in v0.2++
 	MoveLoop struct {}
+
+	ForLoop struct {
+		VarDef    Decl
+		Condition BoolExpr
+		Expr  	  Expression // Assign or expr
+		Code      *Block
+	}
+
+/*
+	Example:
+		repeat (i int = 0) {
+		//code block
+		}
+ */
+
+	Repeat struct {
+		VarDef  Decl
+		Code   *Block
+	}
+
+/*
+	Example:
+		until (1 == 2) {
+			//empty
+		}
+ */
+
+	Until struct {
+		Condition *BoolExpr
+		Code      *Block
+	}
+
+
+/*
+	Example:
+		repeat (i int = 0) {
+			out.put(i);
+			i += 1;
+		} until (i == 3);
+ */
+
+	RepeatUntil struct {
+		VarDef    Decl
+		Condition *BoolExpr
+		Code      *Block
+	}
+
 )
+
+func (u Until) Start() uint {
+	panic("Invalid call")
+}
+
+func (u Until) ExprNode() {}
+
+func (r RepeatUntil) Start() uint {
+	panic("Invalid Call")
+}
+
+func (r RepeatUntil) ExprNode() {}
+func (r RepeatUntil) StmtNode() {}
+
+
+func (r Repeat) Start() uint {
+	panic("Invalid call")
+}
+
+func (r Repeat) ExprNode() {}
+func (r Repeat) StmtNode() {}
+
+
+func (f ForLoop) Start() uint {
+	panic("Invalid call")
+}
+
+func (f ForLoop) ExprNode() {}
+
+func (f ForLoop) StmtNode() {}
 
 func (b Block) ExprNode() {}
 
@@ -157,6 +233,15 @@ func (IfStmt) ExprNode() {}
 //----------------------------------------------------------------------------------------------------------------------
 //Expressions
 
+//Boolean values
+type BoolValue uint
+
+const (
+	BOOL_FALSE BoolValue = 0
+	BOOL_TRUE BoolValue  = 1
+)
+
+//Nodes definition
 type (
 	//todo: change bool expressions to refs
 	Ident struct {
@@ -190,23 +275,27 @@ type (
 	}
 	
 	BoolGreaterThen struct {
-		Le BoolExpr
-		Re BoolExpr
+		Le Expression
+		Re Expression
 	}
 
 	BoolGreatEquals struct {
-		Le BoolExpr
-		Re BoolExpr
+		Le Expression
+		Re Expression
 	}
 
 	BoolLowerThen struct {
-		Le BoolExpr
-		Re BoolExpr
+		Le Expression
+		Re Expression
 	}
 
 	BoolLowerThenEqual struct {
-		Le BoolExpr
-		Re BoolExpr
+		Le Expression
+		Re Expression
+	}
+
+	Boolean struct {
+		Val BoolValue
 	}
 
 	BinaryMul struct {
@@ -239,14 +328,19 @@ type (
 
 	FunctionCall struct {
 		PackagePath []Ident
-		Arguments   []Ident
+
+		/*
+		argument can be any thing that return value.
+		None value is not allowed. And will be caught during type checking
+		*/
+		Arguments   []Expression
 		ReturnType  Types.EplType //todo: Version 0.2+
 		FunctionName Ident
 	}
 
 
 
-Singular struct {
+	Singular struct {
 		Symbol Ident
 	}
 
@@ -263,8 +357,15 @@ Singular struct {
 )
 
 
-func (b BoolOr) Start() uint {
+func (b Boolean) Start() uint {
 	panic("implement me")
+}
+
+func (b Boolean) ExprNode() {}
+func (b Boolean) BoolExprNode() {}
+
+func (b BoolOr) Start() uint {
+	panic("Invalid call")
 }
 
 func (b BoolOr) ExprNode() {}
@@ -397,9 +498,12 @@ func (EmptyExpr) Start() uint {
 }
 func (EmptyExpr) StmtNode() {}
 func (EmptyExpr) ExprNode() {}
+func (e EmptyExpr) BoolExprNode() {}
 
 func (Ident) Start() uint {
 	panic("Invalid call")
 }
 func (Ident) StmtNode() {}
 func (Ident) ExprNode() {}
+func (i Ident) BoolExprNode() {}
+

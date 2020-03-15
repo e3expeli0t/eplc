@@ -46,7 +46,7 @@ func Walk(v Visitor, node ast.Node) {
 	case *ast.IfStmt:
 		Walk(v, *n.Condition)
 		Walk(v, n.Code)
-		Walk(v, n.Else)
+		Walk(v, *n.Else)
 	case *ast.AssignStmt:
 		Walk(v, n.Owner)
 		Walk(v, *n.Value)

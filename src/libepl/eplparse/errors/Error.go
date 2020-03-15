@@ -9,6 +9,7 @@ type InternalParserError struct {
 	ErrCount uint
 }
 
+//todo: support position marker (marks the token in specific position)
 func (ipe *InternalParserError) ParsingError(filename string, line uint, lineOffset uint, errorMsg string, currentline string, token epllex.Token) {
 	descriptor := Output.ErrorDescriptor{
 		Fname: filename,

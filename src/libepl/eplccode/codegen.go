@@ -37,6 +37,7 @@ import (
 func GenerateAIR(source io.Reader, fname string) {
 	lexer := epllex.New(source, fname)
 	parser := eplparse.New(lexer)
+	parser.InitializeTypeHandler()
 	file := parser.ParseProgramFile()
 	generate(file)
 }
