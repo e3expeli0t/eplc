@@ -55,6 +55,7 @@ type (
 	}
 )
 
+
 //Todo: replace all string names in symbol table references
 //Todo: loops
 type (
@@ -265,13 +266,13 @@ type (
 	}
 
 	BoolEquals struct {
-		Le BoolExpr
-		Re BoolExpr
+		Le Expression
+		Re Expression
 	}
 
 	BoolNotEquals struct {
-		Le BoolExpr
-		Re BoolExpr
+		Le Expression
+		Re Expression
 	}
 	
 	BoolGreaterThen struct {

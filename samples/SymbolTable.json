@@ -1,53 +1,9 @@
 {
 	"Table": {},
 	"Prev": {
-		"Table": {
-			"args": {
-				"SType": {
-					"Tname": "unfixed:string",
-					"Tkey": 19510062155911237
-				}
-			},
-			"command": {
-				"SType": {
-					"Tname": "unfixed:string",
-					"Tkey": 19510062155911237
-				}
-			},
-			"one": {
-				"SType": {
-					"Tname": "uint",
-					"Tkey": 19510062155911237
-				}
-			},
-			"two": {
-				"SType": {
-					"Tname": "uint",
-					"Tkey": 19510062155911237
-				}
-			}
-		},
+		"Table": {},
 		"Prev": {
-			"Table": {
-				"exitFlag": {
-					"SType": {
-						"Tname": "unfixed:boolean",
-						"Tkey": 19510062155911237
-					}
-				},
-				"main": {
-					"SType": {
-						"Tname": "unfixed:SystemProc",
-						"Tkey": 19510062155911237
-					}
-				},
-				"oopsi": {
-					"SType": {
-						"Tname": "fixed:Proc",
-						"Tkey": 19510062155911237
-					}
-				}
-			},
+			"Table": {},
 			"Prev": {
 				"Table": {},
 				"Prev": null,

@@ -83,6 +83,20 @@ func (t *Token) IsLeftAssociative() bool {
 	switch t.Ttype {
 	case MULT, ADD, SUB, DIV:
 		return true
+
+	//support SizeOp parsing
+	case GT, LT, GE, LE, EQ:
+		//Output.PrintLog("HJere")
+		return true
+	}
+	return false
+}
+
+//Check if an operator is binary (i.e *,/,-,+)
+func (t *Token) IsBinary() bool {
+	switch t.Ttype {
+	case MULT, ADD, SUB, DIV:
+		return true
 	}
 	return false
 }
