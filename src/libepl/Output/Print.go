@@ -24,12 +24,12 @@ import (
 	"os"
 )
 
-const EPLC_VERSION = "0.1.1"
+const EplcVersion = "0.1.2"
 
 func PrintVersion() {
 	fmt.Print(color.BBlue("****\t"))
 	fmt.Print(color.BCyan("eplc version: "))
-	fmt.Print(color.BLightPurple(EPLC_VERSION))
+	fmt.Print(color.BLightPurple(EplcVersion))
 	fmt.Println(color.BBlue(" ---- Development version\t****"))
 }
 

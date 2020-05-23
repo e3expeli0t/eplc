@@ -1,0 +1,8 @@
+import bio.out;
+
+fnc Main() {
+    if {
+    }
+
+    if decl i uint; i > 2 {}
+}

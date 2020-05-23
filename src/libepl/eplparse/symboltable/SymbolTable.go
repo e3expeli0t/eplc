@@ -22,41 +22,43 @@ import (
 	"eplc/src/libepl/eplparse/Types"
 )
 
-/*
-	Basic  linked list that holds all the symbols inside scopes
-*/
-
 type ScopeType string
 
 const (
-	//BLOCK = evrey staemeant (if, repeat, move, etc)
+	//BLOCK = every statement (if, repeat, move, etc)
 	BLOCK ScopeType = "@@@@BLOCK@@@@"
 
 	/*
-		FUNCTION Scope is the scope thats starts right after function
-		declaration (includes the arguments)
+		FUNCTION Scope is the scope that's starts right after function
+		declaration (including the arguments)
 	*/
 	FUNCTION ScopeType = "@@@@FUNCTION@@@@"
 
-	//GLOBAL Scope is every symbol that wase declare out side of the function (include the functions itself)
+	/*
+		GLOBAL Scope is the whole file scope meaning that the symbols that belongs
+		to the global scope can be used in the WHOLE file
+	*/
 	GLOBAL ScopeType = "@@@@GLOBAL@@@@"
 )
 
 /*
 	SymbolTable stores the information about the symbols.
-	In this case the symboltable data structure is (some kind of) linked list
+	In this case the symboltable data structure is (some kind of) linked list.
+	This simple linked lis holds all the information about symbols that belongs to
+	the current file
 */
 type SymbolTable struct {
 	Table map[string]*SymbolData
 	Prev  *SymbolTable
 	Next  *SymbolTable
+	CurrentScope ScopeType
 }
 
 //SymbolData stores the information about symbols
 type SymbolData struct {
-	SType  Types.EplType
 	symbol string
 	scope  ScopeType
+	SType  Types.EplType
 }
 
 //New creates new empty SymbolTable
@@ -69,7 +71,18 @@ func NewBasicSymbol(s string) *SymbolData {
 }
 
 func NewSymbol(s string, t Types.EplType, scope ScopeType) *SymbolData {
-	return &SymbolData{t, s, scope}
+	return &SymbolData{
+		symbol: s,
+		scope:  scope,
+		SType:  t,
+	}
+}
+
+func NewTypedSymbol(s string, t Types.EplType) *SymbolData {
+	return &SymbolData{
+		SType:  t,
+		symbol: s,
+	}
 }
 
 //returns the current Symbol Table without the prev
@@ -104,11 +117,17 @@ func (st *SymbolTable) Add(s *SymbolData) {
 	st.Table[s.symbol] = s
 }
 
+//Sets the SymbolData scope to the current scope
+func (st *SymbolTable) AddWOScope(s *SymbolData) {
+	s.scope = st.CurrentScope
+	st.Table[s.symbol] = s
+}
+
 func (st *SymbolTable) AddType(symbol string, t Types.EplType) {
 	st.Table[symbol].SType = t
 }
 
-func (st *SymbolTable) AddScope(symbol string, scope ScopeType) {
+func (st *SymbolTable) SetSymbolScope(symbol string, scope ScopeType) {
 	st.Table[symbol].scope = scope
 }
 
@@ -127,4 +146,8 @@ func (st *SymbolTable) Get(symbol string) SymbolData {
 	}
 
 	return SymbolData{}
+}
+
+func (st *SymbolTable) SetScopeType(scope ScopeType) {
+	st.CurrentScope = scope
 }

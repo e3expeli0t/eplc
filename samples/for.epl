@@ -1,0 +1,18 @@
+
+fnc magic(): uint {
+    until true {}
+}
+
+fnc Main() {
+    for i int = 0; i<0; i < 2 {
+        i = i +5563;
+    }
+
+    repeat (decl i int) {
+        magic();
+    }
+
+    repeat (decl q uint = 999) {
+        magic();
+    } until q < 0;
+}

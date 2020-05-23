@@ -1,0 +1,32 @@
+import bio.out;
+
+fnc Main() {
+    decl a int = 2;
+    decl b int = 3;
+
+    if b == a {
+        out.put("2 ==  3");
+    } else {
+        out.put("OK");
+    }
+
+    if b > a {
+        out.put("3 > 2");
+    } else {
+        out.put("OK");
+    }
+
+    if b < a {
+        out.put("3 < 2");
+    } else {
+        out.put("OK");
+    }
+
+    if a-1 == b {
+        out.put("YES!");
+    } else if b-1 == a {
+        out.put("NO");
+    } else {
+        out.put("OK");
+    }
+}

@@ -36,6 +36,13 @@ type Token struct {
 }
 
 const (
+	_ = iota
+	precBoolOr
+	precBoolAnd
+	precBoolCmp
+	precAdd
+	precMul
+
 	ExpLowPrec = 0
 	HighPrec   = 5
 )
@@ -44,16 +51,15 @@ const (
 func (t *Token) Precedence() int {
 	switch t.Ttype {
 	case BOOL_OR:
-		return 1
+		return precBoolOr
 	case BOOL_AND:
-		return 2
+		return precBoolAnd
 	case EQ, NEQ, GT, GE, LT, LE:
-		return 3
+		return precBoolCmp
 	case ADD, SUB:
-		return 4
+		return precAdd
 	case MULT, DIV:
-		return 5
-		
+		return precMul
 	}
 
 	return ExpLowPrec
@@ -76,7 +82,7 @@ func ( t *Token) IsString() bool {
 }
 
 func (t *Token) IsUnary() bool {
-	return t.Ttype == ADD || t.Ttype == SUB
+	return t.Ttype == ADD || t.Ttype == SUB || t.Ttype == BOOL_NOT
 }
 
 func (t *Token) IsLeftAssociative() bool {
@@ -84,18 +90,17 @@ func (t *Token) IsLeftAssociative() bool {
 	case MULT, ADD, SUB, DIV:
 		return true
 
-	//support SizeOp parsing
 	case GT, LT, GE, LE, EQ:
-		//Output.PrintLog("HJere")
 		return true
 	}
 	return false
 }
 
-//Check if an operator is binary (i.e *,/,-,+)
 func (t *Token) IsBinary() bool {
 	switch t.Ttype {
 	case MULT, ADD, SUB, DIV:
+		return true
+	case BOOL_AND, BOOL_OR, EQ, NEQ, LE, GE, LT, GT:
 		return true
 	}
 	return false
@@ -109,7 +114,6 @@ func isLetter(ch rune) bool {
 func isNum(ch rune) bool {
 	return ch >= '0' && ch <= '9'
 }
-
 
 //these are all the reserved names
 func reserve() {

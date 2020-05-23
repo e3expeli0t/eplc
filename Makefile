@@ -1,22 +1,24 @@
-version=0.1.1
+version=0.2.0
 branch=devel
-msg=bug fixing
+msg=bug fixes
 exec=samples/test.epl
+
 check_defined = \
     $(strip $(foreach 1,$1, \
         $(call __check_defined,$1,$(strip $(value 2)))))
+
 __check_defined = \
     $(if $(value $1),, \
       $(error Undefined $1$(if $2, ($2))))
 
-build:
-	@#make clean
+build:clean
 	@command -v go >/dev/null 2>&1 || { echo >&2 "Please install go. Aborting."; exit 1; }
+	@command -v dep >/dev/null 2>&1 || { echo >&2 "Please install dep. Aborting."; exit 1; }
 	@echo Building eplc...
-	go build -i -v -o eplc-$(version) src/eplc.go
+	go build -i -v -o eplc src/eplc.go
 	@mkdir target
 	@mkdir target/bin
-	@mv eplc-$(version) target/bin
+	@mv eplc target/bin
 
 buid_support:
 	@echo Building support tools
@@ -25,41 +27,43 @@ buid_support:
 
 rebuild:
 	@echo Running tests...
-	go test -v eplc/src/libepl/epllex -cover
+	go test -v eplc/tests -cover
 	
 	@echo Rebuilding eplc...
-	go build -i -v -o eplc-$(version) src/eplc.go
-	@rm -rf target/bin/eplc-$(version)
-	@mv eplc-$(version) target/bin/
+	go build -i -v -o eplc src/eplc.go
+	@rm -rf target/bin/eplc
+	@mv eplc target/bin/
 
-install:
-	make build
+install:build
 	@echo "Installing..."
-	@sudo mv target/bin/eplc-$(version) /bin/
+	@sudo mv target/bin/eplc /bin/
 	@echo "Finished..."
-run: 
-	make rebuild
-	./target/bin/eplc-$(version) $(exec)
+
+run:rebuild
+	./target/bin/eplc $(exec)
+
 clean:
 	@echo Removing eplc targets...
 	@rm -rf target
-	@sudo rm -rf /bin/eplc-$(version)
 	@echo Removing Support targets...
 	@cd tools/Support/epldbg/; make clean
+	@rm -rf samples/*.txt samples/syntax_errors/*.txt
+
 devel_tests:
 	dep ensure $(dep_args)
-	go test -v eplc/src/libepl/epllex -covermode=count -coverprofile=count.out fmt
+	go test -v eplc/tests -covermode=count -coverprofile=count.out fmt
 	go tool cover -html=count.out
+
 list:
 	@ls  /bin/epl*
 
-update:clean
-	@rm -rf vendor/*
+commit:clean
 	@git add .
 	@git commit -a -m "$(msg)"
 	@git push
-sync:
+
+pull:
 	@git pull
 
-switch:
+checkout:
 	git checkout $(branch) 

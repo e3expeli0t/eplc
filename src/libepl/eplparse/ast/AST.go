@@ -28,6 +28,10 @@ import (
 */
 
 type VarStat string
+const (
+	Fixed   VarStat = "fixed"
+	Mutable VarStat = "mutable"
+)
 
 type (
 	Node interface {
@@ -49,15 +53,10 @@ type (
 		Statement
 		DeclNode()
 	}
-	BoolExpr interface {
-		Expression
-		BoolExprNode()
-	}
 )
 
 
 //Todo: replace all string names in symbol table references
-//Todo: loops
 type (
 	ProgramFile struct {
 		FileName     string
@@ -81,12 +80,12 @@ type (
 	}
 
 	VarDecl struct {
-		Name    string
+		Name    Ident
 		VarType *Types.EplType
 		Stat    VarStat
 	}
 
-	//todo: IMPL in parser
+	//Declaration and assignment
 	VarExplicitDecl struct {
 		VarDecl
 		Value *Expression
@@ -103,7 +102,7 @@ type (
 	}
 
 	IfStmt struct {
-		Condition *BoolExpr
+		Condition *Expression
 		Code      *Block
 		Else      *Statement // to support if-else-if
 	}
@@ -117,7 +116,7 @@ type (
 
 	ForLoop struct {
 		VarDef    Decl
-		Condition BoolExpr
+		Condition Expression
 		Expr  	  Expression // Assign or expr
 		Code      *Block
 	}
@@ -142,7 +141,7 @@ type (
  */
 
 	Until struct {
-		Condition *BoolExpr
+		Condition *Expression
 		Code      *Block
 	}
 
@@ -157,7 +156,7 @@ type (
 
 	RepeatUntil struct {
 		VarDef    Decl
-		Condition *BoolExpr
+		Condition *Expression
 		Code      *Block
 	}
 
@@ -166,13 +165,11 @@ type (
 func (u Until) Start() uint {
 	panic("Invalid call")
 }
-
 func (u Until) ExprNode() {}
 
 func (r RepeatUntil) Start() uint {
 	panic("Invalid Call")
 }
-
 func (r RepeatUntil) ExprNode() {}
 func (r RepeatUntil) StmtNode() {}
 
@@ -180,7 +177,6 @@ func (r RepeatUntil) StmtNode() {}
 func (r Repeat) Start() uint {
 	panic("Invalid call")
 }
-
 func (r Repeat) ExprNode() {}
 func (r Repeat) StmtNode() {}
 
@@ -188,9 +184,7 @@ func (r Repeat) StmtNode() {}
 func (f ForLoop) Start() uint {
 	panic("Invalid call")
 }
-
 func (f ForLoop) ExprNode() {}
-
 func (f ForLoop) StmtNode() {}
 
 func (b Block) ExprNode() {}
@@ -203,7 +197,6 @@ func (AssignStmt) ExprNode() {}
 func (ElseStmt) Start() uint {
 	panic("Invalid call")
 }
-
 func (ElseStmt) ExprNode() {}
 func (ElseStmt) StmtNode() {}
 
@@ -214,23 +207,31 @@ func (Fnc) DeclNode() {}
 func (Fnc) ExprNode() {}
 func (Fnc) StmtNode() {}
 
-func (vd VarDecl) Start() uint {
-	return 0
+func (VarDecl) Start() uint {
+	panic("Invalid call")
 }
 func (VarDecl) StmtNode() {}
 func (VarDecl) ExprNode() {}
-
-func (ProgramFile) Start() uint { return 0 }
-func (Block) Start() uint       { return 0xFAC } //Todo: Fix
-func (IfStmt) Start() uint      { return 0 }
-
-func (i *Import) Start() uint { return i.StartLoc }
-func (VarDecl) DeclNode()     {}
-
+func (VarDecl) DeclNode(){}
 func (VarExplicitDecl) DeclNode() {}
+
+func (ProgramFile) Start() uint {
+	panic("Invalid call")
+}
+
+func (Block) Start() uint {
+	panic("Invalid call")
+}
+
+func (IfStmt) Start() uint {
+	panic("Invalid call")
+}
 func (IfStmt) StmtNode(){}
 func (IfStmt) ExprNode() {}
 
+func (Import) Start() uint {
+	panic("Invalid call")
+}
 //----------------------------------------------------------------------------------------------------------------------
 //Expressions
 
@@ -244,55 +245,55 @@ const (
 
 //Nodes definition
 type (
-	//todo: change bool expressions to refs
 	Ident struct {
 		Name string
 	}
 
 	EmptyExpr struct{}
 
+	//Note: Expressions must be passed by reference
 	BoolNot struct {
-		Expr BoolExpr
+		Expr Expression
 	}
 
 	BoolAnd struct {
-		Le BoolExpr
-		Re BoolExpr
+		Ls Expression
+		Rs Expression
 	}
 
 	BoolOr struct {
-		Le BoolExpr
-		Re BoolExpr
+		Ls Expression
+		Rs Expression
 	}
 
 	BoolEquals struct {
-		Le Expression
-		Re Expression
+		Ls Expression
+		Rs Expression
 	}
 
 	BoolNotEquals struct {
-		Le Expression
-		Re Expression
+		Ls Expression
+		Rs Expression
 	}
 	
 	BoolGreaterThen struct {
-		Le Expression
-		Re Expression
+		Ls Expression
+		Rs Expression
 	}
 
 	BoolGreatEquals struct {
-		Le Expression
-		Re Expression
+		Ls Expression
+		Rs Expression
 	}
 
 	BoolLowerThen struct {
-		Le Expression
-		Re Expression
+		Ls Expression
+		Rs Expression
 	}
 
 	BoolLowerThenEqual struct {
-		Le Expression
-		Re Expression
+		Ls Expression
+		Rs Expression
 	}
 
 	Boolean struct {
@@ -331,130 +332,99 @@ type (
 		PackagePath []Ident
 
 		/*
-		argument can be any thing that return value.
+		argument can be any thing that returns value.
 		None value is not allowed. And will be caught during type checking
 		*/
 		Arguments   []Expression
-		ReturnType  Types.EplType //todo: Version 0.2+
+		ReturnType  Types.EplType //the return type is set during type analysis
 		FunctionName Ident
 	}
-
-
 
 	Singular struct {
 		Symbol Ident
 	}
 
-	//Represent number such as 5562 or 2
+	//Represent number such as 5562 or 233.9973
 	Number struct {
 		Value string
+		Real bool // If the number is real (i.e 3.2552) this is true
 	}
 
 	String struct {
 		Value string
 	}
-
-
 )
-
 
 func (b Boolean) Start() uint {
 	panic("implement me")
 }
 
 func (b Boolean) ExprNode() {}
-func (b Boolean) BoolExprNode() {}
 
 func (b BoolOr) Start() uint {
 	panic("Invalid call")
 }
-
 func (b BoolOr) ExprNode() {}
-func (b BoolOr) BoolExprNode() {}
-
 
 func (b BoolAnd) Start() uint {
 	panic("implement me")
 }
-
 func (b BoolAnd) ExprNode() {}
-func (b BoolAnd) BoolExprNode() {}
 
 func (b BoolNotEquals) Start() uint {
 	panic("Invalid call")
 }
-
 func (b BoolNotEquals) ExprNode() {}
-func (c BoolNotEquals) BoolExprNode() {}
-
-// both bool expr and expr because its can be boolean function
-func (c FunctionCall) BoolExprNode() {}
 
 func (s String) Start() uint {
 	panic("Invalid call")
 }
-
 func (s String) ExprNode() {}
+
 func (n Number) Start() uint {
 	panic("Invalid call")
 }
-
 func (n Number) ExprNode() {}
 
 func (BoolGreaterThen) Start() uint {
 	panic("Invalid call")
 }
-
 func (BoolGreaterThen) ExprNode() {}
-func (BoolGreaterThen) BoolExprNode() {}
 
 func (BoolEquals) Start() uint {
 	panic("Invalid call")
 }
-
 func (BoolEquals) ExprNode() {}
-func (BoolEquals) BoolExprNode() {}
 
 func (BoolGreatEquals) Start() uint {
 	panic("Invalid call")
 }
-
 func (BoolGreatEquals) ExprNode() {}
-
-func (BoolGreatEquals) BoolExprNode() {}
 
 func (BoolNot) Start() uint {
 	panic("Invalid call")
 }
-
 func (BoolNot) ExprNode() {}
-func (BoolNot) BoolExprNode() {}
 
 func (BoolLowerThen) Start() uint {
 	panic("Invalid call")
 }
-
 func (BoolLowerThen) ExprNode() {}
-func (BoolLowerThen) BoolExprNode() {}
 
 func (BoolLowerThenEqual) Start() uint {
 	panic("Invalid call")
 }
-
 func (BoolLowerThenEqual) ExprNode() {}
-func (BoolLowerThenEqual) BoolExprNode() {}
 
 func (Singular) Start() uint {
 	panic("Invalid call")
 }
-
 func (Singular) StmtNode() {}
 func (Singular) ExprNode() {}
 
 func (FunctionCall) Start() uint {
 	panic("Invalid call")
 }
-
 func (FunctionCall) StmtNode() {}
 func (FunctionCall) ExprNode() {}
 
@@ -499,12 +469,10 @@ func (EmptyExpr) Start() uint {
 }
 func (EmptyExpr) StmtNode() {}
 func (EmptyExpr) ExprNode() {}
-func (e EmptyExpr) BoolExprNode() {}
 
 func (Ident) Start() uint {
 	panic("Invalid call")
 }
 func (Ident) StmtNode() {}
 func (Ident) ExprNode() {}
-func (i Ident) BoolExprNode() {}
 

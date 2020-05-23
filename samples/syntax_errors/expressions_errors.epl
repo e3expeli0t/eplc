@@ -1,0 +1,7 @@
+fnc Main(): uint {
+    decl exp uint;
+    exp = 232+223;
+    exp = 88366 +223232333 / 67236;
+    exp = 22+;
+    exp -232 magic(223);
+}

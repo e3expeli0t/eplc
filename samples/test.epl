@@ -1,0 +1,28 @@
+import os.system;
+import internal.self
+
+decl oopsi uint;
+decl fixed oopsi Proc;
+decl main SystemProc;
+decl exitFlag boolean;
+
+fnc exec(command uint, command string, args string): Proc {
+
+    decl two uint;
+    two = 4;
+    decl one uint = two / 900 * (355355434/899+80087) - get();
+    
+    put("Hello one = {}", one);
+
+    if one < 233 {
+        for decl i int = 0; i < 23; i+32 {
+            put(i);
+        }
+    }
+
+    //return two; // should be type err
+}
+
+fnc Main() {
+    exec(1, "exec" , "/bin/sh");
+}

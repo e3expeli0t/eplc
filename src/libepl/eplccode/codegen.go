@@ -37,7 +37,9 @@ import (
 func GenerateAIR(source io.Reader, fname string) {
 	lexer := epllex.New(source, fname)
 	parser := eplparse.New(lexer)
+
 	parser.InitializeTypeHandler()
+
 	file := parser.ParseProgramFile()
 	generate(file)
 }
@@ -114,7 +116,7 @@ func genDecls(node ast.Decl, index *uint) []Label {
 	case *ast.VarExplicitDecl:
 		var labels []Label
 		labels = append(labels, genVarDecl(&ast.VarDecl{n.Name, n.VarType, n.Stat}, index))
-		labels = append(labels, genAssignStmt(n.Name, n.Value, index)...)
+		labels = append(labels, genAssignStmt(n.Name.Name, n.Value, index)...)
 		return labels
 	case ast.Fnc:
 		return genFncDecl(&n, index)
@@ -128,18 +130,18 @@ func genDecls(node ast.Decl, index *uint) []Label {
 
 func genFncDecl(node *ast.Fnc, index *uint) []Label {
 	var labels []Label
-	labels = append(labels, CreateLabel(*index, "fncdecl", node.Name, node.ReturnType.Tname))
+	labels = append(labels, CreateLabel(*index, "fncdecl", node.Name, node.ReturnType.TypeName))
 	*index++
 	labels = append(labels, genParamList(index, DeclsDeepConvert(node.Params))...)
 	labels = append(labels, genJump(*index+2, index))
 	*index++
 	labels = append(labels, genBlock(index, node.Body)...)
-
+	*index++
 	return labels
 }
 
 func genVarDecl(node *ast.VarDecl, index *uint) Label {
-	return CreateLabel(*index, "vardecl", node.Name, node.VarType.Tname)
+	return CreateLabel(*index, "vardecl", node.Name.Name, node.VarType.TypeName)
 }
 
 //-----------------------------------------------------------------------------------------------------------------------
@@ -183,7 +185,7 @@ func genParamList(index *uint, list *[]ast.VarDecl) []Label {
 	var labels []Label
 
 	for _, param := range *list {
-		labels = append(labels, CreateLabel(*index, "DeclParam", param.Name, param.VarType.Tname))
+		labels = append(labels, CreateLabel(*index, "DeclParam", param.Name.Name, param.VarType.TypeName))
 		*index++
 	}
 

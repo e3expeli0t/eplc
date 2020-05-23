@@ -21,16 +21,16 @@ else` ::= "else" "{" expression "}"
 op_if ::= "if" bool_expr
 if_stmt ::= "if" bool_expr "{"expression"}" "else" [op_if] "{"expression"}" [else`]
 
-unary_ops ::= "+" | "-" | "!"
-ops ::= "+" | "-" | "*" | "/" | ">>" | "<<" | "|" | "&" | "^" | "%"
+unary_ops  ::= `"+" | "-" | "!"`   
+ops ::= `"+" | "-" | "*" | "/" | ">>" | "<<" | "|" | "&" | "^" | "%"`
 assign ::= "+=" |"-=" | "/=" | "*=" | "%=" | "&=" | "|=" | "^="| "<<=" | ">>="
 
 val ::= [unary_ops] id | [unary_ops] number | str
 val' ::= [unary_ops]id | [unary_ops] number
 
 
-repeat_loop_var ::= "("id int = val`")"
-repeat` ::= "repeat" [repeat_loop_var]
+repeat_loop_var ::= `"(" scoped_var_decl ")"`
+repeat ::= `"repeat" [repeat_loop_var]`
 
 repeat ::= repeat ["("var_explicit_decl")"]` "{" expression "}"
 repeat_until ::= repeat` "{" expression "}" "until" bool_expr   

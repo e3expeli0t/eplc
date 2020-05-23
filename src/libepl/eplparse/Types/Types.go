@@ -2,50 +2,63 @@ package Types
 
 import (
 	"eplc/src/libepl/epllex"
-	"eplc/src/libepl/eplparse/Types/errors"
-	"fmt"
 	"strconv"
 )
 
+/*
+The type system:
+	the type system supplies the parser with handful
+	functions and info about types
 
+	The type system should:
+	* Provide type resolving
+	* Disguise between defined types and user defined types
+	* For every type create unique id
+	* Define type hierarchy
+ */
 type TypeSystem struct {
 	lexer epllex.Lexer
 	Fname string
 	BasicTypes []BasicType
-	TypeMap map[string]EplType
+	TypeMap map[string]*EplType
 }
 
 type EplType struct {
-	Tname string //name as text (ex: Int)
-	Tkey  uint64 //Id for the Type
+	TypeName string //name as text (ex: Int)
+	TypeKey  uint64 //Id for the Type
 }
+type BasicType EplType
 
 /*
 design note:
 	basic type is a pre defined fundamental data type such as: uint , int etc...
  */
 func (et *EplType) ToBasic() BasicType {
-	return BasicType{et.Tname, et.Tkey}
+	return BasicType{et.TypeName, et.TypeKey}
 }
-
-type BasicType EplType
 
 //Todo: change this to more efficient way
 func (ts *TypeSystem) Initialize(lex epllex.Lexer) {
-	ts.TypeMap = make(map[string]EplType)
+	ts.TypeMap = make(map[string]*EplType)
 
 	names := []string{"uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64",
-		"float", "float8", "float16", "float32", "float64", "cmx", "cmx64",}
+		"float", "float8", "float16", "float32", "float64", "cmx", "cmx64","string"}
 
 	for _, n := range names {
 		ts.BasicTypes = append(ts.BasicTypes, (ts.MakeType(n)).ToBasic())
 	}
+
+	//for informative errors. Really inefficient
 	ts.Fname = lex.Filename
 	ts.lexer = lex
 }
 
+func (ts *TypeSystem) GetType(name string) *EplType {
+	return ts.TypeMap[name]
+}
+
 func (ts *TypeSystem) IsValidBasicType(token epllex.Token) bool {
-	tp := ts.ResolveType(token).ToBasic()
+	tp := ts.ToType(token).ToBasic()
 	for _, t := range ts.BasicTypes {
 		if tp == t {
 			return true
@@ -58,20 +71,20 @@ func (ts *TypeSystem) IsValidBasicType(token epllex.Token) bool {
 //create new type with name and type key
 func (ts *TypeSystem) MakeType(name string) *EplType {
 	_type := &EplType{
-		Tname: name,
-		Tkey:  ts.genKey(name),
+		TypeName: name,
+		TypeKey:  ts.genKey(name),
 	}
 
 	if !ts.typeDefined(name) {
-		ts.TypeMap[name] = *_type
+		ts.TypeMap[name] = _type
 	}
 	return _type
 }
 
-func (ts *TypeSystem)ResolveType(token epllex.Token) *EplType {
+func (ts *TypeSystem) ToType(token epllex.Token) *EplType {
 	return &EplType{
-		Tname: token.Lexme,
-		Tkey:  ts.genKey(token.Lexme),
+		TypeName: token.Lexme,
+		TypeKey:  ts.genKey(token.Lexme),
 	}
 }
 
@@ -81,9 +94,8 @@ func (ts *TypeSystem) genKey(n string) uint64 {
 	return data ^ 0x45504C54595045
 }
 
-
-//todo: rewrite type system on version 0.2
 func (ts *TypeSystem) ResolveValueType(token epllex.Token) *EplType {
+	panic("This function is not supported")
 	switch token.Ttype {
 	case epllex.NUM:
 		//the default number value is int ( the size is defined by the target system)
@@ -97,19 +109,10 @@ func (ts *TypeSystem) ResolveValueType(token epllex.Token) *EplType {
 		return ts.MakeType("string")
 	case epllex.ID: // never should hit
 	break
-	default:
-		errors.UnresolvedTypeError(
-			fmt.Sprintf("Couldn't resolve type of '%s'", token.Lexme),
-			token,
-			ts.Fname,
-			ts.lexer.GetLine(),
-			)
-
 	}
 
 	return nil
 }
-
 
 func (ts *TypeSystem) typeDefined(name string) bool {
 	_, ok := ts.TypeMap[name]

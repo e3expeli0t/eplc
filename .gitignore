@@ -1,21 +1,29 @@
+# IDE's configuration files
 .idea
-test.epl
-aplc*
-eplc-*
 .vscode
 .bin
+
+aplc*
+eplc-*
+
 header
 count.out
 devel_logs.txt
-bootsrap_system_devel
-*.nvis
 parser_tools
 *.pyc
 *.py
-#grammar.md
+
+# Project directories
+vendor
+grammar.md
+bootstrap_system_devel
 parser-tools
 tools
-*~
 runtime_devel
+runtime
+
+# Speciel files
+*.nvis
+*~
 rtv*
 *.ertdump

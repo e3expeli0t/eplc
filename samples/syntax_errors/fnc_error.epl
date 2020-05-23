@@ -1,0 +1,7 @@
+fnc Main_(): 344 {}
+fnc main():
+
+fnc Main() {
+    Main_();
+    main();
+}

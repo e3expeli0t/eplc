@@ -1,0 +1,6 @@
+//This file shouldn't be parsed
+
+import "abcdef";
+import ab
+import abc.efg;
+import

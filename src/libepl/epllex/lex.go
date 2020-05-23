@@ -65,7 +65,7 @@ func (l *Lexer) Next() Token {
 	ch := l.read() //read one char
 
 	if ch == -1 {
-		return Token{Ttype: EOF, Lexme: "", StartOffset: 0, StartLine: 0}
+		return Token{Ttype: EOF, Lexme: "EOF", StartOffset: 0, StartLine: 0}
 	} else if isLetter(ch) {
 		l.unread()
 		return l.scanID(false)
@@ -200,7 +200,12 @@ func (l *Lexer) Next() Token {
 	}
 
 	Errors.FatalLexical("To many errors")
-	return Token{"", EOF, l.Line, l.LineOffset}
+	return Token{
+		Lexme:       "",
+		Ttype:       0,
+		StartLine:   l.Line,
+		StartOffset: l.LineOffset,
+	}
 }
 
 func (l *Lexer) matchBy(s rune) Token {

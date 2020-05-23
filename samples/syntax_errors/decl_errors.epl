@@ -1,0 +1,4 @@
+decl name uint = 0;
+decl name uint;
+decl uint i = 2;
+name uint = 0;

@@ -1,7 +1,8 @@
-package eplparse
+package tests
 
 import (
 	"eplc/src/libepl/epllex"
+	"eplc/src/libepl/eplparse"
 	"strings"
 	"testing"
 )
@@ -16,7 +17,7 @@ func TestParser_ParseExpression(t *testing.T) {
 
 func TestParser_ParseFnc(t *testing.T) {
 	lx := epllex.New(strings.NewReader("fnc exec(command uint, command string, args string): Proc {\n}"), "Test")
-	p := New(lx)
+	p := eplparse.New(lx)
 
 }
 

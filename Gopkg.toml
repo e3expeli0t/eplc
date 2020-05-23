@@ -1,2 +1,2 @@
-#required = ["github.com/jessevdk/go-flags"] #For future use
-required = ["github.com/pkg/profile"] #     In the development version this is for preformence analysis
+#required = ["github.com/jessevdk/go-flags"] # For future use
+required = ["github.com/pkg/profile"]  # In the development version this is for preformence analysis
