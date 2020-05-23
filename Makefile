@@ -20,11 +20,6 @@ build:clean
 	@mkdir target/bin
 	@mv eplc target/bin
 
-buid_support:
-	@echo Building support tools
-	cd tools/Support/epldbg/; cmake .
-	cd tools/Support/epldbg/; make
-
 rebuild:
 	@echo Running tests...
 	go test -v eplc/tests -cover
@@ -46,7 +41,6 @@ clean:
 	@echo Removing eplc targets...
 	@rm -rf target
 	@echo Removing Support targets...
-	@cd tools/Support/epldbg/; make clean
 	@rm -rf samples/*.txt samples/syntax_errors/*.txt
 
 devel_tests:
