@@ -1,3 +1,21 @@
+import bio.std;
+
+fnc del(i int): int {
+    if  i > 0 {
+        del(i-1) *i;
+    }
+}
 
 fnc Main() {
+
+    decl input uint;
+
+    input =  std.input("Please enter factorial: ");
+
+    if input == std.empty {
+        std.output("YOU NEED TO SUPPLY FACTORIAL\n defaulting to 10");
+        input = 10;
+    }
+
+    del(input);
 }
