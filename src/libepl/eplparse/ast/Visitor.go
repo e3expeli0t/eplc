@@ -1,27 +1,7 @@
 package ast
 
 type Visitor interface {
-	Visit(n Node) Visitor
-}
-
-func Walk(v Visitor, node Node) {
-	if v := v.Visit(node); v == nil {
-		return
-	}
-
-	switch n := node.(type) {
-	case Decl:
-		Walk(v, n)
-	case *Block:
-		for _, sn := range *n.ExprList {
-			Walk(v, sn)
-		}
-	case *ProgramFile:
-		for _, decl := range *n.GlobalDecls {
-			Walk(v, decl)
-		}
-
-	}
+	Visit(node Node) (v Visitor)
 }
 
 type Traveler func(Node) bool

@@ -27,7 +27,6 @@ import (
 func checkType(lexme string, tt epllex.TokenType, startLine uint, startOffset uint) bool {
 	lx := epllex.New(strings.NewReader(lexme), "test_lexer.epl")
 	tk := lx.Next()
-	//fmt.Printf("type: %d, lexme: %s, start Line: %d, start offset:%d \n", tk.Ttype, tk.Lexme, tk.StartLine, tk.StartOffset)
 	return tk.StartLine == startLine && tk.StartOffset == startOffset && tk.Ttype == tt
 }
 
@@ -87,7 +86,7 @@ func TestLexer(t *testing.T) {
 		{"<<", epllex.LSHIFT, 0, 0},
 		{">>", epllex.RSHIFT, 0, 0},
 		{";", epllex.SEMICOLON, 0, 0},
-		{":", epllex.RETURN_IND, 0, 0},
+		{":", epllex.RETURN_TYPE_IND, 0, 0},
 		{",", epllex.COMMA, 0, 0},
 		{".", epllex.DOT, 0, 0},
 		{"int", epllex.INT, 0, 0},

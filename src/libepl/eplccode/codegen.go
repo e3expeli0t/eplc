@@ -34,13 +34,17 @@ import (
 	GenerateAIR generates AIR (AVM IR) for optimization and machine
 	code generation by AVM
 */
+
 func GenerateAIR(source io.Reader, fname string) {
+
+
 	lexer := epllex.New(source, fname)
 	parser := eplparse.New(lexer)
 
 	parser.InitializeTypeHandler()
 
 	file := parser.ParseProgramFile()
+
 	generate(file)
 }
 
@@ -61,8 +65,6 @@ func genProgram(program *ast.ProgramFile) {
 	writer := Writer{Fname: program.FileName}
 	writer.InitializeWriter()
 
-	Output.PrintLog(program.FileName, program.Imports)
-
 	writer.UpdateLabels(genImport(*program.Imports, &index))
 	for _, decl := range *program.GlobalDecls {
 		writer.UpdateLabels(genDecls(decl, &index))
@@ -78,8 +80,8 @@ func genProgram(program *ast.ProgramFile) {
 		Output.PrintFatalErr("Couldn't find main function")
 	}
 
-	writer.produceST(program.Symbols)
-	writer.produceAST(program)
+	writer.ProduceST(program.Symbols)
+	writer.ProduceAST(program)
 	writer.WriteToTarget()
 }
 
@@ -89,7 +91,7 @@ func genProgram(program *ast.ProgramFile) {
 func genImport(node []ast.Import, index *uint) []Label {
 	var labels []Label
 	for _, i := range node {
-		for _, lib := range i.Imports {
+		for _, lib := range *i.Imports {
 			labels = append(labels, CreateLabel(*index, "link", lib, ""))
 			*index++
 		}
@@ -130,7 +132,7 @@ func genDecls(node ast.Decl, index *uint) []Label {
 
 func genFncDecl(node *ast.Fnc, index *uint) []Label {
 	var labels []Label
-	labels = append(labels, CreateLabel(*index, "fncdecl", node.Name, node.ReturnType.TypeName))
+	labels = append(labels, CreateLabel(*index, "fncdecl", node.Name.Name, node.ReturnType.TypeName))
 	*index++
 	labels = append(labels, genParamList(index, DeclsDeepConvert(node.Params))...)
 	labels = append(labels, genJump(*index+2, index))

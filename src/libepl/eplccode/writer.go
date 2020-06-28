@@ -67,7 +67,7 @@ func (w *Writer) UpdateLabel(label Label) {
 	w.Labels = append(w.Labels, label)
 }
 
-func (w *Writer) produceST(st *symboltable.SymbolTable) {
+func (w *Writer) ProduceST(st *symboltable.SymbolTable) {
 	b, err := json.MarshalIndent(*st, "", "\t")
 
 	if err != nil {
@@ -78,8 +78,8 @@ func (w *Writer) produceST(st *symboltable.SymbolTable) {
 	}
 }
 
-func (w *Writer) produceAST(ast *ast.ProgramFile) {
-	b, err := json.MarshalIndent(*ast, "", "\t")
+func (w *Writer) ProduceAST(ast ast.Node) {
+	b, err := json.MarshalIndent(ast, "", "\t")
 
 	if err != nil {
 

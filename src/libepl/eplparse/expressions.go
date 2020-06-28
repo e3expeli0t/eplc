@@ -83,9 +83,9 @@ func (p *Parser) ParseUnary() (unary ast.Expression){
 func (p *Parser) resolveOperator() (exp ast.Expression) {
 	switch p.currentToken.Ttype {
 	case epllex.ADD:
-		exp = ast.UnaryPlus{Rs: p.ParseExpr(epllex.HighPrec)}
+		exp = &ast.UnaryPlus{Rs: p.ParseExpr(epllex.HighPrec)}
 	case epllex.SUB:
-		exp = ast.UnaryMinus{Rs: p.ParseExpr(epllex.HighPrec)}
+		exp = &ast.UnaryMinus{Rs: p.ParseExpr(epllex.HighPrec)}
 	default:
 		return nil
 	}
@@ -102,7 +102,7 @@ func (p *Parser) resolveBinaryOperator(left* ast.Expression) (exp ast.Expression
 	switch p.currentToken.Ttype {
 	case epllex.MULT:
 		p.readNextToken() // Skip the operator
-		exp = ast.BinaryMul{
+		exp = &ast.BinaryMul{
 			Ls: *left,
 			Rs: p.ParseExpr(p.currentToken.Precedence()),
 		}
@@ -111,7 +111,7 @@ func (p *Parser) resolveBinaryOperator(left* ast.Expression) (exp ast.Expression
 
 	case epllex.DIV:
 		p.readNextToken() // Skip the operator
-		exp = ast.BinaryDiv{
+		exp = &ast.BinaryDiv{
 			Ls: *left,
 			Rs: p.ParseExpr(p.currentToken.Precedence()),
 		}
@@ -120,7 +120,7 @@ func (p *Parser) resolveBinaryOperator(left* ast.Expression) (exp ast.Expression
 
 	case epllex.ADD:
 		p.readNextToken() // Skip the operator
-		exp = ast.BinaryAdd{
+		exp = &ast.BinaryAdd{
 			Ls: *left,
 			Rs: p.ParseExpr(p.currentToken.Precedence()),
 		}
@@ -129,7 +129,7 @@ func (p *Parser) resolveBinaryOperator(left* ast.Expression) (exp ast.Expression
 
 	case epllex.SUB:
 		p.readNextToken() // Skip the operator
-		exp = ast.BinarySub{
+		exp = &ast.BinarySub{
 			Ls: *left,
 			Rs: p.ParseExpr(p.currentToken.Precedence()),
 		}
@@ -138,7 +138,7 @@ func (p *Parser) resolveBinaryOperator(left* ast.Expression) (exp ast.Expression
 
 	case epllex.EQ:
 		p.readNextToken() // Skip the operator
-		exp = ast.BoolEquals {
+		exp = &ast.BoolEquals {
 			Ls: *left,
 			Rs: p.ParseExpr(p.currentToken.Precedence()),
 		}
@@ -155,7 +155,7 @@ func (p *Parser) resolveBinaryOperator(left* ast.Expression) (exp ast.Expression
 		break
 	case epllex.LT:
 		p.readNextToken() // Skip the operator
-		exp = ast.BoolLowerThen {
+		exp = &ast.BoolLowerThen {
 			Ls: *left,
 			Rs: p.ParseExpr(p.currentToken.Precedence()),
 		}
@@ -164,7 +164,7 @@ func (p *Parser) resolveBinaryOperator(left* ast.Expression) (exp ast.Expression
 
 	case epllex.GT:
 		p.readNextToken() // Skip the operator
-		exp = ast.BoolGreatEquals {
+		exp = &ast.BoolGreatEquals {
 			Ls: *left,
 			Rs: p.ParseExpr(p.currentToken.Precedence()),
 		}
@@ -173,7 +173,7 @@ func (p *Parser) resolveBinaryOperator(left* ast.Expression) (exp ast.Expression
 
 	case epllex.LE:
 		p.readNextToken() // Skip the operator
-		exp = ast.BoolLowerThenEqual {
+		exp = &ast.BoolLowerThenEqual {
 			Ls: *left,
 			Rs: p.ParseExpr(p.currentToken.Precedence()),
 		}
@@ -181,7 +181,7 @@ func (p *Parser) resolveBinaryOperator(left* ast.Expression) (exp ast.Expression
 		break
 
 	case epllex.GE:
-		exp = ast.BoolGreatEquals {
+		exp = &ast.BoolGreatEquals {
 			Ls: *left,
 			Rs: p.ParseExpr(p.currentToken.Precedence()),
 		}
@@ -226,15 +226,18 @@ func (p *Parser) parseValue() ast.Expression {
 
 //function_call := package_path "(" args ")"
 //package_path := ident "." path_list | ident
-func (p *Parser) ParseFunctionCall() ast.FunctionCall {
-	var package_path []ast.Ident
+func (p *Parser) ParseFunctionCall() *ast.FunctionCall {
+	var package_path []*ast.Ident
 	var name ast.Ident
 	var args []ast.Expression
+
+	var current *ast.Ident
 
 	//parsing the function path
 	for !p.match(epllex.LPAR) && p.match(epllex.ID) {
 		if p.match(epllex.ID) {
-			package_path = append(package_path, p.ParseIdent())
+			current = p.ParseIdent()
+			package_path = append(package_path, current)
 		} else {
 			p.expect("ident")
 		}
@@ -245,11 +248,11 @@ func (p *Parser) ParseFunctionCall() ast.FunctionCall {
 		}
 	}
 
-	if package_path == nil {
+	if package_path == nil || current == nil {
 		p.expect("function name")
 	}
 
-	name = package_path[len(package_path)-1]
+	name = *current
 
 	if !p.match(epllex.LPAR) {
 		p.expect("'('")
@@ -270,19 +273,19 @@ func (p *Parser) ParseFunctionCall() ast.FunctionCall {
 	}
 	p.readNextToken() // skip ')'
 
-	return ast.FunctionCall{
+	return &ast.FunctionCall{
 		PackagePath:  package_path,
 		Arguments:    args,
 		ReturnType:   Types.EplType{}, //gets filled by the type analyser
-		FunctionName: name,
+		FunctionName: &name,
 	}
 }
 
 //Ident := ID (Basic string Token)
-func (p *Parser) ParseIdent() ast.Ident {
+func (p *Parser) ParseIdent() *ast.Ident {
 	if p.match(epllex.ID) {
 		defer p.readNextToken()
-		return ast.Ident{Name: p.currentLexme}
+		return &ast.Ident{Name: p.currentLexme}
 	} else {
 		p.expect("Ident")
 	}

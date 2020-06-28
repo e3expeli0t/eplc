@@ -7,7 +7,7 @@ import (
 
 /*
 The type system:
-	the type system supplies the parser with handful
+	the type system supplies the eplparse with handful
 	functions and info about types
 
 	The type system should:
@@ -17,10 +17,10 @@ The type system:
 	* Define type hierarchy
  */
 type TypeSystem struct {
-	lexer epllex.Lexer
-	Fname string
+	lexer      *epllex.Lexer
+	Fname      string
 	BasicTypes []BasicType
-	TypeMap map[string]*EplType
+	TypeMap    map[string]*EplType
 }
 
 type EplType struct {
@@ -38,7 +38,7 @@ func (et *EplType) ToBasic() BasicType {
 }
 
 //Todo: change this to more efficient way
-func (ts *TypeSystem) Initialize(lex epllex.Lexer) {
+func (ts *TypeSystem) Initialize(lex *epllex.Lexer) {
 	ts.TypeMap = make(map[string]*EplType)
 
 	names := []string{"uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64",

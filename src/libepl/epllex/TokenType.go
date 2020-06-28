@@ -109,12 +109,14 @@ const (
 	STRUCT TokenType = iota // struct
 	TYPE   TokenType = iota // type
 	IMPORT TokenType = iota // import
+	RETURN TokenType = iota // return
+	BREAK  TokenType = iota // break
 
-	SEMICOLON  TokenType = iota // ;
-	DOT        TokenType = iota // .
-	COMMA      TokenType = iota // ,
-	RETURN_IND TokenType = iota // :
-	CFLAG      TokenType = iota // @id
+	SEMICOLON       TokenType = iota // ;
+	DOT             TokenType = iota // .
+	COMMA           TokenType = iota // ,
+	RETURN_TYPE_IND TokenType = iota // :
+	CFLAG           TokenType = iota // @id
 
 	EOF TokenType = -(iota + 1) // '\0'
 )

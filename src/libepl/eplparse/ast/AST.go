@@ -24,7 +24,7 @@ import (
 )
 
 /*
-	AST (or Abstract Syntax Tree) is whats the parser producing
+	AST (or Abstract Syntax Tree) is the output of the eplparse
 */
 
 type VarStat string
@@ -63,12 +63,12 @@ type (
 		Symbols      *symboltable.SymbolTable
 		Imports      *[]Import
 		GlobalDecls  *[]Decl
-		Functions    *[]Fnc
+		Functions    *[]*Fnc
 		MainFunction *Fnc
 	}
 
 	Fnc struct {
-		Name       string
+		Name       *Ident
 		ReturnType *Types.EplType
 		Params     *[]Decl
 		Body       *Block
@@ -80,7 +80,7 @@ type (
 	}
 
 	VarDecl struct {
-		Name    Ident
+		Name    *Ident
 		VarType *Types.EplType
 		Stat    VarStat
 	}
@@ -93,11 +93,11 @@ type (
 
 	Import struct {
 		StartLoc uint
-		Imports  []string
+		Imports  *[]string
 	}
 
 	AssignStmt struct {
-		Owner Ident
+		Owner *Ident
 		Value *Expression
 	}
 
@@ -115,9 +115,9 @@ type (
 	MoveLoop struct {}
 
 	ForLoop struct {
-		VarDef    Decl
-		Condition Expression
-		Expr  	  Expression // Assign or expr
+		VarDef    *Decl
+		Condition *Expression
+		Expr  	  *Expression // Assign or expr
 		Code      *Block
 	}
 
@@ -129,7 +129,7 @@ type (
  */
 
 	Repeat struct {
-		VarDef  Decl
+		VarDef  *Decl
 		Code   *Block
 	}
 
@@ -155,39 +155,55 @@ type (
  */
 
 	RepeatUntil struct {
-		VarDef    Decl
+		VarDef    *Decl
 		Condition *Expression
 		Code      *Block
 	}
-
+	
+	Return struct {
+		Value *Expression
+	}
+	Break struct {}
 )
 
-func (u Until) Start() uint {
+func (Break) Start() uint {
 	panic("Invalid call")
 }
-func (u Until) ExprNode() {}
+func (Break) ExprNode() {}
+func (Break) StmtNode() {}
 
-func (r RepeatUntil) Start() uint {
+func (Return) Start() uint {
+	panic("Invalid call")
+}
+func (Return) ExprNode() {}
+func (Return) StmtNode() {}
+
+func (Until) Start() uint {
+	panic("Invalid call")
+}
+func (Until) ExprNode() {}
+
+func (RepeatUntil) Start() uint {
 	panic("Invalid Call")
 }
-func (r RepeatUntil) ExprNode() {}
-func (r RepeatUntil) StmtNode() {}
+func (RepeatUntil) ExprNode() {}
+func (RepeatUntil) StmtNode() {}
 
 
-func (r Repeat) Start() uint {
+func (Repeat) Start() uint {
 	panic("Invalid call")
 }
-func (r Repeat) ExprNode() {}
-func (r Repeat) StmtNode() {}
+func (Repeat) ExprNode() {}
+func (Repeat) StmtNode() {}
 
 
-func (f ForLoop) Start() uint {
+func (ForLoop) Start() uint {
 	panic("Invalid call")
 }
-func (f ForLoop) ExprNode() {}
-func (f ForLoop) StmtNode() {}
+func (ForLoop) ExprNode() {}
+func (ForLoop) StmtNode() {}
 
-func (b Block) ExprNode() {}
+func (Block) ExprNode() {}
 
 func (AssignStmt) Start() uint {
 	panic("Invalid call")
@@ -329,7 +345,7 @@ type (
 	}
 
 	FunctionCall struct {
-		PackagePath []Ident
+		PackagePath []*Ident
 
 		/*
 		argument can be any thing that returns value.
@@ -337,7 +353,7 @@ type (
 		*/
 		Arguments   []Expression
 		ReturnType  Types.EplType //the return type is set during type analysis
-		FunctionName Ident
+		FunctionName *Ident
 	}
 
 	Singular struct {
@@ -355,36 +371,36 @@ type (
 	}
 )
 
-func (b Boolean) Start() uint {
+func (Boolean) Start() uint {
 	panic("implement me")
 }
 
-func (b Boolean) ExprNode() {}
+func (Boolean) ExprNode() {}
 
-func (b BoolOr) Start() uint {
+func (BoolOr) Start() uint {
 	panic("Invalid call")
 }
-func (b BoolOr) ExprNode() {}
+func (BoolOr) ExprNode() {}
 
-func (b BoolAnd) Start() uint {
+func (BoolAnd) Start() uint {
 	panic("implement me")
 }
-func (b BoolAnd) ExprNode() {}
+func (BoolAnd) ExprNode() {}
 
-func (b BoolNotEquals) Start() uint {
+func (BoolNotEquals) Start() uint {
 	panic("Invalid call")
 }
-func (b BoolNotEquals) ExprNode() {}
+func (BoolNotEquals) ExprNode() {}
 
-func (s String) Start() uint {
+func (String) Start() uint {
 	panic("Invalid call")
 }
-func (s String) ExprNode() {}
+func (String) ExprNode() {}
 
-func (n Number) Start() uint {
+func (Number) Start() uint {
 	panic("Invalid call")
 }
-func (n Number) ExprNode() {}
+func (Number) ExprNode() {}
 
 func (BoolGreaterThen) Start() uint {
 	panic("Invalid call")

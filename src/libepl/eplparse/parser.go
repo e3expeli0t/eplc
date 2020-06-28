@@ -28,29 +28,28 @@ import (
 	"fmt"
 )
 
-
-//New create new parser struct
-func New(lx epllex.Lexer) Parser {
-	return Parser{
-		Lexer:        lx,
-		ST:           symboltable.New(),
+//New create new eplparse struct
+func New(lx *epllex.Lexer) *Parser {
+	return &Parser{
+		Lexer: lx,
+		ST:    symboltable.New(),
 	}
 }
 
 /*
-	Parser. the parser job is to take tokenized stream from the lexer
+	Parser. the eplparse job is to take tokenized stream from the epllex
 	and construct a tree form it, the tree is called AST (Abstract Syntax Tree)
 	by the set of rules that the language grammar produce
-	There are couple of parser kinds, in this version of epl (bootstrap) we are going
-	to use a parser that called predictive parser (The grammar class is LL(k)).
-	In the future  i'm planning to implement LR(0) parser
+	There are couple of eplparse kinds, in this version of epl (bootstrap) we are going
+	to use a eplparse that called predictive eplparse (The grammar class is LL(k)).
+	In the future  i'm planning to implement LR(0) eplparse
 */
 type Parser struct {
-	Lexer       epllex.Lexer
+	Lexer       *epllex.Lexer
 	ST          symboltable.SymbolTable
 	Errors      errors.InternalParserError
 	TypeHandler Types.TypeSystem
-	
+
 	//private fields
 	currentToken epllex.Token
 	lookahead    epllex.Token
@@ -63,7 +62,6 @@ type Parser struct {
 //Parse main language constructs
 //------------------------------------------------------------------------------------------------------------------------------------------------
 
-
 func (p *Parser) ParseProgramFile() ast.Node {
 	//check if the type handler is initialized
 	if !p.Ok {
@@ -75,8 +73,8 @@ func (p *Parser) ParseProgramFile() ast.Node {
 
 	var imports []ast.Import
 	var decls []ast.Decl
-	var fncs []ast.Fnc
-	var MainFunction ast.Fnc
+	var fncs []*ast.Fnc
+	var MainFunction *ast.Fnc
 
 	for p.match(epllex.IMPORT) {
 		Output.PrintLog("Parsing imports")
@@ -96,7 +94,7 @@ func (p *Parser) ParseProgramFile() ast.Node {
 		for p.match(epllex.FNC) {
 			fnc := p.ParseFnc()
 			//todo: Should change in eplc v0.2 to support cflags
-			if fnc.Name == "Main" {
+			if fnc.Name.Name == "Main" {
 				MainFunction = fnc
 				continue
 			}
@@ -108,12 +106,12 @@ func (p *Parser) ParseProgramFile() ast.Node {
 	p.Errors.IsValidFile()
 
 	return &ast.ProgramFile{
-		Imports: &imports,
-		GlobalDecls: &decls,
-		Symbols: &p.ST,
-		Functions: &fncs,
-		FileName: p.Lexer.Filename,
-		MainFunction: &MainFunction,
+		Imports:      &imports,
+		GlobalDecls:  &decls,
+		Symbols:      &p.ST,
+		Functions:    &fncs,
+		FileName:     p.Lexer.Filename,
+		MainFunction: MainFunction,
 	}
 }
 
@@ -130,7 +128,7 @@ func (p *Parser) ParseImport() ast.Import {
 	}
 
 	p.readNextToken() //skip the semicolon
-	return ast.Import{StartLoc: start, Imports: importPath}
+	return ast.Import{StartLoc: start, Imports: &importPath}
 }
 
 func (p *Parser) ParseBlock(keepScope bool) *ast.Block {
@@ -158,14 +156,39 @@ func (p *Parser) ParseBlock(keepScope bool) *ast.Block {
 		case epllex.REPEAT:
 			contents = append(contents, p.ParseRepeatFam())
 		case epllex.LBRACE:
+			Output.PrintLog("In loop current token:", p.currentLexme, "Next: ", p.lookahead.Lexme)
 			contents = append(contents, p.ParseBlock(true))
 		default:
+			switch p.currentToken.Ttype {
+			case epllex.RETURN:
+				p.readNextToken()
+				if !p.match(epllex.SEMICOLON) {
+					contents = append(contents,
+						&ast.Return{Value: p.ParseExpression()},
+					)
+					continue
+				} else {
+					p.readNextToken()
+					contents = append(contents,
+						ast.Return{},
+					)
+					continue
+				}
+			case epllex.BREAK:
+				p.readNextToken()
+				if p.match(epllex.SEMICOLON) {
+					p.readNextToken()
+				}
+
+				contents = append(contents, &ast.Break{})
+				continue
+			}
 			if p.match(epllex.ID) && p.match_n(epllex.ASSIGN) {
-				contents = append(contents,p.ParseAssignStmt())
+				contents = append(contents, p.ParseAssignStmt())
 			} else if p.matchTokens(ExpressionsMAP) {
 				contents = append(contents, *p.ParseExpression())
 			} else {
-				p.report(fmt.Sprintf("Unable to identify keyword: %s", p.currentLexme))
+				p.report(fmt.Sprintf("Unable to identify: %s", p.currentLexme))
 			}
 		}
 	}
@@ -182,9 +205,8 @@ func (p *Parser) ParseBlock(keepScope bool) *ast.Block {
 	}
 }
 
-
 // fnc name([param_list])[type] block
-func (p *Parser) ParseFnc() ast.Fnc {
+func (p *Parser) ParseFnc() *ast.Fnc {
 	if p.match(epllex.FNC) {
 		p.readNextToken() //Skipping the fnc keyword
 	}
@@ -193,14 +215,13 @@ func (p *Parser) ParseFnc() ast.Fnc {
 	p.NewScope()
 	p.ST.SetScopeType(symboltable.FUNCTION)
 
-	var name string
+	var name *ast.Ident
 	var params *[]ast.Decl
 	var returnType *Types.EplType
 	var code *ast.Block
 
 	if p.match(epllex.ID) {
-		name = p.currentLexme
-		p.readNextToken()
+		name = p.ParseIdent()
 	} else {
 		p.expect("Ident")
 	}
@@ -211,7 +232,7 @@ func (p *Parser) ParseFnc() ast.Fnc {
 		p.expect("(")
 	}
 
-	if p.match(epllex.RETURN_IND) {
+	if p.match(epllex.RETURN_TYPE_IND) {
 		p.readNextToken()
 		returnType = p.ParseType()
 	} else {
@@ -226,14 +247,13 @@ func (p *Parser) ParseFnc() ast.Fnc {
 		p.expect("'{' or ';'")
 	}
 
-	return ast.Fnc {
-		Name: name,
+	return &ast.Fnc{
+		Name:       name,
 		ReturnType: returnType,
-		Params: params,
-		Body: code,
+		Params:     params,
+		Body:       code,
 	}
 }
-
 
 // param_list := "(" decl [, param_decl] ")"
 func (p *Parser) ParseParamList() *[]ast.Decl {
@@ -279,8 +299,8 @@ func (p *Parser) ParseVarDecl(scoped bool) ast.Decl {
 	if p.match(epllex.ASSIGN) {
 		value = p.ParseValueAssign(!scoped)
 
-		return ast.VarExplicitDecl{
-			VarDecl: varDec,
+		return &ast.VarExplicitDecl{
+			VarDecl: *varDec,
 			Value:   value,
 		}
 	}
@@ -299,13 +319,13 @@ func (p *Parser) ParseVarDecl(scoped bool) ast.Decl {
 	return varDec
 }
 
-func (p *Parser) decl() ast.VarDecl {
+func (p *Parser) decl() *ast.VarDecl {
 	if p.match(epllex.DECL) {
 		p.readNextToken()
 	}
 
+	var name *ast.Ident
 	var status ast.VarStat
-	var name ast.Ident
 	var varType *Types.EplType
 
 	if p.match(epllex.FIXED) {
@@ -323,7 +343,7 @@ func (p *Parser) decl() ast.VarDecl {
 
 	varType = p.ParseType()
 
-	return ast.VarDecl{
+	return &ast.VarDecl{
 		Name:    name,
 		VarType: varType,
 		Stat:    status,
@@ -348,7 +368,6 @@ func (p *Parser) ParseValueAssign(semicolon bool) *ast.Expression {
 	return &value
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 //Statements
 
@@ -372,14 +391,14 @@ func (p *Parser) ParseIf() ast.Statement {
 
 	if p.match(epllex.ELSE) {
 		elseCode := p.ParseElse()
-		return ast.IfStmt{
-			Code: code,
-			Else: &elseCode,
+		return &ast.IfStmt{
+			Code:      code,
+			Else:      &elseCode,
 			Condition: &condition,
 		}
 	}
 
-	return ast.IfStmt{
+	return &ast.IfStmt{
 		Condition: &condition,
 		Code:      code,
 		Else:      nil,
@@ -400,13 +419,13 @@ func (p *Parser) ParseElse() ast.Statement {
 	}
 	code := p.ParseBlock(false)
 
-	return ast.ElseStmt{Code: code}
+	return &ast.ElseStmt{Code: code}
 }
 
 //Design note:
 // the language does not allow expressions like : expr =  expr therefore the assign is a statement
-func (p *Parser) ParseAssignStmt() ast.AssignStmt {
-	var Owner ast.Ident
+func (p *Parser) ParseAssignStmt() *ast.AssignStmt {
+	var Owner *ast.Ident
 	var Value *ast.Expression
 
 	if p.match(epllex.ID) {
@@ -416,7 +435,7 @@ func (p *Parser) ParseAssignStmt() ast.AssignStmt {
 	}
 
 	Value = p.ParseValueAssign(true)
-	return ast.AssignStmt{
+	return &ast.AssignStmt{
 		Owner: Owner,
 		Value: Value,
 	}
@@ -428,10 +447,10 @@ func (p *Parser) ParseAssignStmt() ast.AssignStmt {
 	Until: like while
 	Repeat: infinite loop
 	Repeat-Until: repeats until condition is met
- */
+*/
 
 //until := "until" bool_expr "{" expression "}"
-func (p *Parser) ParseUntil() ast.Until {
+func (p *Parser) ParseUntil() *ast.Until {
 	if p.match(epllex.UNTIL) {
 		p.readNextToken()
 	}
@@ -448,14 +467,14 @@ func (p *Parser) ParseUntil() ast.Until {
 
 	code = p.ParseBlock(false)
 
-	return ast.Until{
+	return &ast.Until{
 		Condition: &cond,
 		Code:      code,
 	}
 }
 
 //for := "for" for_header block
-func (p *Parser) ParseForLoop() ast.ForLoop {
+func (p *Parser) ParseForLoop() *ast.ForLoop {
 	if p.match(epllex.FOR) {
 		p.readNextToken() // skip for token
 	}
@@ -470,10 +489,10 @@ func (p *Parser) ParseForLoop() ast.ForLoop {
 	}
 	code := p.ParseBlock(true)
 
-	return ast.ForLoop{
-		VarDef:    decl,
-		Condition: cond,
-		Expr:      expr,
+	return &ast.ForLoop{
+		VarDef:    &decl,
+		Condition: &cond,
+		Expr:      &expr,
 		Code:      code,
 	}
 }
@@ -506,12 +525,11 @@ func (p *Parser) forHeader() (ast.Decl, ast.Expression, ast.Expression) {
 	}
 
 	if !p.match(epllex.RBRACE) {
-		exp  = p.ParseExpr(0)
+		exp = p.ParseExpr(0)
 	}
 
 	return decl, cond, exp
 }
-
 
 //parse repeat and repeat like loops
 func (p *Parser) ParseRepeatFam() ast.Statement {
@@ -551,21 +569,20 @@ func (p *Parser) ParseRepeatFam() ast.Statement {
 			p.expect("condition")
 		}
 
-		return ast.RepeatUntil{
-			VarDef:    varDecl,
+		return &ast.RepeatUntil{
+			VarDef:    &varDecl,
 			Condition: cond,
 			Code:      code,
 		}
 
 	}
 
-	return ast.Repeat{
-		VarDef: varDecl,
+	return &ast.Repeat{
+		VarDef: &varDecl,
 		Code:   code,
 	}
 
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 //State Machine control and support functions
@@ -574,10 +591,10 @@ func (p *Parser) ParseRepeatFam() ast.Statement {
 //convert raw Token value to boolean node
 func (p *Parser) ToBoolVal(t epllex.Token) ast.Boolean {
 	if t.Ttype == epllex.FALSE {
-		return  ast.Boolean{Val: ast.BOOL_FALSE}
+		return ast.Boolean{Val: ast.BOOL_FALSE}
 	}
 
-	return ast.Boolean{Val:ast.BOOL_TRUE}
+	return ast.Boolean{Val: ast.BOOL_TRUE}
 }
 
 func (p *Parser) AddToST(decl ast.Decl) {

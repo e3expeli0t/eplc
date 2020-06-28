@@ -15,6 +15,18 @@ type LexicalErrorDescriptor struct {
 	ch          rune
 }
 
+type PhaseIndicator uint
+
+const (
+	_ = iota
+	Parser
+	Lexer
+	IntermediateCodeGenerator
+	TypeChecker
+	Analysis
+	TargetCodeGenerator
+)
+
 //Todo: Make this more elegant
 func LexicalPrint(fname string, line uint, lineOffset uint, currentLine string, errorMSG string, ch rune) {
 	ed := LexicalErrorDescriptor{fname, line, lineOffset,
@@ -96,22 +108,60 @@ func (e *LexicalErrorDescriptor) LexicalMarker() string {
 
 //todo: support multiple error printing ?
 func LexerIntelligentError(err LexicalErrorDescriptor) {
+	//Basic information about the error
 	fmt.Print(color.BGreen("Error:") + err.basicInfoPrinter())
 	fmt.Print(color.BGreen(err.errorMSG) + "\n")
+
+	//Mark the problematic char
 	fmt.Println(err.LexicalMarker())
+
+	//Print tips?
+	fmt.Println(specialError(string(err.ch), Lexer))
 }
 
 //todo: support multiple error printing ?
 func ParserIntelligentError(err ErrorDescriptor) {
+	//Basic information about the error
 	fmt.Print(color.BGreen("Error:") + err.basicInfoPrinter())
 	fmt.Println(color.BGreen(err.ErrorMSG) + "\n")
+
+	//Mark the problematic token
 	fmt.Println(err.TokenMarker())
+
+	//Print tips?
+	fmt.Println(specialError(err.Token, Parser))
 	PrintFatalErr("SyntaxError", "To many errors")
 }
 
 func TypeIntelligentError(err ErrorDescriptor) {
+	//Basic information about the error
 	fmt.Print(color.BGreen("Error:") + err.basicInfoPrinter())
 	fmt.Println(color.BGreen(err.ErrorMSG) + "\n")
+
+	//Mark the problematic token
 	fmt.Println(err.TokenMarker())
+
+	//Print tips?
+	fmt.Println(specialError(err.Token, TypeChecker))
 	PrintFatalErr("TypeError", "To many errors")
+}
+
+func specialError(toke string, d PhaseIndicator) (err string) {
+
+
+	switch toke {
+	case "EOF": //Note: in the future this  will be changed to much smarter version
+		err = "This error is possibly because you mismatched block indicators (i.e '{' and '}'"
+	default:
+		switch d {
+		case Parser:
+			err = "Sorry about that mate. You probably have syntax problem.\n\tTry fix it"
+		case Lexer:
+			err = "Sorry about that mate. You probably have weird letters.\n\tTry check your file encoding"
+		case TypeChecker:
+			err = "Sorry about that mate. You probably used the wrong type.\n\tTry checking your types again"
+		}
+	}
+
+	return color.Blink("[?] ")+color.BWhite(err)
 }

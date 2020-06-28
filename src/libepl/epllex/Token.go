@@ -22,7 +22,7 @@ import (
 	"bytes"
 )
 
-//todo: remove to inside the lexer struct
+//todo: remove to inside the epllex struct
 var (
 	reserved = map[string]TokenType{}
 )
@@ -153,7 +153,9 @@ func reserve() {
 	reserved["bool"] = BOOL
 	reserved["import"] = IMPORT
 	reserved["true"] = TRUE
-	reserved["false" ] = FALSE
+	reserved["false"] = FALSE
+	reserved["break"] = BREAK
+	reserved["return"] = RETURN
 }
 
 func resolveType(buffer bytes.Buffer, startLine uint, startOffset uint) Token {

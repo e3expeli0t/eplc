@@ -1,0 +1,3 @@
+[submodule "avm"]
+	path = avm
+	url = https://github.com/e3expeli0t/avm.git

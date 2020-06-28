@@ -19,7 +19,6 @@ func (ipe *InternalParserError) ParsingError(filename string, line uint, lineOff
 		ErrorMSG: errorMsg,
 		Token: token.Lexme,
 	}
-	//Output.PrintFatalErr(fmt.Sprintf("at %s:%d:%d: Syntax error: %s", filename, line, lineOffset, errorMsg))
 	Output.ParserIntelligentError(descriptor)
 	ipe.ErrCount++
 }

@@ -21,22 +21,22 @@ package main
 import (
 	"eplc/src/libepl/Output"
 	"eplc/src/libeplc"
+	"flag"
 	"fmt"
 	"os"
-	//"github.com/pkg/profile"
+	"runtime"
+	"runtime/pprof"
 )
 
 func main() {
-	//defer profile.Start(profile.CPUProfile).Stop()
-	//defer profile.Start(profile.MemProfile).Stop()
+	prof := flag.Bool("profile", false, "profile the compilation process")
+	flag.Parse()
 
-	if len(os.Args) == 1 {
-		fmt.Println("Usage: eplc <file>")
+	if len(flag.Args()) < 1 {
+		fmt.Println("Usage: eplc [options] <file>")
 		os.Exit(-1)
 	}
-
-	args := os.Args[1:]
-	file := args[0]
+	file := flag.Args()[0]
 
 	reader, err := os.Open(file)
 
@@ -46,5 +46,27 @@ func main() {
 
 	Output.PrintVersion()
 	//For tests
+	if *prof {
+		f, err := os.Create("Profile/dump.cpu")
+		if err != nil {
+			Output.PrintFatalErr("could not create CPU profile: ", err.Error())
+		}
+		defer f.Close()
+
+		if err := pprof.StartCPUProfile(f); err != nil {
+			Output.PrintFatalErr("could not start CPU profile: ", err)
+		}
+		defer pprof.StopCPUProfile()
+	}
 	libeplc.Compile(reader, file)
+
+	f, err := os.Create("Profile/dump.mem")
+	if err != nil {
+		Output.PrintFatalErr("could not create memory profile: ", err)
+	}
+	defer f.Close()
+	runtime.GC() // get up-to-date statistics
+	if err := pprof.WriteHeapProfile(f); err != nil {
+		Output.PrintFatalErr("could not write memory profile: ", err)
+	}
 }

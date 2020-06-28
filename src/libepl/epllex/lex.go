@@ -28,9 +28,9 @@ import (
 
 /*
 Design note:
-	Lexer. the job of the lexer is to break the input stream into
-	meaningful parts that later will be used by the parser and the IR generator
-	The lexer is Deterministic finite state machine (Deterministic finite automata)
+	Lexer. the job of the epllex is to break the input stream into
+	meaningful parts that later will be used by the eplparse and the IR generator
+	The epllex is Deterministic finite state machine (Deterministic finite automata)
 */
 
 type Lexer struct {
@@ -45,8 +45,17 @@ type Lexer struct {
 }
 
 //New Lexer
-func New(file io.Reader, name string) Lexer {
-	return Lexer{Buffer: bufio.NewReader(file), Filename: name, Line: 0, LineOffset: 0, ErrCount: 0}
+func New(file io.Reader, name string) *Lexer {
+	return &Lexer{Buffer: bufio.NewReader(file), Filename: name, Line: 0, LineOffset: 0, ErrCount: 0}
+}
+
+func (l *Lexer) GetEOFToken() Token {
+	return Token{
+		Lexme:       "EOF",
+		Ttype:       EOF,
+		StartLine:   l.Line,
+		StartOffset: l.LineOffset,
+	}
 }
 
 //Checks if the character is valid utf
@@ -58,14 +67,14 @@ func (l *Lexer) checkEncoding(ch rune) bool {
 func (l *Lexer) Next() Token {
 	l.skipWhiteSpaces() //if there are whitespaces skip them
 
-	//Save the Line and the Line offset for the parser error handling
+	//Save the Line and the Line offset for the eplparse error handling
 	startOffset := l.LineOffset
 	startLine := l.Line
 
 	ch := l.read() //read one char
 
 	if ch == -1 {
-		return Token{Ttype: EOF, Lexme: "EOF", StartOffset: 0, StartLine: 0}
+		return l.GetEOFToken()
 	} else if isLetter(ch) {
 		l.unread()
 		return l.scanID(false)
@@ -73,7 +82,6 @@ func (l *Lexer) Next() Token {
 		l.unread()
 		return l.scanNumbers()
 	} else {
-
 		switch ch {
 		case '@':
 			//Read the string that followed the @ char and return it as compiler flag
@@ -85,7 +93,7 @@ func (l *Lexer) Next() Token {
 		case ',':
 			return Token{Ttype: COMMA, Lexme: ",", StartOffset: startOffset, StartLine: startLine}
 		case ':':
-			return Token{Ttype: RETURN_IND, Lexme: ":", StartOffset: startOffset, StartLine: startLine}
+			return Token{Ttype: RETURN_TYPE_IND, Lexme: ":", StartOffset: startOffset, StartLine: startLine}
 		case '[':
 			return Token{Ttype: LSUBSCRIPT, Lexme: "[", StartOffset: startOffset, StartLine: startLine}
 		case ']':
@@ -189,14 +197,8 @@ func (l *Lexer) Next() Token {
 		case '"':
 			return l.matchBy('"')
 		}
-		//ErrCount.TokenError(l.Line, l.LineOffset, ch, l.Filename)
-		Errors.ExpError(l.Line, l.LineOffset, l.Filename, l.GetLine(), ch)
-		l.ErrCount++
 
-		if l.ErrCount > 5 {
-			Errors.FatalLexical("To many errors")
-		}
-		l.Next()
+		Errors.ExpError(l.Line, l.LineOffset, l.Filename, l.GetLine(), ch)
 	}
 
 	Errors.FatalLexical("To many errors")
@@ -329,7 +331,13 @@ func (l *Lexer) GetLine() string {
 	prevLexer := l.getMachineState()
 	line := l.currentLine
 
-	for l.Line == prevLexer.Line {
+	if l.Next() == l.GetEOFToken() {
+		l.unread()
+		l.setMachineState(prevLexer)
+		return l.currentLine+"EOF"
+	}
+
+	for l.Line == prevLexer.Line && l.Line != 0{
 		line += string(l.read())
 	}
 
@@ -348,6 +356,10 @@ func (l *Lexer) setMachineState(lex Lexer) {
 	l.ErrCount = lex.ErrCount
 	l.Filename = lex.Filename
 	l.Buffer = lex.Buffer
+}
+
+func (l *Lexer) Reset(r io.Reader) {
+	l.Buffer.Reset(r)
 }
 
 func (l *Lexer) read() rune {
