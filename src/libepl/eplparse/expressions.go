@@ -1,8 +1,8 @@
 package eplparse
 
 import (
+	"eplc/src/libepl/Types"
 	"eplc/src/libepl/epllex"
-	"eplc/src/libepl/eplparse/Types"
 	"eplc/src/libepl/eplparse/ast"
 	"fmt"
 )
@@ -227,7 +227,7 @@ func (p *Parser) parseValue() ast.Expression {
 //function_call := package_path "(" args ")"
 //package_path := ident "." path_list | ident
 func (p *Parser) ParseFunctionCall() *ast.FunctionCall {
-	var package_path []*ast.Ident
+	var packagePath []*ast.Ident
 	var name ast.Ident
 	var args []ast.Expression
 
@@ -237,7 +237,7 @@ func (p *Parser) ParseFunctionCall() *ast.FunctionCall {
 	for !p.match(epllex.LPAR) && p.match(epllex.ID) {
 		if p.match(epllex.ID) {
 			current = p.ParseIdent()
-			package_path = append(package_path, current)
+			packagePath = append(packagePath, current)
 		} else {
 			p.expect("ident")
 		}
@@ -248,12 +248,14 @@ func (p *Parser) ParseFunctionCall() *ast.FunctionCall {
 		}
 	}
 
-	if package_path == nil || current == nil {
+	if packagePath == nil || current == nil {
 		p.expect("function name")
 	}
 
+	// current != nil
 	name = *current
 
+	//Todo: Handle group variable access(i.e std.eof) v0.2+
 	if !p.match(epllex.LPAR) {
 		p.expect("'('")
 	}
@@ -274,7 +276,7 @@ func (p *Parser) ParseFunctionCall() *ast.FunctionCall {
 	p.readNextToken() // skip ')'
 
 	return &ast.FunctionCall{
-		PackagePath:  package_path,
+		PackagePath:  packagePath,
 		Arguments:    args,
 		ReturnType:   Types.EplType{}, //gets filled by the type analyser
 		FunctionName: &name,

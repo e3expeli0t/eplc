@@ -12,7 +12,7 @@ fnc Main() {
 
     input =  std.input("Please enter factorial: ");
 
-    if input == std.empty {
+    if input == std.empty() {
         std.output("YOU NEED TO SUPPLY FACTORIAL\n defaulting to 10");
         input = 10;
     }

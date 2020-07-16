@@ -1,0 +1,45 @@
+{
+	"Table": {},
+	"Prev": {
+		"Table": {
+			"input": {
+				"SType": {
+					"TypeName": "uint",
+					"TypeKey": 19510062155911237
+				}
+			}
+		},
+		"Prev": {
+			"Table": {},
+			"Prev": {
+				"Table": {
+					"i": {
+						"SType": {
+							"TypeName": "int",
+							"TypeKey": 19510062155911237
+						}
+					}
+				},
+				"Prev": {
+					"Table": {},
+					"Prev": {
+						"Table": {},
+						"Prev": null,
+						"Next": null,
+						"CurrentScope": ""
+					},
+					"Next": null,
+					"CurrentScope": ""
+				},
+				"Next": null,
+				"CurrentScope": "@@@@FUNCTION@@@@"
+			},
+			"Next": null,
+			"CurrentScope": "@@@@BLOCK@@@@"
+		},
+		"Next": null,
+		"CurrentScope": "@@@@FUNCTION@@@@"
+	},
+	"Next": null,
+	"CurrentScope": "@@@@BLOCK@@@@"
+}

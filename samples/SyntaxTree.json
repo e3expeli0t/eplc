@@ -1,0 +1,442 @@
+{
+	"FileName": "samples/colton.epl",
+	"Symbols": {
+		"Table": {},
+		"Prev": {
+			"Table": {
+				"input": {
+					"SType": {
+						"TypeName": "uint",
+						"TypeKey": 19510062155911237
+					}
+				}
+			},
+			"Prev": {
+				"Table": {},
+				"Prev": {
+					"Table": {
+						"i": {
+							"SType": {
+								"TypeName": "int",
+								"TypeKey": 19510062155911237
+							}
+						}
+					},
+					"Prev": {
+						"Table": {},
+						"Prev": {
+							"Table": {},
+							"Prev": null,
+							"Next": null,
+							"CurrentScope": ""
+						},
+						"Next": null,
+						"CurrentScope": ""
+					},
+					"Next": null,
+					"CurrentScope": "@@@@FUNCTION@@@@"
+				},
+				"Next": null,
+				"CurrentScope": "@@@@BLOCK@@@@"
+			},
+			"Next": null,
+			"CurrentScope": "@@@@FUNCTION@@@@"
+		},
+		"Next": null,
+		"CurrentScope": "@@@@BLOCK@@@@"
+	},
+	"Imports": [
+		{
+			"StartLoc": 0,
+			"Imports": [
+				"bio",
+				"std"
+			]
+		}
+	],
+	"GlobalDecls": null,
+	"Functions": [
+		{
+			"Name": {
+				"Name": "del"
+			},
+			"ReturnType": {
+				"TypeName": "int",
+				"TypeKey": 19510062155911237
+			},
+			"Params": [
+				{
+					"Name": {
+						"Name": "i"
+					},
+					"VarType": {
+						"TypeName": "int",
+						"TypeKey": 19510062155911237
+					},
+					"Stat": "mutable"
+				}
+			],
+			"Body": {
+				"Symbols": {
+					"Table": {},
+					"Prev": {
+						"Table": {
+							"input": {
+								"SType": {
+									"TypeName": "uint",
+									"TypeKey": 19510062155911237
+								}
+							}
+						},
+						"Prev": {
+							"Table": {},
+							"Prev": {
+								"Table": {
+									"i": {
+										"SType": {
+											"TypeName": "int",
+											"TypeKey": 19510062155911237
+										}
+									}
+								},
+								"Prev": {
+									"Table": {},
+									"Prev": {
+										"Table": {},
+										"Prev": null,
+										"Next": null,
+										"CurrentScope": ""
+									},
+									"Next": null,
+									"CurrentScope": ""
+								},
+								"Next": null,
+								"CurrentScope": "@@@@FUNCTION@@@@"
+							},
+							"Next": null,
+							"CurrentScope": "@@@@BLOCK@@@@"
+						},
+						"Next": null,
+						"CurrentScope": "@@@@FUNCTION@@@@"
+					},
+					"Next": null,
+					"CurrentScope": "@@@@BLOCK@@@@"
+				},
+				"ExprList": [
+					{
+						"Condition": {
+							"Ls": {
+								"Name": "i"
+							},
+							"Rs": {
+								"Value": "0",
+								"Real": false
+							}
+						},
+						"Code": {
+							"Symbols": {
+								"Table": {},
+								"Prev": {
+									"Table": {
+										"input": {
+											"SType": {
+												"TypeName": "uint",
+												"TypeKey": 19510062155911237
+											}
+										}
+									},
+									"Prev": {
+										"Table": {},
+										"Prev": {
+											"Table": {
+												"i": {
+													"SType": {
+														"TypeName": "int",
+														"TypeKey": 19510062155911237
+													}
+												}
+											},
+											"Prev": {
+												"Table": {},
+												"Prev": {
+													"Table": {},
+													"Prev": null,
+													"Next": null,
+													"CurrentScope": ""
+												},
+												"Next": null,
+												"CurrentScope": ""
+											},
+											"Next": null,
+											"CurrentScope": "@@@@FUNCTION@@@@"
+										},
+										"Next": null,
+										"CurrentScope": "@@@@BLOCK@@@@"
+									},
+									"Next": null,
+									"CurrentScope": "@@@@FUNCTION@@@@"
+								},
+								"Next": null,
+								"CurrentScope": "@@@@BLOCK@@@@"
+							},
+							"ExprList": [
+								{
+									"Ls": {
+										"PackagePath": [
+											{
+												"Name": "del"
+											}
+										],
+										"Arguments": [
+											{
+												"Ls": {
+													"Name": "i"
+												},
+												"Rs": {
+													"Value": "1",
+													"Real": false
+												}
+											}
+										],
+										"ReturnType": {
+											"TypeName": "",
+											"TypeKey": 0
+										},
+										"FunctionName": {
+											"Name": "del"
+										}
+									},
+									"Rs": {
+										"Name": "i"
+									}
+								}
+							]
+						},
+						"Else": null
+					}
+				]
+			}
+		}
+	],
+	"MainFunction": {
+		"Name": {
+			"Name": "Main"
+		},
+		"ReturnType": {
+			"TypeName": "None",
+			"TypeKey": 19510062155911237
+		},
+		"Params": null,
+		"Body": {
+			"Symbols": {
+				"Table": {},
+				"Prev": {
+					"Table": {
+						"input": {
+							"SType": {
+								"TypeName": "uint",
+								"TypeKey": 19510062155911237
+							}
+						}
+					},
+					"Prev": {
+						"Table": {},
+						"Prev": {
+							"Table": {
+								"i": {
+									"SType": {
+										"TypeName": "int",
+										"TypeKey": 19510062155911237
+									}
+								}
+							},
+							"Prev": {
+								"Table": {},
+								"Prev": {
+									"Table": {},
+									"Prev": null,
+									"Next": null,
+									"CurrentScope": ""
+								},
+								"Next": null,
+								"CurrentScope": ""
+							},
+							"Next": null,
+							"CurrentScope": "@@@@FUNCTION@@@@"
+						},
+						"Next": null,
+						"CurrentScope": "@@@@BLOCK@@@@"
+					},
+					"Next": null,
+					"CurrentScope": "@@@@FUNCTION@@@@"
+				},
+				"Next": null,
+				"CurrentScope": "@@@@BLOCK@@@@"
+			},
+			"ExprList": [
+				{
+					"Name": {
+						"Name": "input"
+					},
+					"VarType": {
+						"TypeName": "uint",
+						"TypeKey": 19510062155911237
+					},
+					"Stat": "mutable"
+				},
+				{
+					"Owner": {
+						"Name": "input"
+					},
+					"Value": {
+						"PackagePath": [
+							{
+								"Name": "std"
+							},
+							{
+								"Name": "input"
+							}
+						],
+						"Arguments": [
+							{
+								"Value": "\"Please enter factorial: \""
+							}
+						],
+						"ReturnType": {
+							"TypeName": "",
+							"TypeKey": 0
+						},
+						"FunctionName": {
+							"Name": "input"
+						}
+					}
+				},
+				{
+					"Condition": {
+						"Ls": {
+							"Name": "input"
+						},
+						"Rs": {
+							"PackagePath": [
+								{
+									"Name": "std"
+								},
+								{
+									"Name": "empty"
+								}
+							],
+							"Arguments": null,
+							"ReturnType": {
+								"TypeName": "",
+								"TypeKey": 0
+							},
+							"FunctionName": {
+								"Name": "empty"
+							}
+						}
+					},
+					"Code": {
+						"Symbols": {
+							"Table": {},
+							"Prev": {
+								"Table": {
+									"input": {
+										"SType": {
+											"TypeName": "uint",
+											"TypeKey": 19510062155911237
+										}
+									}
+								},
+								"Prev": {
+									"Table": {},
+									"Prev": {
+										"Table": {
+											"i": {
+												"SType": {
+													"TypeName": "int",
+													"TypeKey": 19510062155911237
+												}
+											}
+										},
+										"Prev": {
+											"Table": {},
+											"Prev": {
+												"Table": {},
+												"Prev": null,
+												"Next": null,
+												"CurrentScope": ""
+											},
+											"Next": null,
+											"CurrentScope": ""
+										},
+										"Next": null,
+										"CurrentScope": "@@@@FUNCTION@@@@"
+									},
+									"Next": null,
+									"CurrentScope": "@@@@BLOCK@@@@"
+								},
+								"Next": null,
+								"CurrentScope": "@@@@FUNCTION@@@@"
+							},
+							"Next": null,
+							"CurrentScope": "@@@@BLOCK@@@@"
+						},
+						"ExprList": [
+							{
+								"PackagePath": [
+									{
+										"Name": "std"
+									},
+									{
+										"Name": "output"
+									}
+								],
+								"Arguments": [
+									{
+										"Value": "\"YOU NEED TO SUPPLY FACTORIAL\\n defaulting to 10\""
+									}
+								],
+								"ReturnType": {
+									"TypeName": "",
+									"TypeKey": 0
+								},
+								"FunctionName": {
+									"Name": "output"
+								}
+							},
+							{
+								"Owner": {
+									"Name": "input"
+								},
+								"Value": {
+									"Value": "10",
+									"Real": false
+								}
+							}
+						]
+					},
+					"Else": null
+				},
+				{
+					"PackagePath": [
+						{
+							"Name": "del"
+						}
+					],
+					"Arguments": [
+						{
+							"Name": "input"
+						}
+					],
+					"ReturnType": {
+						"TypeName": "",
+						"TypeKey": 0
+					},
+					"FunctionName": {
+						"Name": "del"
+					}
+				}
+			]
+		}
+	}
+}

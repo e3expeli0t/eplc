@@ -16,6 +16,7 @@ The type system:
 	* For every type create unique id
 	* Define type hierarchy
  */
+
 type TypeSystem struct {
 	lexer      *epllex.Lexer
 	Fname      string
@@ -42,7 +43,7 @@ func (ts *TypeSystem) Initialize(lex *epllex.Lexer) {
 	ts.TypeMap = make(map[string]*EplType)
 
 	names := []string{"uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64",
-		"float", "float8", "float16", "float32", "float64", "cmx", "cmx64","string"}
+		"float", "float8", "float16", "float32", "float64", "cmx", "cmx64","string", "bool"}
 
 	for _, n := range names {
 		ts.BasicTypes = append(ts.BasicTypes, (ts.MakeType(n)).ToBasic())

@@ -20,8 +20,8 @@ package eplparse
 
 import (
 	"eplc/src/libepl/Output"
+	"eplc/src/libepl/Types"
 	"eplc/src/libepl/epllex"
-	"eplc/src/libepl/eplparse/Types"
 	"eplc/src/libepl/eplparse/ast"
 	"eplc/src/libepl/eplparse/errors"
 	"eplc/src/libepl/eplparse/symboltable"

@@ -19,7 +19,7 @@
 package symboltable
 
 import (
-	"eplc/src/libepl/eplparse/Types"
+	"eplc/src/libepl/Types"
 )
 
 type ScopeType string

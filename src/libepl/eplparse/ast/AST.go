@@ -19,12 +19,12 @@
 package ast
 
 import (
-	"eplc/src/libepl/eplparse/Types"
+	"eplc/src/libepl/Types"
 	"eplc/src/libepl/eplparse/symboltable"
 )
 
 /*
-	AST (or Abstract Syntax Tree) is the output of the eplparse
+	AST (or Abstract Syntax Tree) is the output of  eplparse
 */
 
 type VarStat string
@@ -56,7 +56,7 @@ type (
 )
 
 
-//Todo: replace all string names in symbol table references
+//Todo: replace all string names with symbol table references
 type (
 	ProgramFile struct {
 		FileName     string
@@ -351,8 +351,8 @@ type (
 		argument can be any thing that returns value.
 		None value is not allowed. And will be caught during type checking
 		*/
-		Arguments   []Expression
-		ReturnType  Types.EplType //the return type is set during type analysis
+		Arguments    []Expression
+		ReturnType   Types.EplType //the return type is set during type analysis
 		FunctionName *Ident
 	}
 
