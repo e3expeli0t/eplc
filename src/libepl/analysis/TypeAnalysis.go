@@ -3,6 +3,7 @@ package analysis
 import (
 	"eplc/src/libepl/Types"
 	"eplc/src/libepl/eplparse/ast"
+	"eplc/src/libepl/eplparse/symboltable"
 	"fmt"
 )
 
@@ -30,7 +31,14 @@ const (
 	InvalidUseOfUnary TypeErrorCase = iota
 )
 
+func NewTypeChecker(table *symboltable.SymbolTable) *TypeChecker {
+	return &TypeChecker{
+		St: table,
+	}
+}
+
 type TypeChecker struct {
+	St *symboltable.SymbolTable
 	Errors []*TypeError
 }
 
@@ -57,8 +65,8 @@ func (tc *TypeChecker) addError(c TypeErrorCase, t1 Types.EplType, t2 Types.EplT
 	tc.Errors = append(tc.Errors, NewError(Major, descriptor))
 }
 
-func (tc *TypeChecker) Check(expr *ast.Expression) {
-
+func(tc *TypeChecker) HasErrors() bool {
+	return len(tc.Errors) > 0
 }
 
 func (tc *TypeChecker) WalkExpression(expr ast.Expression) Types.EplType {
@@ -88,7 +96,7 @@ func (tc *TypeChecker) WalkExpression(expr ast.Expression) Types.EplType {
 	case ast.BoolNot:
 		ExprType := tc.WalkExpression(n.Expr)
 
-		if ExprType != Types.TypeBool {
+		if ExprType.Equals(Types.TypeBool) {
 			//todo: error recovery
 			tc.addError(InvalidUseOfNot, ExprType, Types.EplType{})
 		}
@@ -101,8 +109,8 @@ func (tc *TypeChecker) WalkExpression(expr ast.Expression) Types.EplType {
 		ExprTypeLeft := tc.WalkExpression(n.Ls)
 		ExprTypeRight := tc.WalkExpression(n.Rs)
 
-		if ExprTypeLeft == ExprTypeRight {
-			return ExprTypeLeft
+		if ExprTypeLeft.IsMathematical() && ExprTypeRight.IsMathematical() {
+			return ExprTypeLeft // The left side of expression is the expression type
 		} else {
 			//todo: add recovery
 			tc.addError(TypeMismatch, ExprTypeLeft, ExprTypeRight)
@@ -112,20 +120,23 @@ func (tc *TypeChecker) WalkExpression(expr ast.Expression) Types.EplType {
 	case ast.UnaryPlus:
 		ExprType := tc.WalkExpression(n.Rs)
 
-		if ExprType != Types.TypeBool {
+		if !ExprType.IsMathematical() {
 			//todo: error recovery
 			tc.addError(InvalidUseOfUnary, ExprType, Types.EplType{})
 		}
 		return ExprType
-
+	case ast.FunctionCall:
+		
+		
 	case ast.Ident:
-		//do nothing
+		
 	case ast.Number:
-		return Types.TypeInt
+		//Add system cpu bits resolver
+		return Types.TypeInt.AsEplType()
 	case ast.String:
-		return Types.TypeString
+		return Types.TypeString.AsEplType()
 	case ast.Boolean:
-		return  Types.TypeBool
+		return  Types.TypeBool.AsEplType()
 	}
 
 	return Types.EplType{}

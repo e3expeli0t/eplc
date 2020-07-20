@@ -1,6 +1,7 @@
 package Output
 
 import (
+	"eplc/src/libepl"
 	"eplc/src/libepl/Output/color"
 	"fmt"
 	"strings"
@@ -15,17 +16,6 @@ type LexicalErrorDescriptor struct {
 	ch          rune
 }
 
-type PhaseIndicator uint
-
-const (
-	_ = iota
-	Parser
-	Lexer
-	IntermediateCodeGenerator
-	TypeChecker
-	Analysis
-	TargetCodeGenerator
-)
 
 //Todo: Make this more elegant
 func LexicalPrint(fname string, line uint, lineOffset uint, currentLine string, errorMSG string, ch rune) {
@@ -116,7 +106,7 @@ func LexerIntelligentError(err LexicalErrorDescriptor) {
 	fmt.Println(err.LexicalMarker())
 
 	//Print tips?
-	fmt.Println(specialError(string(err.ch), Lexer))
+	fmt.Println(specialError(string(err.ch), libepl.Lexer))
 }
 
 //todo: support multiple error printing ?
@@ -129,7 +119,7 @@ func ParserIntelligentError(err ErrorDescriptor) {
 	fmt.Println(err.TokenMarker())
 
 	//Print tips?
-	fmt.Println(specialError(err.Token, Parser))
+	fmt.Println(specialError(err.Token, libepl.Parser))
 	PrintFatalErr("SyntaxError", "To many errors")
 }
 
@@ -142,11 +132,11 @@ func TypeIntelligentError(err ErrorDescriptor) {
 	fmt.Println(err.TokenMarker())
 
 	//Print tips?
-	fmt.Println(specialError(err.Token, TypeChecker))
+	fmt.Println(specialError(err.Token, libepl.TypeChecker))
 	PrintFatalErr("TypeError", "To many errors")
 }
 
-func specialError(toke string, d PhaseIndicator) (err string) {
+func specialError(toke string, d libepl.PhaseIndicator) (err string) {
 
 
 	switch toke {
@@ -154,11 +144,11 @@ func specialError(toke string, d PhaseIndicator) (err string) {
 		err = "This error is possibly because you mismatched block indicators (i.e '{' and '}'"
 	default:
 		switch d {
-		case Parser:
+		case libepl.Parser:
 			err = "Sorry about that mate. You probably have syntax problem.\n\tTry fix it"
-		case Lexer:
+		case libepl.Lexer:
 			err = "Sorry about that mate. You probably have weird letters.\n\tTry check your file encoding"
-		case TypeChecker:
+		case libepl.TypeChecker:
 			err = "Sorry about that mate. You probably used the wrong type.\n\tTry checking your types again"
 		}
 	}

@@ -24,19 +24,6 @@ type TypeSystem struct {
 	TypeMap    map[string]*EplType
 }
 
-type EplType struct {
-	TypeName string //name as text (ex: Int)
-	TypeKey  uint64 //Id for the Type
-}
-type BasicType EplType
-
-/*
-design note:
-	basic type is a pre defined fundamental data type such as: uint , int etc...
- */
-func (et *EplType) ToBasic() BasicType {
-	return BasicType{et.TypeName, et.TypeKey}
-}
 
 //Todo: change this to more efficient way
 func (ts *TypeSystem) Initialize(lex *epllex.Lexer) {

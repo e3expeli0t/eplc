@@ -19,10 +19,24 @@
 package libeplc
 
 import (
+	"eplc/src/libepl/analysis"
 	"eplc/src/libepl/eplccode"
+	"eplc/src/libepl/epllex"
+	"eplc/src/libepl/eplparse"
 	"io"
 )
 
 func Compile(source io.Reader, fname string) {
-	eplccode.GenerateAIR(source, fname)
+
+	lexer := epllex.New(source, fname)
+	parser := eplparse.New(lexer)
+
+	parser.InitializeTypeHandler()
+	file := parser.ParseProgramFile()
+
+	Analyzer := analysis.NewAnalyzer(file)
+	Analyzer.Init()
+	Analyzer.Run()
+
+	eplccode.GenerateAIR(file)
 }

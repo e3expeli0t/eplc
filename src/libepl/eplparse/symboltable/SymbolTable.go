@@ -22,23 +22,30 @@ import (
 	"eplc/src/libepl/Types"
 )
 
-type ScopeType string
+type ScopeType uint
+type SymbolType uint
 
 const (
 	//BLOCK = every statement (if, repeat, move, etc)
-	BLOCK ScopeType = "@@@@BLOCK@@@@"
+	BLOCK ScopeType = iota
 
 	/*
 		FUNCTION Scope is the scope that's starts right after function
 		declaration (including the arguments)
 	*/
-	FUNCTION ScopeType = "@@@@FUNCTION@@@@"
+	FUNCTION
 
 	/*
 		GLOBAL Scope is the whole file scope meaning that the symbols that belongs
 		to the global scope can be used in the WHOLE file
 	*/
-	GLOBAL ScopeType = "@@@@GLOBAL@@@@"
+	GLOBAL
+)
+
+const (
+	Function SymbolType = iota
+	Variable
+	Unknown
 )
 
 /*
@@ -46,6 +53,8 @@ const (
 	In this case the symboltable data structure is (some kind of) linked list.
 	This simple linked lis holds all the information about symbols that belongs to
 	the current file
+	Note: the symbol is resolved with is FULL path.
+	For example std.out is in the symbol table as "std.out" not as "out"
 */
 type SymbolTable struct {
 	Table map[string]*SymbolData
@@ -58,7 +67,10 @@ type SymbolTable struct {
 type SymbolData struct {
 	symbol string
 	scope  ScopeType
-	SType  Types.EplType
+	SType SymbolType
+	SymbolValue Types.Value
+	ValueType  Types.EplType
+
 }
 
 //New creates new empty SymbolTable
@@ -66,21 +78,21 @@ func New() SymbolTable {
 	return SymbolTable{Table: map[string]*SymbolData{}, Prev: nil, Next: nil}
 }
 
-func NewBasicSymbol(s string) *SymbolData {
+func NewBasicSymbol(s string, stype SymbolType) *SymbolData {
 	return &SymbolData{symbol: s}
 }
 
-func NewSymbol(s string, t Types.EplType, scope ScopeType) *SymbolData {
+func NewSymbol(s string, t Types.EplType, scope ScopeType, stype SymbolType) *SymbolData {
 	return &SymbolData{
 		symbol: s,
 		scope:  scope,
-		SType:  t,
+		ValueType:  t,
 	}
 }
 
-func NewTypedSymbol(s string, t Types.EplType) *SymbolData {
+func NewTypedSymbol(s string, t Types.EplType, stype SymbolType) *SymbolData {
 	return &SymbolData{
-		SType:  t,
+		ValueType:  t,
 		symbol: s,
 	}
 }
@@ -124,19 +136,33 @@ func (st *SymbolTable) AddWOScope(s *SymbolData) {
 }
 
 func (st *SymbolTable) AddType(symbol string, t Types.EplType) {
-	st.Table[symbol].SType = t
+	st.Table[symbol].ValueType = t
 }
-
+func (st *SymbolTable) AddSymbolType(symbol string, stype SymbolType) {
+	st.Table[symbol].SType = stype
+}
 func (st *SymbolTable) SetSymbolScope(symbol string, scope ScopeType) {
 	st.Table[symbol].scope = scope
 }
 
-func (st *SymbolTable) GetType(symbol string) Types.EplType {
+func (st *SymbolTable) GetSymbolType(symbol string) SymbolType {
 	return st.Table[symbol].SType
+}
+
+func (st *SymbolTable) GetType(symbol string) Types.EplType {
+	return st.Table[symbol].ValueType
 }
 
 func (st *SymbolTable) GetScope(symbol string) ScopeType {
 	return st.Table[symbol].scope
+}
+
+func (st *SymbolTable) GetValue(symbol string) Types.Value {
+	return st.Table[symbol].SymbolValue
+}
+
+func (st *SymbolTable) SetValue(symbol string, val Types.Value) {
+	st.Table[symbol].SymbolValue = val
 }
 
 //Get symbol

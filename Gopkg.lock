@@ -2,14 +2,38 @@
 
 
 [[projects]]
+  name = "github.com/StackExchange/wmi"
+  packages = ["."]
+  revision = "cbe66965904dbe8a6cd589e2298e5d8b986bd7dd"
+  version = "1.1.0"
+
+[[projects]]
+  name = "github.com/go-ole/go-ole"
+  packages = [".","oleutil"]
+  revision = "97b6244175ae18ea6eef668034fd6565847501c9"
+  version = "v1.2.4"
+
+[[projects]]
   name = "github.com/pkg/profile"
   packages = ["."]
   revision = "e3db4c838a54a61aab235fd8b66b8ca09fd2dec2"
   version = "v1.5.0"
 
+[[projects]]
+  name = "github.com/shirou/gopsutil"
+  packages = ["cpu","internal/common"]
+  revision = "10a398abdd2d49a0905dae63644eb0cafc2006e2"
+  version = "v2.20.6"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sys"
+  packages = ["internal/unsafeheader","unix","windows"]
+  revision = "ddb9806d33aed8dbaac1cd6f1cba58952e87f933"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ce91c08f189710bbaea0401fd5e7b528ad452c034b7670f5926943b83484f984"
+  inputs-digest = "b072749c378392c449b5827a84621400a98aefe995ab283a9f2bd412300ad004"
   solver-name = "gps-cdcl"
   solver-version = 1

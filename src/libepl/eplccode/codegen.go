@@ -20,11 +20,8 @@ package eplccode
 
 import (
 	"eplc/src/libepl/Output"
-	"eplc/src/libepl/epllex"
-	"eplc/src/libepl/eplparse"
 	"eplc/src/libepl/eplparse/ast"
 	"fmt"
-	"io"
 	"reflect"
 )
 
@@ -35,16 +32,7 @@ import (
 	code generation by AVM
 */
 
-func GenerateAIR(source io.Reader, fname string) {
-
-
-	lexer := epllex.New(source, fname)
-	parser := eplparse.New(lexer)
-
-	parser.InitializeTypeHandler()
-
-	file := parser.ParseProgramFile()
-
+func GenerateAIR(file ast.Node) {
 	generate(file)
 }
 

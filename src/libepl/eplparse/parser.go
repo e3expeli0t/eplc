@@ -25,6 +25,7 @@ import (
 	"eplc/src/libepl/eplparse/ast"
 	"eplc/src/libepl/eplparse/errors"
 	"eplc/src/libepl/eplparse/symboltable"
+
 	"fmt"
 )
 
@@ -600,7 +601,7 @@ func (p *Parser) ToBoolVal(t epllex.Token) ast.Boolean {
 func (p *Parser) AddToST(decl ast.Decl) {
 	switch t := decl.(type) {
 	case *ast.VarDecl:
-		p.ST.AddWOScope(symboltable.NewTypedSymbol(t.Name.Name, *t.VarType))
+		p.ST.AddWOScope(symboltable.NewTypedSymbol(t.Name.Name, *t.VarType, symboltable.Variable))
 	}
 }
 

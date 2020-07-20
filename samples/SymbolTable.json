@@ -3,9 +3,19 @@
 	"Prev": {
 		"Table": {
 			"input": {
-				"SType": {
+				"SType": 0,
+				"SymbolValue": {
+					"ValueType": {
+						"TypeName": "",
+						"TypeKey": 0,
+						"Attributes": 0
+					},
+					"Val": null
+				},
+				"ValueType": {
 					"TypeName": "uint",
-					"TypeKey": 19510062155911237
+					"TypeKey": 19510062155911237,
+					"Attributes": 0
 				}
 			}
 		},
@@ -14,9 +24,19 @@
 			"Prev": {
 				"Table": {
 					"i": {
-						"SType": {
+						"SType": 0,
+						"SymbolValue": {
+							"ValueType": {
+								"TypeName": "",
+								"TypeKey": 0,
+								"Attributes": 0
+							},
+							"Val": null
+						},
+						"ValueType": {
 							"TypeName": "int",
-							"TypeKey": 19510062155911237
+							"TypeKey": 19510062155911237,
+							"Attributes": 0
 						}
 					}
 				},
@@ -26,20 +46,20 @@
 						"Table": {},
 						"Prev": null,
 						"Next": null,
-						"CurrentScope": ""
+						"CurrentScope": 0
 					},
 					"Next": null,
-					"CurrentScope": ""
+					"CurrentScope": 0
 				},
 				"Next": null,
-				"CurrentScope": "@@@@FUNCTION@@@@"
+				"CurrentScope": 1
 			},
 			"Next": null,
-			"CurrentScope": "@@@@BLOCK@@@@"
+			"CurrentScope": 0
 		},
 		"Next": null,
-		"CurrentScope": "@@@@FUNCTION@@@@"
+		"CurrentScope": 1
 	},
 	"Next": null,
-	"CurrentScope": "@@@@BLOCK@@@@"
+	"CurrentScope": 0
 }

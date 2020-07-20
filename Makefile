@@ -53,7 +53,7 @@ list:
 
 commit:clean
 	@git add .
-	@git commit -a -m "$(msg)"
+	@git commit -a
 	@git push
 
 pull:

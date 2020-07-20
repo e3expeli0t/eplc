@@ -5,9 +5,19 @@
 		"Prev": {
 			"Table": {
 				"input": {
-					"SType": {
+					"SType": 0,
+					"SymbolValue": {
+						"ValueType": {
+							"TypeName": "",
+							"TypeKey": 0,
+							"Attributes": 0
+						},
+						"Val": null
+					},
+					"ValueType": {
 						"TypeName": "uint",
-						"TypeKey": 19510062155911237
+						"TypeKey": 19510062155911237,
+						"Attributes": 0
 					}
 				}
 			},
@@ -16,9 +26,19 @@
 				"Prev": {
 					"Table": {
 						"i": {
-							"SType": {
+							"SType": 0,
+							"SymbolValue": {
+								"ValueType": {
+									"TypeName": "",
+									"TypeKey": 0,
+									"Attributes": 0
+								},
+								"Val": null
+							},
+							"ValueType": {
 								"TypeName": "int",
-								"TypeKey": 19510062155911237
+								"TypeKey": 19510062155911237,
+								"Attributes": 0
 							}
 						}
 					},
@@ -28,22 +48,22 @@
 							"Table": {},
 							"Prev": null,
 							"Next": null,
-							"CurrentScope": ""
+							"CurrentScope": 0
 						},
 						"Next": null,
-						"CurrentScope": ""
+						"CurrentScope": 0
 					},
 					"Next": null,
-					"CurrentScope": "@@@@FUNCTION@@@@"
+					"CurrentScope": 1
 				},
 				"Next": null,
-				"CurrentScope": "@@@@BLOCK@@@@"
+				"CurrentScope": 0
 			},
 			"Next": null,
-			"CurrentScope": "@@@@FUNCTION@@@@"
+			"CurrentScope": 1
 		},
 		"Next": null,
-		"CurrentScope": "@@@@BLOCK@@@@"
+		"CurrentScope": 0
 	},
 	"Imports": [
 		{
@@ -62,7 +82,8 @@
 			},
 			"ReturnType": {
 				"TypeName": "int",
-				"TypeKey": 19510062155911237
+				"TypeKey": 19510062155911237,
+				"Attributes": 0
 			},
 			"Params": [
 				{
@@ -71,7 +92,8 @@
 					},
 					"VarType": {
 						"TypeName": "int",
-						"TypeKey": 19510062155911237
+						"TypeKey": 19510062155911237,
+						"Attributes": 0
 					},
 					"Stat": "mutable"
 				}
@@ -82,9 +104,19 @@
 					"Prev": {
 						"Table": {
 							"input": {
-								"SType": {
+								"SType": 0,
+								"SymbolValue": {
+									"ValueType": {
+										"TypeName": "",
+										"TypeKey": 0,
+										"Attributes": 0
+									},
+									"Val": null
+								},
+								"ValueType": {
 									"TypeName": "uint",
-									"TypeKey": 19510062155911237
+									"TypeKey": 19510062155911237,
+									"Attributes": 0
 								}
 							}
 						},
@@ -93,9 +125,19 @@
 							"Prev": {
 								"Table": {
 									"i": {
-										"SType": {
+										"SType": 0,
+										"SymbolValue": {
+											"ValueType": {
+												"TypeName": "",
+												"TypeKey": 0,
+												"Attributes": 0
+											},
+											"Val": null
+										},
+										"ValueType": {
 											"TypeName": "int",
-											"TypeKey": 19510062155911237
+											"TypeKey": 19510062155911237,
+											"Attributes": 0
 										}
 									}
 								},
@@ -105,22 +147,22 @@
 										"Table": {},
 										"Prev": null,
 										"Next": null,
-										"CurrentScope": ""
+										"CurrentScope": 0
 									},
 									"Next": null,
-									"CurrentScope": ""
+									"CurrentScope": 0
 								},
 								"Next": null,
-								"CurrentScope": "@@@@FUNCTION@@@@"
+								"CurrentScope": 1
 							},
 							"Next": null,
-							"CurrentScope": "@@@@BLOCK@@@@"
+							"CurrentScope": 0
 						},
 						"Next": null,
-						"CurrentScope": "@@@@FUNCTION@@@@"
+						"CurrentScope": 1
 					},
 					"Next": null,
-					"CurrentScope": "@@@@BLOCK@@@@"
+					"CurrentScope": 0
 				},
 				"ExprList": [
 					{
@@ -139,9 +181,19 @@
 								"Prev": {
 									"Table": {
 										"input": {
-											"SType": {
+											"SType": 0,
+											"SymbolValue": {
+												"ValueType": {
+													"TypeName": "",
+													"TypeKey": 0,
+													"Attributes": 0
+												},
+												"Val": null
+											},
+											"ValueType": {
 												"TypeName": "uint",
-												"TypeKey": 19510062155911237
+												"TypeKey": 19510062155911237,
+												"Attributes": 0
 											}
 										}
 									},
@@ -150,9 +202,19 @@
 										"Prev": {
 											"Table": {
 												"i": {
-													"SType": {
+													"SType": 0,
+													"SymbolValue": {
+														"ValueType": {
+															"TypeName": "",
+															"TypeKey": 0,
+															"Attributes": 0
+														},
+														"Val": null
+													},
+													"ValueType": {
 														"TypeName": "int",
-														"TypeKey": 19510062155911237
+														"TypeKey": 19510062155911237,
+														"Attributes": 0
 													}
 												}
 											},
@@ -162,22 +224,22 @@
 													"Table": {},
 													"Prev": null,
 													"Next": null,
-													"CurrentScope": ""
+													"CurrentScope": 0
 												},
 												"Next": null,
-												"CurrentScope": ""
+												"CurrentScope": 0
 											},
 											"Next": null,
-											"CurrentScope": "@@@@FUNCTION@@@@"
+											"CurrentScope": 1
 										},
 										"Next": null,
-										"CurrentScope": "@@@@BLOCK@@@@"
+										"CurrentScope": 0
 									},
 									"Next": null,
-									"CurrentScope": "@@@@FUNCTION@@@@"
+									"CurrentScope": 1
 								},
 								"Next": null,
-								"CurrentScope": "@@@@BLOCK@@@@"
+								"CurrentScope": 0
 							},
 							"ExprList": [
 								{
@@ -200,7 +262,8 @@
 										],
 										"ReturnType": {
 											"TypeName": "",
-											"TypeKey": 0
+											"TypeKey": 0,
+											"Attributes": 0
 										},
 										"FunctionName": {
 											"Name": "del"
@@ -224,7 +287,8 @@
 		},
 		"ReturnType": {
 			"TypeName": "None",
-			"TypeKey": 19510062155911237
+			"TypeKey": 19510062155911237,
+			"Attributes": 0
 		},
 		"Params": null,
 		"Body": {
@@ -233,9 +297,19 @@
 				"Prev": {
 					"Table": {
 						"input": {
-							"SType": {
+							"SType": 0,
+							"SymbolValue": {
+								"ValueType": {
+									"TypeName": "",
+									"TypeKey": 0,
+									"Attributes": 0
+								},
+								"Val": null
+							},
+							"ValueType": {
 								"TypeName": "uint",
-								"TypeKey": 19510062155911237
+								"TypeKey": 19510062155911237,
+								"Attributes": 0
 							}
 						}
 					},
@@ -244,9 +318,19 @@
 						"Prev": {
 							"Table": {
 								"i": {
-									"SType": {
+									"SType": 0,
+									"SymbolValue": {
+										"ValueType": {
+											"TypeName": "",
+											"TypeKey": 0,
+											"Attributes": 0
+										},
+										"Val": null
+									},
+									"ValueType": {
 										"TypeName": "int",
-										"TypeKey": 19510062155911237
+										"TypeKey": 19510062155911237,
+										"Attributes": 0
 									}
 								}
 							},
@@ -256,22 +340,22 @@
 									"Table": {},
 									"Prev": null,
 									"Next": null,
-									"CurrentScope": ""
+									"CurrentScope": 0
 								},
 								"Next": null,
-								"CurrentScope": ""
+								"CurrentScope": 0
 							},
 							"Next": null,
-							"CurrentScope": "@@@@FUNCTION@@@@"
+							"CurrentScope": 1
 						},
 						"Next": null,
-						"CurrentScope": "@@@@BLOCK@@@@"
+						"CurrentScope": 0
 					},
 					"Next": null,
-					"CurrentScope": "@@@@FUNCTION@@@@"
+					"CurrentScope": 1
 				},
 				"Next": null,
-				"CurrentScope": "@@@@BLOCK@@@@"
+				"CurrentScope": 0
 			},
 			"ExprList": [
 				{
@@ -280,7 +364,8 @@
 					},
 					"VarType": {
 						"TypeName": "uint",
-						"TypeKey": 19510062155911237
+						"TypeKey": 19510062155911237,
+						"Attributes": 0
 					},
 					"Stat": "mutable"
 				},
@@ -304,7 +389,8 @@
 						],
 						"ReturnType": {
 							"TypeName": "",
-							"TypeKey": 0
+							"TypeKey": 0,
+							"Attributes": 0
 						},
 						"FunctionName": {
 							"Name": "input"
@@ -328,7 +414,8 @@
 							"Arguments": null,
 							"ReturnType": {
 								"TypeName": "",
-								"TypeKey": 0
+								"TypeKey": 0,
+								"Attributes": 0
 							},
 							"FunctionName": {
 								"Name": "empty"
@@ -341,9 +428,19 @@
 							"Prev": {
 								"Table": {
 									"input": {
-										"SType": {
+										"SType": 0,
+										"SymbolValue": {
+											"ValueType": {
+												"TypeName": "",
+												"TypeKey": 0,
+												"Attributes": 0
+											},
+											"Val": null
+										},
+										"ValueType": {
 											"TypeName": "uint",
-											"TypeKey": 19510062155911237
+											"TypeKey": 19510062155911237,
+											"Attributes": 0
 										}
 									}
 								},
@@ -352,9 +449,19 @@
 									"Prev": {
 										"Table": {
 											"i": {
-												"SType": {
+												"SType": 0,
+												"SymbolValue": {
+													"ValueType": {
+														"TypeName": "",
+														"TypeKey": 0,
+														"Attributes": 0
+													},
+													"Val": null
+												},
+												"ValueType": {
 													"TypeName": "int",
-													"TypeKey": 19510062155911237
+													"TypeKey": 19510062155911237,
+													"Attributes": 0
 												}
 											}
 										},
@@ -364,22 +471,22 @@
 												"Table": {},
 												"Prev": null,
 												"Next": null,
-												"CurrentScope": ""
+												"CurrentScope": 0
 											},
 											"Next": null,
-											"CurrentScope": ""
+											"CurrentScope": 0
 										},
 										"Next": null,
-										"CurrentScope": "@@@@FUNCTION@@@@"
+										"CurrentScope": 1
 									},
 									"Next": null,
-									"CurrentScope": "@@@@BLOCK@@@@"
+									"CurrentScope": 0
 								},
 								"Next": null,
-								"CurrentScope": "@@@@FUNCTION@@@@"
+								"CurrentScope": 1
 							},
 							"Next": null,
-							"CurrentScope": "@@@@BLOCK@@@@"
+							"CurrentScope": 0
 						},
 						"ExprList": [
 							{
@@ -398,7 +505,8 @@
 								],
 								"ReturnType": {
 									"TypeName": "",
-									"TypeKey": 0
+									"TypeKey": 0,
+									"Attributes": 0
 								},
 								"FunctionName": {
 									"Name": "output"
@@ -430,7 +538,8 @@
 					],
 					"ReturnType": {
 						"TypeName": "",
-						"TypeKey": 0
+						"TypeKey": 0,
+						"Attributes": 0
 					},
 					"FunctionName": {
 						"Name": "del"
