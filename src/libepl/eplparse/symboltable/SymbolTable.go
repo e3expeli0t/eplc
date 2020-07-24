@@ -1,6 +1,5 @@
 /*
-*	eplc
-*	Copyright (C) 2018 eplc core team
+*	Copyright (C) 2018-2020 Elia Ariaz
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU General Public License as published by
@@ -68,7 +67,7 @@ type SymbolData struct {
 	symbol string
 	scope  ScopeType
 	SType SymbolType
-	SymbolValue Types.Value
+	SymbolValue Types.ObjectValue
 	ValueType  Types.EplType
 
 }
@@ -157,11 +156,11 @@ func (st *SymbolTable) GetScope(symbol string) ScopeType {
 	return st.Table[symbol].scope
 }
 
-func (st *SymbolTable) GetValue(symbol string) Types.Value {
+func (st *SymbolTable) GetValue(symbol string) Types.ObjectValue {
 	return st.Table[symbol].SymbolValue
 }
 
-func (st *SymbolTable) SetValue(symbol string, val Types.Value) {
+func (st *SymbolTable) SetValue(symbol string, val Types.ObjectValue) {
 	st.Table[symbol].SymbolValue = val
 }
 

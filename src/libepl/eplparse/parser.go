@@ -1,6 +1,5 @@
 /*
-*	eplc
-*	Copyright (C) 2018 eplc core team
+*	Copyright (C) 2018-2020 Elia Ariaz
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU General Public License as published by
@@ -299,7 +298,7 @@ func (p *Parser) ParseVarDecl(scoped bool) ast.Decl {
 
 	if p.match(epllex.ASSIGN) {
 		value = p.ParseValueAssign(!scoped)
-
+		p.ST.SetValue(varDec.Name.Name, value)
 		return &ast.VarExplicitDecl{
 			VarDecl: *varDec,
 			Value:   value,
@@ -602,6 +601,13 @@ func (p *Parser) AddToST(decl ast.Decl) {
 	switch t := decl.(type) {
 	case *ast.VarDecl:
 		p.ST.AddWOScope(symboltable.NewTypedSymbol(t.Name.Name, *t.VarType, symboltable.Variable))
+	case *ast.Fnc:
+		p.ST.AddWOScope(
+			symboltable.NewTypedSymbol(t.Name.Name, *t.ReturnType, symboltable.Function),
+			)
+		for _, sym := range *t.Params {
+			p.AddToST(sym)
+		}
 	}
 }
 

@@ -1,6 +1,24 @@
+/*
+*	Copyright (C) 2018-2020 Elia Ariaz
+*
+*	This program is free software: you can redistribute it and/or modify
+*	it under the terms of the GNU General Public License as published by
+*	the Free Software Foundation, either version 3 of the License, or
+*	(at your option) any later version.
+*
+*	This program is distributed in the hope that it will be useful,
+*	but WITHOUT ANY WARRANTY; without even the implied warranty of
+*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*	GNU General Public License for more details.
+*
+*	You should have received a copy of the GNU General Public License
+*	along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package analysis
 
 import (
+	"eplc/src/libepl/Output"
 	"eplc/src/libepl/Types"
 	"eplc/src/libepl/eplparse/ast"
 	"eplc/src/libepl/eplparse/symboltable"
@@ -76,23 +94,61 @@ func (tc *TypeChecker) WalkExpression(expr ast.Expression) Types.EplType {
 
 	switch n := expr.(type) {
 	case ast.BoolGreatEquals:
-	case ast.BoolGreaterThen:
-	case ast.BoolLowerThen:
-	case ast.BoolLowerThenEqual:
-	case ast.BoolEquals:
-	case ast.BoolNotEquals:
-	case ast.BoolAnd:
-	case ast.BoolOr:
-		ExprTypeLeft := tc.WalkExpression(n.Ls)
-		ExprTypeRight := tc.WalkExpression(n.Rs)
+		status, t := tc.HandleBinaryGeneral(&n.Rs, &n.Ls)
 
-		if ExprTypeLeft == ExprTypeRight {
-			return ExprTypeLeft
-		} else {
-			//todo: add recovery
-			tc.addError(TypeMismatch, ExprTypeLeft, ExprTypeRight)
+		if status {
+			return t
 		}
+		break
+	case ast.BoolGreaterThen:
+		status, t := tc.HandleBinaryGeneral(&n.Rs, &n.Ls)
 
+		if status {
+			return t
+		}
+		break
+	case ast.BoolLowerThen:
+		status, t := tc.HandleBinaryGeneral(&n.Rs, &n.Ls)
+
+		if status {
+			return t
+		}
+		break
+	case ast.BoolLowerThenEqual:
+		status, t := tc.HandleBinaryGeneral(&n.Rs, &n.Ls)
+
+		if status {
+			return t
+		}
+		break
+	case ast.BoolEquals:
+		status, t := tc.HandleBinaryGeneral(&n.Rs, &n.Ls)
+
+		if status {
+			return t
+		}
+		break
+	case ast.BoolNotEquals:
+		status, t := tc.HandleBinaryGeneral(&n.Rs, &n.Ls)
+
+		if status {
+			return t
+		}
+		break
+	case ast.BoolAnd:
+		status, t := tc.HandleBinaryGeneral(&n.Rs, &n.Ls)
+
+		if status {
+			return t
+		}
+		break
+	case ast.BoolOr:
+		status, t := tc.HandleBinaryGeneral(&n.Rs, &n.Ls)
+
+		if status {
+			return t
+		}
+		break
 	case ast.BoolNot:
 		ExprType := tc.WalkExpression(n.Expr)
 
@@ -103,33 +159,52 @@ func (tc *TypeChecker) WalkExpression(expr ast.Expression) Types.EplType {
 		return ExprType
 
 	case ast.BinarySub:
-	case ast.BinaryAdd:
-	case ast.BinaryDiv:
-	case ast.BinaryMul:
-		ExprTypeLeft := tc.WalkExpression(n.Ls)
-		ExprTypeRight := tc.WalkExpression(n.Rs)
+		status, t := tc.HandleBinaryMathematical(&n.Rs, &n.Ls)
 
-		if ExprTypeLeft.IsMathematical() && ExprTypeRight.IsMathematical() {
-			return ExprTypeLeft // The left side of expression is the expression type
-		} else {
-			//todo: add recovery
-			tc.addError(TypeMismatch, ExprTypeLeft, ExprTypeRight)
+		if status {
+			return t
 		}
+		break
+	case ast.BinaryAdd:
+		status, t := tc.HandleBinaryMathematical(&n.Rs, &n.Ls)
+
+		if status {
+			return t
+		}
+		break
+	case ast.BinaryDiv:
+		status, t := tc.HandleBinaryMathematical(&n.Rs, &n.Ls)
+
+		if status {
+			return t
+		}
+		break
+	case ast.BinaryMul:
+		status, t := tc.HandleBinaryMathematical(&n.Rs, &n.Ls)
+
+		if status {
+			return t
+		}
+		break
 
 	case ast.UnaryMinus:
-	case ast.UnaryPlus:
-		ExprType := tc.WalkExpression(n.Rs)
+		status, t := tc.HandleUnaryMathematical(&n.Rs)
 
-		if !ExprType.IsMathematical() {
-			//todo: error recovery
-			tc.addError(InvalidUseOfUnary, ExprType, Types.EplType{})
+		if status {
+			return t
 		}
-		return ExprType
+		break
+	case ast.UnaryPlus:
+		status, t := tc.HandleUnaryMathematical(&n.Rs)
+
+		if status {
+			return t
+		}
+		break
 	case ast.FunctionCall:
-		
-		
+		break
 	case ast.Ident:
-		
+		break
 	case ast.Number:
 		//Add system cpu bits resolver
 		return Types.TypeInt.AsEplType()
@@ -139,5 +214,42 @@ func (tc *TypeChecker) WalkExpression(expr ast.Expression) Types.EplType {
 		return  Types.TypeBool.AsEplType()
 	}
 
+	Output.PrintLog(expr.Start())
 	return Types.EplType{}
 }
+
+func (tc* TypeChecker) HandleBinaryGeneral(left *ast.Expression, right *ast.Expression) (bool, Types.EplType) {
+	ExprTypeLeft := tc.WalkExpression(*left)
+	ExprTypeRight := tc.WalkExpression(*right)
+
+
+	if ExprTypeRight == ExprTypeLeft {
+		return true, ExprTypeLeft
+	}
+	tc.addError(TypeMismatch, ExprTypeLeft, ExprTypeRight)
+	return false, ExprTypeRight
+}
+
+
+func (tc* TypeChecker) HandleBinaryMathematical(left *ast.Expression, right *ast.Expression) (bool, Types.EplType) {
+	ExprTypeLeft := tc.WalkExpression(*left)
+	ExprTypeRight := tc.WalkExpression(*right)
+
+
+	if ExprTypeLeft.IsMathematical() && ExprTypeRight.IsMathematical() {
+		return true, ExprTypeLeft
+	}
+	tc.addError(TypeMismatch, ExprTypeLeft, ExprTypeRight)
+	return false, ExprTypeRight
+}
+
+func (tc* TypeChecker) HandleUnaryMathematical(left *ast.Expression) (bool, Types.EplType) {
+	ExprType := tc.WalkExpression(*left)
+
+	if ExprType.IsMathematical(){
+		return true, ExprType
+	}
+	tc.addError(InvalidUseOfUnary, ExprType, Types.EplType{})
+	return false, ExprType
+}
+
