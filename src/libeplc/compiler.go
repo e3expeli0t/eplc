@@ -22,12 +22,53 @@ import (
 	"eplc/src/libepl/eplccode"
 	"eplc/src/libepl/epllex"
 	"eplc/src/libepl/eplparse"
+	"eplc/src/libio"
+
+	"fmt"
 	"io"
+	"os"
+	"runtime"
+	"runtime/debug"
+	"runtime/pprof"
 )
 
-func Compile(source io.Reader, fname string) {
+func eplRecover(r interface{}, stack bool) {
 
-	lexer := epllex.New(source, fname)
+	errorString := fmt.Sprintf("got an '%v' error during execution.\n"+
+		"This is an internal compiler error, please contact one of the project developers.\n"+
+		"You can rerun the compiler with the flag --verbose to get stack trace", r)
+	libio.PrintErr(errorString)
+
+	if stack {
+		fmt.Println("----------------------Stack----------------------")
+		fmt.Println(string(debug.Stack()))
+		fmt.Println("-------------------------------------------------")
+	}
+
+	libio.PrintFatalErr("Quiting due to previous error")
+}
+
+func Compile(source io.Reader, fileName string, options Flag) {
+	defer func() {
+		if r := recover(); r != nil {
+			eplRecover(r, options.Contains(Verbose))
+		}
+	}()
+
+	if options.Contains(Profile) {
+		f, err := os.Create("Profile/dump.cpu")
+		if err != nil {
+			libio.PrintFatalErr("could not create CPU profile: ", err.Error())
+		}
+		defer f.Close()
+
+		if err := pprof.StartCPUProfile(f); err != nil {
+			libio.PrintFatalErr("could not start CPU profile: ", err)
+		}
+		defer pprof.StopCPUProfile()
+	}
+
+	lexer := epllex.New(source, fileName)
 	parser := eplparse.New(lexer)
 
 	parser.InitializeTypeHandler()
@@ -38,4 +79,17 @@ func Compile(source io.Reader, fname string) {
 	Analyzer.Run()
 
 	eplccode.GenerateAIR(file)
+
+	if options.Contains(Profile) {
+		f, err := os.Create("Profile/dump.mem")
+		if err != nil {
+			libio.PrintFatalErr("could not create memory profile: ", err)
+		}
+		defer f.Close()
+
+		runtime.GC() // get up-to-date statistics
+		if err := pprof.WriteHeapProfile(f); err != nil {
+			libio.PrintFatalErr("could not write memory profile: ", err)
+		}
+	}
 }

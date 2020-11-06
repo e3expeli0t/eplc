@@ -21,7 +21,7 @@ package eplccode
 import (
 	"encoding/json"
 	"eplc/src/libepl/eplparse/ast"
-	"eplc/src/libepl/eplparse/symboltable"
+	"eplc/src/libepl/eplparse/deprecated"
 	"fmt"
 	"os"
 	"path"
@@ -85,7 +85,7 @@ func (w *Writer) UpdateLabel(label Label) {
 	w.Labels = append(w.Labels, label)
 }
 
-func (w *Writer) ProduceST(st *symboltable.SymbolTable) {
+func (w *Writer) ProduceST(st *deprecated.SymbolTable) {
 	b, err := json.MarshalIndent(*st, "", "\t")
 
 	if err != nil {

@@ -19,6 +19,7 @@ package ast
 
 import (
 	"eplc/src/libepl/Types"
+	"eplc/src/libepl/eplparse/deprecated"
 	"eplc/src/libepl/eplparse/symboltable"
 )
 
@@ -27,6 +28,7 @@ import (
 */
 
 type VarStat string
+
 const (
 	Fixed   VarStat = "fixed"
 	Mutable VarStat = "mutable"
@@ -54,16 +56,15 @@ type (
 	}
 )
 
-
 //Todo: replace all string names with symbol table references
 type (
 	ProgramFile struct {
-		FileName     string
-		Symbols      *symboltable.SymbolTable
-		Imports      *[]Import
-		GlobalDecls  *[]Decl
-		Functions    *[]*Fnc
-		MainFunction *Fnc
+		FileName       string
+		SymbolTableMap *symboltable.TableMap
+		Imports        *[]Import
+		GlobalDecls    *[]Decl
+		Functions      *[]*Fnc
+		MainFunction   *Fnc
 	}
 
 	Fnc struct {
@@ -71,11 +72,18 @@ type (
 		ReturnType *Types.EplType
 		Params     *[]Decl
 		Body       *Block
+		Symbols    *deprecated.SymbolTable
 	}
 
+	//todo: create InnerBlock and Block structures
 	Block struct {
-		Symbols  *symboltable.SymbolTable
+		Symbols  *symboltable.ScopeSymbolTable
 		ExprList *[]Expression
+	}
+
+	InnerBlock struct {
+		Block
+		PreviousTable *symboltable.ScopeSymbolTable
 	}
 
 	VarDecl struct {
@@ -111,58 +119,61 @@ type (
 	}
 
 	//todo: IMPL in v0.2++
-	MoveLoop struct {}
+	MoveLoop struct{}
 
 	ForLoop struct {
 		VarDef    *Decl
 		Condition *Expression
-		Expr  	  *Expression // Assign or expr
+		Expr      *Expression // Assign or expr
 		Code      *Block
+		Symbols   *deprecated.SymbolTable
 	}
 
-/*
-	Example:
-		repeat (i int = 0) {
-		//code block
-		}
- */
+	/*
+		Example:
+			repeat (i int = 0) {
+			//code block
+			}
+	*/
 
 	Repeat struct {
 		VarDef  *Decl
-		Code   *Block
+		Code    *Block
+		Symbols *deprecated.SymbolTable
 	}
 
-/*
-	Example:
-		until (1 == 2) {
-			//empty
-		}
- */
+	/*
+		Example:
+			until (1 == 2) {
+				//empty
+			}
+	*/
 
 	Until struct {
 		Condition *Expression
 		Code      *Block
+		Symbols   *deprecated.SymbolTable
 	}
 
-
-/*
-	Example:
-		repeat (i int = 0) {
-			out.put(i);
-			i += 1;
-		} until (i == 3);
- */
+	/*
+		Example:
+			repeat (i int = 0) {
+				out.put(i);
+				i += 1;
+			} until (i == 3);
+	*/
 
 	RepeatUntil struct {
 		VarDef    *Decl
 		Condition *Expression
 		Code      *Block
+		Symbols   *deprecated.SymbolTable
 	}
-	
+
 	Return struct {
 		Value *Expression
 	}
-	Break struct {}
+	Break struct{}
 )
 
 func (Break) Start() uint {
@@ -188,13 +199,11 @@ func (RepeatUntil) Start() uint {
 func (RepeatUntil) ExprNode() {}
 func (RepeatUntil) StmtNode() {}
 
-
 func (Repeat) Start() uint {
 	panic("Invalid call")
 }
 func (Repeat) ExprNode() {}
 func (Repeat) StmtNode() {}
-
 
 func (ForLoop) Start() uint {
 	panic("Invalid call")
@@ -225,9 +234,9 @@ func (Fnc) StmtNode() {}
 func (VarDecl) Start() uint {
 	panic("Invalid call")
 }
-func (VarDecl) StmtNode() {}
-func (VarDecl) ExprNode() {}
-func (VarDecl) DeclNode(){}
+func (VarDecl) StmtNode()         {}
+func (VarDecl) ExprNode()         {}
+func (VarDecl) DeclNode()         {}
 func (VarExplicitDecl) DeclNode() {}
 
 func (ProgramFile) Start() uint {
@@ -241,12 +250,13 @@ func (Block) Start() uint {
 func (IfStmt) Start() uint {
 	panic("Invalid call")
 }
-func (IfStmt) StmtNode(){}
+func (IfStmt) StmtNode() {}
 func (IfStmt) ExprNode() {}
 
 func (Import) Start() uint {
 	panic("Invalid call")
 }
+
 //----------------------------------------------------------------------------------------------------------------------
 //Expressions
 
@@ -255,7 +265,7 @@ type BoolValue uint
 
 const (
 	BOOL_FALSE BoolValue = 0
-	BOOL_TRUE BoolValue  = 1
+	BOOL_TRUE  BoolValue = 1
 )
 
 //Nodes definition
@@ -290,7 +300,7 @@ type (
 		Ls Expression
 		Rs Expression
 	}
-	
+
 	BoolGreaterThen struct {
 		Ls Expression
 		Rs Expression
@@ -347,8 +357,8 @@ type (
 		PackagePath []*Ident
 
 		/*
-		argument can be any thing that returns value.
-		None value is not allowed. And will be caught during type checking
+			argument can be any thing that returns value.
+			None value is not allowed. And will be caught during type checking
 		*/
 		Arguments    []Expression
 		ReturnType   Types.EplType //the return type is set during type analysis
@@ -362,7 +372,7 @@ type (
 	//Represent number such as 5562 or 233.9973
 	Number struct {
 		Value string
-		Real bool // If the number is real (i.e 3.2552) this is true
+		Real  bool // If the number is real (i.e 3.2552) this is true
 	}
 
 	String struct {
@@ -440,6 +450,17 @@ func (Singular) ExprNode() {}
 func (FunctionCall) Start() uint {
 	panic("Invalid call")
 }
+
+func (f *FunctionCall) ConstructFullPath() string {
+	var path string
+
+	for _, x := range f.PackagePath {
+		path += x.Name + "."
+	}
+
+	return path
+}
+
 func (FunctionCall) StmtNode() {}
 func (FunctionCall) ExprNode() {}
 
@@ -490,4 +511,3 @@ func (Ident) Start() uint {
 }
 func (Ident) StmtNode() {}
 func (Ident) ExprNode() {}
-

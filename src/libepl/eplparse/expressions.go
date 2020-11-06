@@ -21,6 +21,7 @@ import (
 	"eplc/src/libepl/Types"
 	"eplc/src/libepl/epllex"
 	"eplc/src/libepl/eplparse/ast"
+
 	"fmt"
 )
 
@@ -86,7 +87,7 @@ func (p *Parser) ParseUnary() (unary ast.Expression){
 	}
 
 	if p.match(epllex.ID) {
-		if p.match_n(epllex.DOT) || p.match_n(epllex.LPAR) {
+		if p.matchN(epllex.DOT) || p.matchN(epllex.LPAR) {
 			return p.ParseFunctionCall()
 		}
 		return p.ParseIdent()
@@ -112,7 +113,7 @@ func (p *Parser) resolveOperator() (exp ast.Expression) {
 
 
 //todo: return pointer
-//if the function returns nill this is a sign that the expression has ended
+//if the function returns nil this is a sign that the expression has ended
 func (p *Parser) resolveBinaryOperator(left* ast.Expression) (exp ast.Expression, nil bool) {
 	nil = true
 
@@ -221,30 +222,30 @@ func (p *Parser) parseValue() ast.Expression {
 	case epllex.TRUE, epllex.FALSE:
 		return p.ToBoolVal(p.currentToken)
 	case epllex.STRINGLITERAL:
-		return ast.String{Value: p.currentLexme}
+		return ast.String{Value: p.currentLexeme}
 	case epllex.REAL:
 		return ast.Number{
-			Value: p.currentLexme,
+			Value: p.currentLexeme,
 			Real:  true,
 		}
 	case epllex.NUM:
 		return ast.Number{
-			Value: p.currentLexme,
+			Value: p.currentLexeme,
 			Real:  false,
 		}
 	case epllex.CMX:
 	default:
-		p.report(fmt.Sprintf("Can't resolve type of value:%s.", p.currentLexme))
+		p.report(fmt.Sprintf("Can't resolve type of value:%s.", p.currentLexeme))
 	}
 
 	//Not reached
-	panic("Shouldn't be reached")
+	panic("Shouldn't be reached.\nPlease report to e3expeli0t or other developer")
 }
 
 //function_call := package_path "(" args ")"
 //package_path := ident "." path_list | ident
 func (p *Parser) ParseFunctionCall() *ast.FunctionCall {
-	var packagePath []*ast.Ident
+	var fullPath []*ast.Ident // the full path of the function
 	var name ast.Ident
 	var args []ast.Expression
 
@@ -254,10 +255,11 @@ func (p *Parser) ParseFunctionCall() *ast.FunctionCall {
 	for !p.match(epllex.LPAR) && p.match(epllex.ID) {
 		if p.match(epllex.ID) {
 			current = p.ParseIdent()
-			packagePath = append(packagePath, current)
+			fullPath = append(fullPath, current)
 		} else {
 			p.expect("ident")
 		}
+
 		if p.match(epllex.DOT) {
 			p.readNextToken() //assume that the current token is DOT
 		} else {
@@ -265,7 +267,7 @@ func (p *Parser) ParseFunctionCall() *ast.FunctionCall {
 		}
 	}
 
-	if packagePath == nil || current == nil {
+	if fullPath == nil || current == nil {
 		p.expect("function name")
 	}
 
@@ -293,7 +295,7 @@ func (p *Parser) ParseFunctionCall() *ast.FunctionCall {
 	p.readNextToken() // skip ')'
 
 	return &ast.FunctionCall{
-		PackagePath:  packagePath,
+		PackagePath:  fullPath,
 		Arguments:    args,
 		ReturnType:   Types.EplType{}, //gets filled by the type analyser
 		FunctionName: &name,
@@ -304,7 +306,7 @@ func (p *Parser) ParseFunctionCall() *ast.FunctionCall {
 func (p *Parser) ParseIdent() *ast.Ident {
 	if p.match(epllex.ID) {
 		defer p.readNextToken()
-		return &ast.Ident{Name: p.currentLexme}
+		return &ast.Ident{Name: p.currentLexeme}
 	} else {
 		p.expect("Ident")
 	}

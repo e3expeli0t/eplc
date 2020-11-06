@@ -18,29 +18,29 @@
 package Errors
 
 import (
-	"eplc/src/libepl/Output"
+	"eplc/src/libio"
 	"fmt"
 )
 
 //TokenError prints error msg with precise info about the token that cause the error
 func TokenError(line uint, lineOffset uint, token rune, filename string) {
-	Output.PrintErr(fmt.Sprintf(" in %s:%d:%d: Could't resolve Token %#U", filename, line, lineOffset, token))
+	libio.PrintErr(fmt.Sprintf(" in %s:%d:%d: Could't resolve Token %#U", filename, line, lineOffset, token))
 }
 
 func ExpError(line uint, lineOffset uint, fname string, cline string, char rune) {
-	Output.LexicalPrint(fname, line, lineOffset, cline, "Couldn't resolve token", char)
+	libio.LexicalPrint(fname, line, lineOffset, cline, "Couldn't resolve token", char)
 }
 
 //Prints lexical error msg and quits after that
 func FatalLexical(msg ...interface{}) {
-	Output.PrintFatalErr(msg...)
+	libio.PrintFatalErr(msg...)
 }
 
 func EncodingError(line uint, lineOffset uint, filename string, char rune) {
-	Output.PrintErr(fmt.Sprintf(" in %s:%d:%d: Encoding error %#U", filename, line, lineOffset, char))
+	libio.PrintErr(fmt.Sprintf(" in %s:%d:%d: Encoding error %#U", filename, line, lineOffset, char))
 }
 
 //Lexical prints lexical error msg without quiting
 func Lexical(msg ...interface{}) {
-	Output.PrintErr(msg...)
+	libio.PrintErr(msg...)
 }

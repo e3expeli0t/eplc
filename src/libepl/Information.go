@@ -39,3 +39,15 @@ type InfoStruct struct {
 	Filename string
 	SystemCPU int
 }
+
+type LocationInfo struct {
+	Line uint
+	Offset uint
+}
+
+func NewLocation (line uint, offset uint) LocationInfo {
+	return LocationInfo{
+		Line:   line,
+		Offset: offset,
+	}
+}

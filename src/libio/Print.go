@@ -15,15 +15,15 @@
 *	along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package Output
+package libio
 
 import (
-	"eplc/src/libepl/Output/color"
+	"eplc/src/libio/color"
 	"fmt"
 	"os"
 )
 
-const EplcVersion = "0.1.2"
+const EplcVersion = "0.1.3"
 
 func PrintVersion() {
 	fmt.Print(color.BBlue("****\t"))

@@ -18,21 +18,21 @@
 package eplparse
 
 import (
-	"eplc/src/libepl/Output"
+	"eplc/src/libepl"
 	"eplc/src/libepl/Types"
 	"eplc/src/libepl/epllex"
 	"eplc/src/libepl/eplparse/ast"
 	"eplc/src/libepl/eplparse/errors"
 	"eplc/src/libepl/eplparse/symboltable"
-
+	"eplc/src/libio"
 	"fmt"
 )
 
 //New create new eplparse struct
 func New(lx *epllex.Lexer) *Parser {
 	return &Parser{
-		Lexer: lx,
-		ST:    symboltable.New(),
+		Lexer:    lx,
+		GlobalST: symboltable.NewScopedSymbolTable(symboltable.GLOBAL),
 	}
 }
 
@@ -46,17 +46,23 @@ func New(lx *epllex.Lexer) *Parser {
 */
 type Parser struct {
 	Lexer       *epllex.Lexer
-	ST          symboltable.SymbolTable
+
+	Symbols symboltable.TableMap
+	CurrentSymbolTable symboltable.ScopeSymbolTable
+
 	Errors      errors.InternalParserError
 	TypeHandler Types.TypeSystem
 
 	//private fields
-	currentToken epllex.Token
-	lookahead    epllex.Token
-	currentLexme string
+	currentToken  epllex.Token
+	lookahead     epllex.Token
+	currentLexeme string
 
-	// set to true if type handler is Initialized
+	// set to true if the type handler is Initialized
 	Ok bool
+
+	// tell the functions to use SaveSymbol
+	GlobalPhase bool
 }
 
 //Parse main language constructs
@@ -65,32 +71,32 @@ type Parser struct {
 func (p *Parser) ParseProgramFile() ast.Node {
 	//check if the type handler is initialized
 	if !p.Ok {
-		Output.PrintFatalErr("eplc: Parser couldn't be initialized")
+		panic("eplc: Parser couldn't be initialized")
 	}
-
 	p.readNextToken()
-	p.NewScope()
+	p.GlobalPhase = true
 
 	var imports []ast.Import
 	var decls []ast.Decl
-	var fncs []*ast.Fnc
+	var Functions []*ast.Fnc
 	var MainFunction *ast.Fnc
 
 	for p.match(epllex.IMPORT) {
-		Output.PrintLog("Parsing imports")
+		libio.PrintLog("Parsing imports")
 		imports = append(imports, p.ParseImport())
 	}
 
+	p.CurrentSymbolTable.SetScopeType(symboltable.GLOBAL)
+
 	if p.match(epllex.DECL) {
-		Output.PrintLog("Parsing global variables")
+		libio.PrintLog("Parsing global variables")
 		for p.match(epllex.DECL) {
-			p.ST.SetScopeType(symboltable.GLOBAL)
 			decls = append(decls, p.ParseVarDecl(false))
 		}
 	}
 
 	if p.match(epllex.FNC) {
-		Output.PrintLog("Parsing functions")
+		libio.PrintLog("Parsing functions")
 		for p.match(epllex.FNC) {
 			fnc := p.ParseFnc()
 			//todo: Should change in eplc v0.2 to support cflags
@@ -98,7 +104,7 @@ func (p *Parser) ParseProgramFile() ast.Node {
 				MainFunction = fnc
 				continue
 			}
-			fncs = append(fncs, fnc)
+			Functions = append(Functions, fnc)
 		}
 	}
 
@@ -106,23 +112,22 @@ func (p *Parser) ParseProgramFile() ast.Node {
 	p.Errors.IsValidFile()
 
 	return &ast.ProgramFile{
-		Imports:      &imports,
-		GlobalDecls:  &decls,
-		Symbols:      &p.ST,
-		Functions:    &fncs,
-		FileName:     p.Lexer.Filename,
-		MainFunction: MainFunction,
+		Imports:       &imports,
+		GlobalDecls:   &decls,
+		SymbolTableMap: &p.Symbols,
+		Functions:     &Functions,
+		FileName:      p.Lexer.Filename,
+		MainFunction:  MainFunction,
 	}
 }
 
 func (p *Parser) ParseImport() ast.Import {
-
 	var importPath []string
 	start := p.currentToken.StartLine
 
 	for !p.match(epllex.SEMICOLON) {
 		if p.match(epllex.ID) {
-			importPath = append(importPath, p.currentLexme)
+			importPath = append(importPath, p.currentLexeme)
 		}
 		p.readNextToken() // skip the dot
 	}
@@ -136,9 +141,10 @@ func (p *Parser) ParseBlock(keepScope bool) *ast.Block {
 		p.readNextToken()
 	}
 
-	if !keepScope {
-		p.NewScope()
-		p.ST.SetScopeType(symboltable.BLOCK)
+	var inner = !keepScope
+
+	if inner {
+		p.NewScope(symboltable.BLOCK)
 	}
 
 	var contents []ast.Expression
@@ -156,7 +162,7 @@ func (p *Parser) ParseBlock(keepScope bool) *ast.Block {
 		case epllex.REPEAT:
 			contents = append(contents, p.ParseRepeatFam())
 		case epllex.LBRACE:
-			Output.PrintLog("In loop current token:", p.currentLexme, "Next: ", p.lookahead.Lexme)
+			libio.PrintLog("In loop current token:", p.currentLexeme, "Next: ", p.lookahead.Lexme)
 			contents = append(contents, p.ParseBlock(true))
 		default:
 			switch p.currentToken.Ttype {
@@ -183,16 +189,15 @@ func (p *Parser) ParseBlock(keepScope bool) *ast.Block {
 				contents = append(contents, &ast.Break{})
 				continue
 			}
-			if p.match(epllex.ID) && p.match_n(epllex.ASSIGN) {
+			if p.match(epllex.ID) && p.matchN(epllex.ASSIGN) {
 				contents = append(contents, p.ParseAssignStmt())
 			} else if p.matchTokens(ExpressionsMAP) {
 				contents = append(contents, *p.ParseExpression())
 			} else {
-				p.report(fmt.Sprintf("Unable to identify: %s", p.currentLexme))
+				p.report(fmt.Sprintf("Unable to identify: %s", p.currentLexeme))
 			}
 		}
 	}
-
 	if p.match(epllex.EOF) {
 		p.expect("'}'")
 	} else {
@@ -200,7 +205,7 @@ func (p *Parser) ParseBlock(keepScope bool) *ast.Block {
 	}
 
 	return &ast.Block{
-		Symbols:  &p.ST,
+		Symbols:  &p.CurrentSymbolTable,
 		ExprList: &contents,
 	}
 }
@@ -212,8 +217,8 @@ func (p *Parser) ParseFnc() *ast.Fnc {
 	}
 
 	//create new scope for function
-	p.NewScope()
-	p.ST.SetScopeType(symboltable.FUNCTION)
+	p.NewScope(symboltable.FUNCTION)
+	p.CurrentSymbolTable.SetScopeType(symboltable.FUNCTION)
 
 	var name *ast.Ident
 	var params *[]ast.Decl
@@ -223,7 +228,7 @@ func (p *Parser) ParseFnc() *ast.Fnc {
 	if p.match(epllex.ID) {
 		name = p.ParseIdent()
 	} else {
-		p.expect("Ident")
+		p.expect("Ident") 
 	}
 
 	if p.match(epllex.LPAR) {
@@ -247,12 +252,15 @@ func (p *Parser) ParseFnc() *ast.Fnc {
 		p.expect("'{' or ';'")
 	}
 
-	return &ast.Fnc{
+	f := &ast.Fnc{
 		Name:       name,
 		ReturnType: returnType,
 		Params:     params,
 		Body:       code,
 	}
+	p.SaveSymbol(f)
+
+	return  f
 }
 
 // param_list := "(" decl [, param_decl] ")"
@@ -279,7 +287,7 @@ func (p *Parser) ParseParamList() *[]ast.Decl {
 	p.readNextToken() // skip the rpar token
 
 	for _, decl := range params {
-		p.AddToST(decl)
+		p.SaveSymbol(decl)
 	}
 	return &params
 }
@@ -289,16 +297,16 @@ func (p *Parser) ParseParamList() *[]ast.Decl {
 // scoped_var_decl := decl [value_assign]
 // value_assign := "=" Expression
 //status := "fixed" | "mutable"
-//todo: support auto value detection
+//todo: support dynamic value type  detection
 func (p *Parser) ParseVarDecl(scoped bool) ast.Decl {
 	var value *ast.Expression
 
 	varDec := p.decl()
-	p.AddToST(varDec)
+	p.SaveSymbol(varDec)
 
 	if p.match(epllex.ASSIGN) {
 		value = p.ParseValueAssign(!scoped)
-		p.ST.SetValue(varDec.Name.Name, value)
+
 		return &ast.VarExplicitDecl{
 			VarDecl: *varDec,
 			Value:   value,
@@ -442,7 +450,7 @@ func (p *Parser) ParseAssignStmt() *ast.AssignStmt {
 }
 
 /*
-	There is three kinds of loops
+	There are three kinds of loops
 	For: regular loop
 	Until: like while
 	Repeat: infinite loop
@@ -454,7 +462,7 @@ func (p *Parser) ParseUntil() *ast.Until {
 	if p.match(epllex.UNTIL) {
 		p.readNextToken()
 	}
-	p.NewScope()
+	p.NewScope(symboltable.BLOCK)
 
 	var cond ast.Expression
 	var code *ast.Block
@@ -480,7 +488,7 @@ func (p *Parser) ParseForLoop() *ast.ForLoop {
 	}
 
 	//New scope for loop
-	p.NewScope()
+	p.NewScope(symboltable.BLOCK)
 
 	decl, cond, expr := p.forHeader()
 
@@ -538,7 +546,7 @@ func (p *Parser) ParseRepeatFam() ast.Statement {
 	}
 
 	//create new scope here since we have scoped variable declaration
-	p.NewScope()
+	p.NewScope(symboltable.BLOCK)
 
 	var varDecl ast.Decl
 	var code *ast.Block
@@ -597,16 +605,26 @@ func (p *Parser) ToBoolVal(t epllex.Token) ast.Boolean {
 	return ast.Boolean{Val: ast.BOOL_TRUE}
 }
 
-func (p *Parser) AddToST(decl ast.Decl) {
+//todo: ScopeType?
+func (p *Parser) SaveSymbol(decl ast.Decl) {
 	switch t := decl.(type) {
 	case *ast.VarDecl:
-		p.ST.AddWOScope(symboltable.NewTypedSymbol(t.Name.Name, *t.VarType, symboltable.Variable))
+		p.CurrentSymbolTable.Add(
+			symboltable.NewTypedSymbol(
+				t.Name.Name, *t.VarType,
+				p.ProduceLocationInfo(),
+				symboltable.Variable),
+		)
 	case *ast.Fnc:
-		p.ST.AddWOScope(
-			symboltable.NewTypedSymbol(t.Name.Name, *t.ReturnType, symboltable.Function),
-			)
+		p.CurrentSymbolTable.Add(
+			symboltable.NewTypedSymbol(
+				t.Name.Name,
+				*t.ReturnType,
+				p.ProduceLocationInfo(),
+				symboltable.Function),
+		)
 		for _, sym := range *t.Params {
-			p.AddToST(sym)
+			p.SaveSymbol(sym)
 		}
 	}
 }
@@ -625,7 +643,7 @@ func (p *Parser) matchTokens(tokens []epllex.TokenType) bool {
 // check if the p.lookahead equal to one of the list elem's
 func (p *Parser) matchNTokens(tokens []epllex.TokenType) bool {
 	for _, token := range tokens {
-		if p.match_n(token) {
+		if p.matchN(token) {
 			return true
 		}
 	}
@@ -637,7 +655,7 @@ func (p *Parser) match(t epllex.TokenType) bool {
 	return p.currentToken.Ttype == t
 }
 
-func (p *Parser) match_n(t epllex.TokenType) bool {
+func (p *Parser) matchN(t epllex.TokenType) bool {
 	return p.lookahead.Ttype == t
 }
 
@@ -648,7 +666,7 @@ func (p *Parser) readNextToken() {
 		p.currentToken = p.lookahead
 	}
 	p.lookahead = p.Lexer.Next()
-	p.currentLexme = p.currentToken.Lexme
+	p.currentLexeme = p.currentToken.Lexme
 }
 
 //--------------------------------------------------------------------------------------
@@ -662,9 +680,9 @@ func (p *Parser) ParseType() (Type *Types.EplType) {
 func (p *Parser) processType() (Type *Types.EplType) {
 
 	if p.TypeHandler.IsValidBasicType(p.currentToken) {
-		Type = p.TypeHandler.GetType(p.currentLexme)
+		Type = p.TypeHandler.GetType(p.currentLexeme)
 	} else if p.match(epllex.ID) {
-		Type = p.TypeHandler.MakeType(p.currentLexme)
+		Type = p.TypeHandler.MakeType(p.currentLexeme)
 	} else {
 		p.expect("type")
 	}
@@ -678,7 +696,7 @@ func (p *Parser) InitializeTypeHandler() {
 
 //Error handling functions
 func (p *Parser) expect(ex string) {
-	p.report(fmt.Sprintf("expected %s found %s ", ex, p.currentLexme))
+	p.report(fmt.Sprintf("expected %s found %s ", ex, p.currentLexeme))
 }
 
 func (p *Parser) report(msg string) {
@@ -686,29 +704,15 @@ func (p *Parser) report(msg string) {
 }
 
 //Scope handling functions
-func (p *Parser) NewScope() {
-	currentST := p.ST
-
-	if p.ST.Next == nil {
-		p.ST = symboltable.New()
-		p.ST.Prev = &currentST
-	} else {
-		for currentST.Next != nil {
-			currentST = *currentST.Next
-		}
-
-		p.ST = symboltable.New()
-		p.ST.Prev = &currentST
-	}
+func (p *Parser) NewScope(scope symboltable.ScopeType) {
+	p.Symbols.Insert(p.CurrentSymbolTable)
+	p.CurrentSymbolTable.Clear()
+	p.CurrentSymbolTable.SetScopeType(scope)
 }
 
-func (p *Parser) PreviousScope() {
-	p.ST = *p.ST.Prev
-}
-
-func (p *Parser) NextScope() {
-	if p.ST.Next != nil {
-		p.ST = *p.ST.Next
+func (p *Parser) ProduceLocationInfo() libepl.LocationInfo {
+	return libepl.LocationInfo{
+		Line:   p.currentToken.StartLine,
+		Offset: p.currentToken.StartOffset,
 	}
-	//TODO: Make the method go to the first scope in case the next scope is nil
 }

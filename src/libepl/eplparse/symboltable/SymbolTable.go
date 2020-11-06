@@ -1,28 +1,13 @@
-/*
-*	Copyright (C) 2018-2020 Elia Ariaz
-*
-*	This program is free software: you can redistribute it and/or modify
-*	it under the terms of the GNU General Public License as published by
-*	the Free Software Foundation, either version 3 of the License, or
-*	(at your option) any later version.
-*
-*	This program is distributed in the hope that it will be useful,
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*	GNU General Public License for more details.
-*
-*	You should have received a copy of the GNU General Public License
-*	along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
 package symboltable
 
 import (
 	"eplc/src/libepl/Types"
 )
 
+//Note: Currently this is not in use
+//Attribute for more convenient SymbolTable searches
 type ScopeType uint
-type SymbolType uint
+type SymbolKind uint
 
 const (
 	//BLOCK = every statement (if, repeat, move, etc)
@@ -42,137 +27,62 @@ const (
 )
 
 const (
-	Function SymbolType = iota
+	_ SymbolKind = iota
+	Function
 	Variable
 	Unknown
+
+	//Locates default error value
+	EmptySymbol
 )
 
-/*
-	SymbolTable stores the information about the symbols.
-	In this case the symboltable data structure is (some kind of) linked list.
-	This simple linked lis holds all the information about symbols that belongs to
-	the current file
-	Note: the symbol is resolved with is FULL path.
-	For example std.out is in the symbol table as "std.out" not as "out"
-*/
-type SymbolTable struct {
+func  CantLocate() SymbolData {
+	return SymbolData{Kind: EmptySymbol}
+}
+
+func NewScopedSymbolTable(Scope ScopeType) *ScopeSymbolTable {
+	return &ScopeSymbolTable {
+		Scope: Scope,
+		Table: nil,
+	}
+}
+
+//Every scope has a ScopeSymbolTable
+type ScopeSymbolTable struct {
+	Scope ScopeType
 	Table map[string]*SymbolData
-	Prev  *SymbolTable
-	Next  *SymbolTable
-	CurrentScope ScopeType
 }
 
-//SymbolData stores the information about symbols
-type SymbolData struct {
-	symbol string
-	scope  ScopeType
-	SType SymbolType
-	SymbolValue Types.ObjectValue
-	ValueType  Types.EplType
-
+func (st *ScopeSymbolTable) Clear() {
+	st.Table= make(map[string]*SymbolData)
 }
 
-//New creates new empty SymbolTable
-func New() SymbolTable {
-	return SymbolTable{Table: map[string]*SymbolData{}, Prev: nil, Next: nil}
+func (st* ScopeSymbolTable) Exists(name string) bool {
+	_, found := st.Table[name]
+	return found
 }
 
-func NewBasicSymbol(s string, stype SymbolType) *SymbolData {
-	return &SymbolData{symbol: s}
-}
-
-func NewSymbol(s string, t Types.EplType, scope ScopeType, stype SymbolType) *SymbolData {
-	return &SymbolData{
-		symbol: s,
-		scope:  scope,
-		ValueType:  t,
-	}
-}
-
-func NewTypedSymbol(s string, t Types.EplType, stype SymbolType) *SymbolData {
-	return &SymbolData{
-		ValueType:  t,
-		symbol: s,
-	}
-}
-
-//returns the current Symbol Table without the prev
-func (st *SymbolTable) Strip() SymbolTable {
-	tmp := *st
-	tmp.Prev = nil
-	tmp.Next = nil
-
-	return tmp
-}
-
-func (st *SymbolTable) First() SymbolTable {
-	tmp := *st
-	for tmp.Prev != nil {
-		tmp = *tmp.Prev
+func (st* ScopeSymbolTable) Lookup(name string) SymbolData {
+	if !st.Exists(name) {
+		return CantLocate()
 	}
 
-	return tmp
+	return *st.Table[name]
 }
 
-func (st *SymbolTable) Last() SymbolTable {
-	tmp := *st
-	for tmp.Next != nil {
-		tmp = *tmp.Next
-	}
-
-	return tmp
+func (st* ScopeSymbolTable) GetSymbolType(name string) Types.EplType {
+	return st.Table[name].Type
 }
 
-//Add new symbol
-func (st *SymbolTable) Add(s *SymbolData) {
-	st.Table[s.symbol] = s
+func (st* ScopeSymbolTable) SetSymbolType(name string, t Types.EplType) {
+	st.Table[name].Type = t
 }
 
-//Sets the SymbolData scope to the current scope
-func (st *SymbolTable) AddWOScope(s *SymbolData) {
-	s.scope = st.CurrentScope
-	st.Table[s.symbol] = s
+func (st* ScopeSymbolTable) Add(data *SymbolData) {
+	st.Table[data.Name] = data
 }
 
-func (st *SymbolTable) AddType(symbol string, t Types.EplType) {
-	st.Table[symbol].ValueType = t
-}
-func (st *SymbolTable) AddSymbolType(symbol string, stype SymbolType) {
-	st.Table[symbol].SType = stype
-}
-func (st *SymbolTable) SetSymbolScope(symbol string, scope ScopeType) {
-	st.Table[symbol].scope = scope
+func (st* ScopeSymbolTable) SetScopeType(scope ScopeType) {
+	st.Scope = scope
 }
 
-func (st *SymbolTable) GetSymbolType(symbol string) SymbolType {
-	return st.Table[symbol].SType
-}
-
-func (st *SymbolTable) GetType(symbol string) Types.EplType {
-	return st.Table[symbol].ValueType
-}
-
-func (st *SymbolTable) GetScope(symbol string) ScopeType {
-	return st.Table[symbol].scope
-}
-
-func (st *SymbolTable) GetValue(symbol string) Types.ObjectValue {
-	return st.Table[symbol].SymbolValue
-}
-
-func (st *SymbolTable) SetValue(symbol string, val Types.ObjectValue) {
-	st.Table[symbol].SymbolValue = val
-}
-
-//Get symbol
-func (st *SymbolTable) Get(symbol string) SymbolData {
-	if st.Table[symbol] != nil {
-		return *st.Table[symbol]
-	}
-
-	return SymbolData{}
-}
-
-func (st *SymbolTable) SetScopeType(scope ScopeType) {
-	st.CurrentScope = scope
-}

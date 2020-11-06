@@ -18,7 +18,7 @@
 package ast
 
 import (
-	"eplc/src/libepl/Output"
+	"eplc/src/libio"
 	"reflect"
 )
 
@@ -83,7 +83,7 @@ func Walk(v Visitor, node Node) {
 			Walk(v, *n.Else)
 		}
 	case *ElseStmt:
-		Output.PrintFatalErr("ElseStmt node is deprecated")
+		libio.PrintFatalErr("ElseStmt node is deprecated")
 	case *Repeat:
 		{
 			if n.VarDef != nil {
@@ -164,11 +164,11 @@ func Walk(v Visitor, node Node) {
 	case *Break:
 		//do nothing
 	case Singular:
-		Output.PrintFatalErr("Singular node is deprecated")
+		libio.PrintFatalErr("Singular node is deprecated")
 	case EmptyExpr:
 		//do nothing
 	default:
-		Output.PrintFatalErr("Unexpected node", reflect.TypeOf(n))
+		libio.PrintFatalErr("Unexpected node", reflect.TypeOf(n))
 	}
 	v.Visit(nil)
 }

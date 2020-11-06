@@ -1,12 +1,12 @@
 package errors
 
 import (
-	"eplc/src/libepl/Output"
 	"eplc/src/libepl/epllex"
+	"eplc/src/libio"
 )
 
 func UnresolvedTypeError(msg string, token epllex.Token, fname string, line string) {
-	descriptor := Output.ErrorDescriptor{
+	descriptor := libio.ErrorDescriptor{
 		Fname:		 fname ,
 		Line:        token.StartLine,
 		LineOffset:  token.StartOffset,
@@ -14,5 +14,5 @@ func UnresolvedTypeError(msg string, token epllex.Token, fname string, line stri
 		ErrorMSG:    msg,
 		Token:       token.Lexme,
 	}
-	Output.TypeIntelligentError(descriptor)
+	libio.TypeIntelligentError(descriptor)
 }

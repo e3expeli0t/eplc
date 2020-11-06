@@ -2,8 +2,10 @@ import bio.std;
 
 fnc del(i int): int {
     if  i > 0 {
-        del(i-1) *i;
+        return del(i-1) *i;
     }
+
+    return 1;
 }
 
 fnc Main() {

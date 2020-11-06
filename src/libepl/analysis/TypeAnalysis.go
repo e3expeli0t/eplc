@@ -18,11 +18,12 @@
 package analysis
 
 import (
-	"eplc/src/libepl/Output"
 	"eplc/src/libepl/Types"
 	"eplc/src/libepl/eplparse/ast"
-	"eplc/src/libepl/eplparse/symboltable"
+	"eplc/src/libepl/eplparse/deprecated"
+	"eplc/src/libio"
 	"fmt"
+	"reflect"
 )
 
 /*
@@ -49,14 +50,17 @@ const (
 	InvalidUseOfUnary TypeErrorCase = iota
 )
 
-func NewTypeChecker(table *symboltable.SymbolTable) *TypeChecker {
+func NewTypeChecker(table *deprecated.SymbolTable) *TypeChecker {
+	if table.Table == nil {
+		panic("Couldn't load symbol table")
+	}
 	return &TypeChecker{
 		St: table,
 	}
 }
 
 type TypeChecker struct {
-	St *symboltable.SymbolTable
+	St *deprecated.SymbolTable
 	Errors []*TypeError
 }
 
@@ -89,67 +93,65 @@ func(tc *TypeChecker) HasErrors() bool {
 
 func (tc *TypeChecker) WalkExpression(expr ast.Expression) Types.EplType {
 	//todo: Divide the boolean nodes into classes
-	//todo: Add explicit type check ( for example in BoolGreatEquals Ls and Rs type
-	// should be some kind of uint/int)
 
 	switch n := expr.(type) {
-	case ast.BoolGreatEquals:
+	case *ast.BoolGreatEquals:
 		status, t := tc.HandleBinaryGeneral(&n.Rs, &n.Ls)
 
 		if status {
 			return t
 		}
 		break
-	case ast.BoolGreaterThen:
+	case *ast.BoolGreaterThen:
 		status, t := tc.HandleBinaryGeneral(&n.Rs, &n.Ls)
 
 		if status {
 			return t
 		}
 		break
-	case ast.BoolLowerThen:
+	case *ast.BoolLowerThen:
 		status, t := tc.HandleBinaryGeneral(&n.Rs, &n.Ls)
 
 		if status {
 			return t
 		}
 		break
-	case ast.BoolLowerThenEqual:
+	case *ast.BoolLowerThenEqual:
 		status, t := tc.HandleBinaryGeneral(&n.Rs, &n.Ls)
 
 		if status {
 			return t
 		}
 		break
-	case ast.BoolEquals:
+	case *ast.BoolEquals:
 		status, t := tc.HandleBinaryGeneral(&n.Rs, &n.Ls)
 
 		if status {
 			return t
 		}
 		break
-	case ast.BoolNotEquals:
+	case *ast.BoolNotEquals:
 		status, t := tc.HandleBinaryGeneral(&n.Rs, &n.Ls)
 
 		if status {
 			return t
 		}
 		break
-	case ast.BoolAnd:
+	case *ast.BoolAnd:
 		status, t := tc.HandleBinaryGeneral(&n.Rs, &n.Ls)
 
 		if status {
 			return t
 		}
 		break
-	case ast.BoolOr:
+	case *ast.BoolOr:
 		status, t := tc.HandleBinaryGeneral(&n.Rs, &n.Ls)
 
 		if status {
 			return t
 		}
 		break
-	case ast.BoolNot:
+	case *ast.BoolNot:
 		ExprType := tc.WalkExpression(n.Expr)
 
 		if ExprType.Equals(Types.TypeBool) {
@@ -158,28 +160,28 @@ func (tc *TypeChecker) WalkExpression(expr ast.Expression) Types.EplType {
 		}
 		return ExprType
 
-	case ast.BinarySub:
+	case *ast.BinarySub:
 		status, t := tc.HandleBinaryMathematical(&n.Rs, &n.Ls)
 
 		if status {
 			return t
 		}
 		break
-	case ast.BinaryAdd:
+	case *ast.BinaryAdd:
 		status, t := tc.HandleBinaryMathematical(&n.Rs, &n.Ls)
 
 		if status {
 			return t
 		}
 		break
-	case ast.BinaryDiv:
+	case *ast.BinaryDiv:
 		status, t := tc.HandleBinaryMathematical(&n.Rs, &n.Ls)
 
 		if status {
 			return t
 		}
 		break
-	case ast.BinaryMul:
+	case *ast.BinaryMul:
 		status, t := tc.HandleBinaryMathematical(&n.Rs, &n.Ls)
 
 		if status {
@@ -187,34 +189,47 @@ func (tc *TypeChecker) WalkExpression(expr ast.Expression) Types.EplType {
 		}
 		break
 
-	case ast.UnaryMinus:
+	case *ast.UnaryMinus:
 		status, t := tc.HandleUnaryMathematical(&n.Rs)
 
 		if status {
 			return t
 		}
 		break
-	case ast.UnaryPlus:
+	case *ast.UnaryPlus:
 		status, t := tc.HandleUnaryMathematical(&n.Rs)
 
 		if status {
 			return t
 		}
 		break
-	case ast.FunctionCall:
-		break
-	case ast.Ident:
-		break
+	case *ast.FunctionCall:
+
+		libio.PrintLog("Found call to: "+n.FunctionName.Name)
+
+		if len(n.PackagePath) == 0 {
+			return tc.St.GetType(n.FunctionName.Name)
+		}
+
+		return tc.St.GetType(n.ConstructFullPath())
+
+	case *ast.Ident:
+		if !tc.St.IsSymbolInScope(n.Name) {
+			libio.PrintErr("Not in scope")
+		}
+		libio.PrintLog("the type of "+n.Name+" is ")
+		return tc.St.GetType(n.Name)
 	case ast.Number:
 		//Add system cpu bits resolver
 		return Types.TypeInt.AsEplType()
 	case ast.String:
 		return Types.TypeString.AsEplType()
 	case ast.Boolean:
-		return  Types.TypeBool.AsEplType()
+		return Types.TypeBool.AsEplType()
+	default:
+		panic(reflect.TypeOf(n))
 	}
 
-	Output.PrintLog(expr.Start())
 	return Types.EplType{}
 }
 
@@ -253,3 +268,24 @@ func (tc* TypeChecker) HandleUnaryMathematical(left *ast.Expression) (bool, Type
 	return false, ExprType
 }
 
+
+//todo: error handling?
+func (tc* TypeChecker) enterBlock() {
+	if tc.St.Next != nil {
+		tc.St = tc.St.Next
+		libio.PrintLog(tc.St.Table, "\n\n")
+	}
+	libio.PrintLog("OK")
+}
+
+//todo: error handling?
+func (tc* TypeChecker) exitBlock() {
+	if tc.St.Prev != nil {
+		tc.St = tc.St.Prev
+	}
+	libio.PrintLog("OK")
+}
+
+func (tc* TypeChecker) resolveSymbolType(sym string) deprecated.SymbolType {
+	return tc.St.GetSymbolType(sym)
+}

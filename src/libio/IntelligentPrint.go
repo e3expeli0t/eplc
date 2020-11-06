@@ -15,11 +15,11 @@
 *	along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package Output
+package libio
 
 import (
 	"eplc/src/libepl"
-	"eplc/src/libepl/Output/color"
+	"eplc/src/libio/color"
 	"fmt"
 	"strings"
 )
@@ -170,5 +170,5 @@ func specialError(toke string, d libepl.PhaseIndicator) (err string) {
 		}
 	}
 
-	return color.Blink("[?] ")+color.BWhite(err)
+	return color.Blink("[?] ")+ color.BWhite(err)
 }

@@ -15,57 +15,48 @@
 *	along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package Types
+package eplparse
 
 import (
 	"encoding/binary"
-	"eplc/src/libepl/eplparse/ast"
+	"eplc/src/libepl/Types"
 )
 
 type ObjectValue interface {
-	Convert(t EplType) bool
+	Convert(t Types.EplType) bool
 }
 
 type EvalValue struct {
-	ValueType EplType
-	Val []byte
-}
-
-type UnknownValue struct {
-	ValueType EplType
-	exp ast.Expression
-}
-
-func (uv UnknownValue) Convert(t EplType) bool {
-	panic("Unimplemented")
+	ValueType Types.EplType
+	Val       []byte
 }
 
 //Prototype
 ////todo: type conversions
-func (v *EvalValue) Convert(t EplType) bool {
+func (v *EvalValue) Convert(t Types.EplType) bool {
 	if v.ValueType.Attributes == t.Attributes {
 		v.ValueType = t
-	} else if t.Equals(TypeString) && v.ValueType.IsMathematical() {
+	} else if t.Equals(Types.TypeString) && v.ValueType.IsMathematical() {
 		//Strings are represented in memory as sequence of bytes followed by null terminator
 		switch v.ValueType {
-		case EplType(TypeUint):
+		case Types.EplType(Types.TypeUint):
 
-		case EplType(TypeUint8):
+		case Types.EplType(Types.TypeUint8):
 			//not supported yet
 			break
-		case EplType(TypeUint16):
-		case EplType(TypeUint32):
-		case EplType(TypeUint64):
-		case EplType(TypeInt):
-		case EplType(TypeInt8):
-		case EplType(TypeInt16):
-		case EplType(TypeInt32):
-		case EplType(TypeInt64):
-		case EplType(TypeFloat):
-		case EplType(TypeFloat8):
-		case EplType(TypeUint16):
-		case EplType(TypeFloat32):
-		case EplType(TypeFloat64):
+		case Types.EplType(Types.TypeUint16):
+		case Types.EplType(Types.TypeUint32):
+		case Types.EplType(Types.TypeUint64):
+		case Types.EplType(Types.TypeInt):
+		case Types.EplType(Types.TypeInt8):
+		case Types.EplType(Types.TypeInt16):
+		case Types.EplType(Types.TypeInt32):
+		case Types.EplType(Types.TypeInt64):
+		case Types.EplType(Types.TypeFloat):
+		case Types.EplType(Types.TypeFloat8):
+		case Types.EplType(Types.TypeUint16):
+		case Types.EplType(Types.TypeFloat32):
+		case Types.EplType(Types.TypeFloat64):
 		default:
 			return false
 		}
@@ -75,7 +66,7 @@ func (v *EvalValue) Convert(t EplType) bool {
 
 func MakeString(str string) EvalValue {
 	return EvalValue{
-		ValueType: EplType(TypeString),
+		ValueType: Types.EplType(Types.TypeString),
 		Val:       []byte(str),
 	}
 }
@@ -86,7 +77,7 @@ func MakeUint(val uint) EvalValue {
 	binary.BigEndian.PutUint64(slice, uint64(val))
 
 	return EvalValue{
-		ValueType: EplType(TypeUint),
+		ValueType: Types.EplType(Types.TypeUint),
 		Val:       slice,
 	}
 }
@@ -98,7 +89,7 @@ func MakeUint16(val uint16) EvalValue {
 	binary.BigEndian.PutUint16(slice, val)
 
 	return EvalValue{
-		ValueType: EplType(TypeUint16),
+		ValueType: Types.EplType(Types.TypeUint16),
 		Val:       slice,
 	}
 }
@@ -110,7 +101,7 @@ func MakeUint32(val uint32) EvalValue {
 	binary.BigEndian.PutUint32(slice, val)
 
 	return EvalValue{
-		ValueType: EplType(TypeUint),
+		ValueType: Types.EplType(Types.TypeUint),
 		Val:       slice,
 	}
 }
@@ -122,7 +113,7 @@ func MakeUint64(val uint64) EvalValue {
 	binary.BigEndian.PutUint64(slice, val)
 
 	return EvalValue{
-		ValueType: EplType(TypeUint),
+		ValueType: Types.EplType(Types.TypeUint),
 		Val:       slice,
 	}
 }

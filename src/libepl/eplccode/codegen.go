@@ -18,8 +18,8 @@
 package eplccode
 
 import (
-	"eplc/src/libepl/Output"
 	"eplc/src/libepl/eplparse/ast"
+	"eplc/src/libio"
 	"fmt"
 	"reflect"
 )
@@ -38,11 +38,11 @@ func GenerateAIR(file ast.Node) {
 func generate(n ast.Node) bool {
 	switch n := n.(type) {
 	case *ast.ProgramFile:
-		Output.PrintLog("Generating AIR")
+		libio.PrintLog("Generating AIR")
 		genProgram(n)
 		return true
 	default:
-		Output.PrintErr("Unknown node type '", reflect.TypeOf(n), "' 	expected type ast.ProgramFile")
+		libio.PrintErr("Unknown node type '", reflect.TypeOf(n), "' 	expected type ast.ProgramFile")
 		return false
 	}
 }
@@ -55,7 +55,7 @@ func genProgram(program *ast.ProgramFile) {
 	writer.UpdateLabels(genImport(*program.Imports, &index))
 	for _, decl := range *program.GlobalDecls {
 		writer.UpdateLabels(genDecls(decl, &index))
-		Output.PrintLog("decl generated")
+		libio.PrintLog("decl generated")
 	}
 	for _, fnc := range *program.Functions {
 		writer.UpdateLabels(genDecls(fnc, &index))
@@ -64,10 +64,10 @@ func genProgram(program *ast.ProgramFile) {
 	if *program.MainFunction != (ast.Fnc{}) {
 		writer.UpdateLabels(genDecls(program.MainFunction, &index))
 	} else {
-		Output.PrintFatalErr("Couldn't find main function")
+		libio.PrintFatalErr("Couldn't find main function")
 	}
 
-	writer.ProduceST(program.Symbols)
+	writer.ProduceST(program.GlobalSymbols)
 	writer.ProduceAST(program)
 	writer.WriteToTarget()
 }
@@ -112,7 +112,7 @@ func genDecls(node ast.Decl, index *uint) []Label {
 	case *ast.Fnc:
 		return genFncDecl(n, index)
 	default:
-		Output.PrintErr("Unknown node type '", reflect.TypeOf(n), "'")
+		libio.PrintErr("Unknown node type '", reflect.TypeOf(n), "'")
 	}
 	return []Label{}
 }

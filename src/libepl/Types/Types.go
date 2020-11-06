@@ -36,7 +36,7 @@ The type system:
 
 type TypeSystem struct {
 	lexer      *epllex.Lexer
-	Fname      string
+	FileName   string
 	BasicTypes []BasicType
 	TypeMap    map[string]*EplType
 }
@@ -54,7 +54,7 @@ func (ts *TypeSystem) Initialize(lex *epllex.Lexer) {
 	}
 
 	//for informative errors. Really inefficient
-	ts.Fname = lex.Filename
+	ts.FileName = lex.Filename
 	ts.lexer = lex
 }
 
@@ -97,26 +97,6 @@ func (ts *TypeSystem) ToType(token epllex.Token) *EplType {
 func (ts *TypeSystem) genKey(n string) uint64 {
 	data, _ := strconv.ParseUint(n, 10, 0)
 	return data ^ 0x45504C54595045
-}
-
-func (ts *TypeSystem) ResolveValueType(token epllex.Token) *EplType {
-	panic("This function is not supported")
-	switch token.Ttype {
-	case epllex.NUM:
-		//the default number value is int ( the size is defined by the target system)
-		return ts.MakeType("int") // the call does not matter
-	case epllex.REAL:
-		//the default  real number value is float ( the size is defined by the target system)
-		return ts.MakeType("float") // the call does not matter
-	case epllex.STRINGLITERAL:
-		//todo: define string handling system
-		//string is special runtime defined type
-		return ts.MakeType("string")
-	case epllex.ID: // never should hit
-	break
-	}
-
-	return nil
 }
 
 func (ts *TypeSystem) typeDefined(name string) bool {

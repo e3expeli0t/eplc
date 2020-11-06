@@ -18,7 +18,7 @@
 package internal
 
 import (
-	"eplc/src/libepl/Output/color"
+	"eplc/src/libio/color"
 	"fmt"
 )
 

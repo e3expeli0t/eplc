@@ -18,8 +18,8 @@
 package errors
 
 import (
-	"eplc/src/libepl/Output"
 	"eplc/src/libepl/epllex"
+	"eplc/src/libio"
 )
 
 type InternalParserError struct {
@@ -28,7 +28,7 @@ type InternalParserError struct {
 
 //todo: support position marker (marks the token in specific position)
 func (ipe *InternalParserError) ParsingError(filename string, line uint, lineOffset uint, errorMsg string, currentline string, token epllex.Token) {
-	descriptor := Output.ErrorDescriptor{
+	descriptor := libio.ErrorDescriptor{
 		Fname: filename,
 		Line: line,
 		LineOffset: lineOffset,
@@ -36,12 +36,12 @@ func (ipe *InternalParserError) ParsingError(filename string, line uint, lineOff
 		ErrorMSG: errorMsg,
 		Token: token.Lexme,
 	}
-	Output.ParserIntelligentError(descriptor)
+	libio.ParserIntelligentError(descriptor)
 	ipe.ErrCount++
 }
 
 func (ipe *InternalParserError) IsValidFile() {
 	if ipe.ErrCount != 0 {
-		Output.PrintFatalErr("Parser: Aborting due to previous errors")
+		libio.PrintFatalErr("Parser: Aborting due to previous errors")
 	}
 }

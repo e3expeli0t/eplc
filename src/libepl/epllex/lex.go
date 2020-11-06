@@ -272,14 +272,14 @@ func (l *Lexer) scanID(cf bool) Token {
 	}
 
 	/*
-		if l.ST.Get(buf.String()) != (SymbolData{}) {
+		if l.GlobalST.Get(buf.String()) != (SymbolData{}) {
 			return Token{buf.String(), ID}
 		}
 	*/
 	tmp := resolveType(buf, startLine, startOffset)
 	/*
 		if tmp.Ttype == ID {
-			l.ST.Add(&SymbolData{symbol: tmp.Lexme})
+			l.GlobalST.Add(&SymbolData{symbol: tmp.Lexme})
 		}
 	*/
 	return tmp
