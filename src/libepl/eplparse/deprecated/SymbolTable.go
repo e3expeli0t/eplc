@@ -212,7 +212,7 @@ func (st *SymbolTable) ToString() string {
 	}
 
 	return fmt.Sprintf(
-		"Size: %d:\nTable contents:\n\t %s\nPrevious table is: %s\n",
+		"Last: %d:\nTable contents:\n\t %s\nPrevious table is: %s\n",
 		size, contents, prev,
 		)
 }

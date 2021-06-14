@@ -15,7 +15,7 @@ build:clean
 	@command -v go >/dev/null 2>&1 || { echo >&2 "Please install go. Aborting."; exit 1; }
 	@command -v dep >/dev/null 2>&1 || { echo >&2 "Please install dep. Aborting."; exit 1; }
 	@echo Building eplc...
-	go build -i -v -o eplc src/eplc.go
+	go build -v -o eplc src/eplc.go
 	@mkdir target
 	@mkdir target/bin
 	@mv eplc target/bin
@@ -25,7 +25,7 @@ rebuild:
 	go test -v eplc/tests -cover
 	
 	@echo Rebuilding eplc...
-	go build -i -v -o eplc src/eplc.go
+	go build -v -o eplc src/eplc.go
 	@rm -rf target/bin/eplc
 	@mv eplc target/bin/
 

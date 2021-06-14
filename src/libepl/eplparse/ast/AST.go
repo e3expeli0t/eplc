@@ -77,13 +77,9 @@ type (
 
 	//todo: create InnerBlock and Block structures
 	Block struct {
-		Symbols  *symboltable.ScopeSymbolTable
+		PreviousSymbols symboltable.TableCode
+		Symbols symboltable.TableCode
 		ExprList *[]Expression
-	}
-
-	InnerBlock struct {
-		Block
-		PreviousTable *symboltable.ScopeSymbolTable
 	}
 
 	VarDecl struct {

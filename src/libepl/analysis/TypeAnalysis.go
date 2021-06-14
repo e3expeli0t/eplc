@@ -20,8 +20,9 @@ package analysis
 import (
 	"eplc/src/libepl/Types"
 	"eplc/src/libepl/eplparse/ast"
-	"eplc/src/libepl/eplparse/deprecated"
+	"eplc/src/libepl/eplparse/symboltable"
 	"eplc/src/libio"
+
 	"fmt"
 	"reflect"
 )
@@ -50,18 +51,19 @@ const (
 	InvalidUseOfUnary TypeErrorCase = iota
 )
 
-func NewTypeChecker(table *deprecated.SymbolTable) *TypeChecker {
-	if table.Table == nil {
+func NewTypeChecker(table *symboltable.TableMap) *TypeChecker {
+	if table.Last == 0 {
 		panic("Couldn't load symbol table")
 	}
 	return &TypeChecker{
-		St: table,
+		SymbolMap: table,
 	}
 }
 
 type TypeChecker struct {
-	St *deprecated.SymbolTable
-	Errors []*TypeError
+	SymbolMap *symboltable.TableMap
+	Current  symboltable.ScopeSymbolTable
+	Errors    []*TypeError
 }
 
 func (tc *TypeChecker) addError(c TypeErrorCase, t1 Types.EplType, t2 Types.EplType) {
@@ -74,9 +76,15 @@ func (tc *TypeChecker) addError(c TypeErrorCase, t1 Types.EplType, t2 Types.EplT
 			t2.TypeName,
 		)
 	case InvalidUseOfNot:
-		descriptor = fmt.Sprintf("Type %s cant be used in boolean not expression, type should be bool", t1.TypeName)
+		descriptor = fmt.Sprintf(
+			"Type %s cant be used in boolean not expression, type should be bool",
+			t1.TypeName,
+			)
 	case InvalidUseOfUnary:
-		descriptor = fmt.Sprintf("Type %s can't be used as number in unary expression, should be int or uint", t1.TypeName)
+		descriptor = fmt.Sprintf(
+			"Type %s can't be used as number in unary expression, should be int or uint",
+			t1.TypeName,
+			)
 	default:
 		descriptor = fmt.Sprintf("Type error between %s and %s",
 			t1.TypeName,
@@ -92,8 +100,8 @@ func(tc *TypeChecker) HasErrors() bool {
 }
 
 func (tc *TypeChecker) WalkExpression(expr ast.Expression) Types.EplType {
-	//todo: Divide the boolean nodes into classes
-
+	//note: since go doesn't allow fallthrough in type switches
+	// we have this amazing chunk of redundant code
 	switch n := expr.(type) {
 	case *ast.BoolGreatEquals:
 		status, t := tc.HandleBinaryGeneral(&n.Rs, &n.Ls)
@@ -208,17 +216,13 @@ func (tc *TypeChecker) WalkExpression(expr ast.Expression) Types.EplType {
 		libio.PrintLog("Found call to: "+n.FunctionName.Name)
 
 		if len(n.PackagePath) == 0 {
-			return tc.St.GetType(n.FunctionName.Name)
+			return tc.SymbolMap.Locate(n.FunctionName.Name).Type
 		}
 
-		return tc.St.GetType(n.ConstructFullPath())
+		return tc.SymbolMap.Locate(n.ConstructFullPath()).Type
 
 	case *ast.Ident:
-		if !tc.St.IsSymbolInScope(n.Name) {
-			libio.PrintErr("Not in scope")
-		}
-		libio.PrintLog("the type of "+n.Name+" is ")
-		return tc.St.GetType(n.Name)
+
 	case ast.Number:
 		//Add system cpu bits resolver
 		return Types.TypeInt.AsEplType()
@@ -227,7 +231,7 @@ func (tc *TypeChecker) WalkExpression(expr ast.Expression) Types.EplType {
 	case ast.Boolean:
 		return Types.TypeBool.AsEplType()
 	default:
-		panic(reflect.TypeOf(n))
+		panic(fmt.Sprintf("Unexpected node type: %s", reflect.TypeOf(n)))
 	}
 
 	return Types.EplType{}
@@ -236,7 +240,6 @@ func (tc *TypeChecker) WalkExpression(expr ast.Expression) Types.EplType {
 func (tc* TypeChecker) HandleBinaryGeneral(left *ast.Expression, right *ast.Expression) (bool, Types.EplType) {
 	ExprTypeLeft := tc.WalkExpression(*left)
 	ExprTypeRight := tc.WalkExpression(*right)
-
 
 	if ExprTypeRight == ExprTypeLeft {
 		return true, ExprTypeLeft
@@ -266,26 +269,4 @@ func (tc* TypeChecker) HandleUnaryMathematical(left *ast.Expression) (bool, Type
 	}
 	tc.addError(InvalidUseOfUnary, ExprType, Types.EplType{})
 	return false, ExprType
-}
-
-
-//todo: error handling?
-func (tc* TypeChecker) enterBlock() {
-	if tc.St.Next != nil {
-		tc.St = tc.St.Next
-		libio.PrintLog(tc.St.Table, "\n\n")
-	}
-	libio.PrintLog("OK")
-}
-
-//todo: error handling?
-func (tc* TypeChecker) exitBlock() {
-	if tc.St.Prev != nil {
-		tc.St = tc.St.Prev
-	}
-	libio.PrintLog("OK")
-}
-
-func (tc* TypeChecker) resolveSymbolType(sym string) deprecated.SymbolType {
-	return tc.St.GetSymbolType(sym)
 }

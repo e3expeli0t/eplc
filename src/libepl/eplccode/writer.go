@@ -91,7 +91,7 @@ func (w *Writer) ProduceST(st *deprecated.SymbolTable) {
 	if err != nil {
 
 	} else {
-		file, _ := os.Create(w.path+"SymbolTable.json")
+		file, _ := os.Create(w.path+"SymbolMap.json")
 		_, _ = file.Write(b)
 	}
 }

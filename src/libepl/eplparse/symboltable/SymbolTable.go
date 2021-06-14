@@ -22,7 +22,7 @@ import (
 )
 
 //Note: Currently this is not in use
-//Attribute for more convenient SymbolTable searches
+//Attribute for more convenient SymbolMap searches
 type ScopeType uint
 type SymbolKind uint
 
@@ -102,4 +102,3 @@ func (st* ScopeSymbolTable) Add(data *SymbolData) {
 func (st* ScopeSymbolTable) SetScopeType(scope ScopeType) {
 	st.Scope = scope
 }
-

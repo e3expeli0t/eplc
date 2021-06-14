@@ -25,14 +25,26 @@ import (
 
 const EplcVersion = "0.1.3"
 
+var outputStatusOn = false
+
+func SwitchOutputStatus() {
+	outputStatusOn = !outputStatusOn
+}
+
 func PrintVersion() {
-	fmt.Print(color.BBlue("****\t"))
-	fmt.Print(color.BCyan("eplc version: "))
-	fmt.Print(color.BLightPurple(EplcVersion))
-	fmt.Println(color.BBlue(" ---- Development version\t****"))
+	if !outputStatusOn {
+		return
+	}
+
+	fmt.Print(color.BBlue("****\t"), color.BCyan("eplc version: "))
+	fmt.Print(color.BLightPurple(EplcVersion), color.BBlue(" ---- Development version\t****\n"))
 }
 
 func PrintLog(log ...interface{}) {
+	if !outputStatusOn {
+		return
+	}
+
 	fmt.Print(color.BLightGreen("[*] "))
 	fmt.Println(log...)
 }

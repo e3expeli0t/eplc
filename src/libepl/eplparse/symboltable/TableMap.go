@@ -17,20 +17,33 @@
 
 package symboltable
 
-type TableCode uint
+type TableCode int
+
+const EndOfTable TableCode = -1
 
 type TableMap struct {
-	Map map[TableCode]*ScopeSymbolTable
-	Size uint64
+	Map  map[TableCode]*ScopeSymbolTable
+	Last TableCode
 
 	currentTableCode  TableCode
 	previousTableCode TableCode
 }
 
+func NewTableMap() *TableMap {
+	newMap := make(map[TableCode]*ScopeSymbolTable)
+	return &TableMap{
+		Map:               newMap,
+		Last:              0,
+		currentTableCode:  0,
+		previousTableCode: 0,
+	}
+}
+
 func (tm *TableMap) Insert(table ScopeSymbolTable) {
-	tm.previousTableCode = tm.currentTableCode
-	tm.currentTableCode++
+	tm.Next()
+
 	tm.Map[tm.currentTableCode] = &table
+	tm.Last++
 }
 
 //Locate Walks backwards to find the requested symbol
@@ -50,7 +63,7 @@ func (tm *TableMap) Locate(name string) SymbolData {
 	return CantLocate()
 }
 
-//LocateInScope searches for the symbol in the current SymbolTable
+//LocateInScope searches for the symbol in the current SymbolMap
 func (tm *TableMap) LocateInScope(name string) SymbolData {
 	return tm.Map[tm.currentTableCode].Lookup(name)
 }
@@ -65,4 +78,22 @@ func (tm *TableMap) Restore() {
 
 	tm.previousTableCode = tm.currentTableCode
 	tm.currentTableCode = tmp
+}
+
+func (tm *TableMap) HasNext() bool {
+	return tm.Last > tm.currentTableCode
+}
+
+func (tm *TableMap) Next() {
+	tm.previousTableCode = tm.currentTableCode
+	tm.currentTableCode++
+}
+
+func (tm *TableMap) GetCurrent() *ScopeSymbolTable {
+	return tm.Map[tm.currentTableCode]
+}
+
+func (tm *TableMap) SwitchTable(code TableCode) {
+	tm.previousTableCode = tm.currentTableCode
+	tm.currentTableCode = code
 }

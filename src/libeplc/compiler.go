@@ -49,11 +49,17 @@ func eplRecover(r interface{}, stack bool) {
 }
 
 func Compile(source io.Reader, fileName string, options Flag) {
+
+	/*
 	defer func() {
 		if r := recover(); r != nil {
 			eplRecover(r, options.Contains(Verbose))
 		}
 	}()
+	*/
+	if options.Contains(Verbose) {
+		libio.SwitchOutputStatus()
+	}
 
 	if options.Contains(Profile) {
 		f, err := os.Create("Profile/dump.cpu")
@@ -71,7 +77,7 @@ func Compile(source io.Reader, fileName string, options Flag) {
 	lexer := epllex.New(source, fileName)
 	parser := eplparse.New(lexer)
 
-	parser.InitializeTypeHandler()
+	parser.Initialize()
 	file := parser.ParseProgramFile()
 
 	Analyzer := analysis.NewAnalyzer(file)

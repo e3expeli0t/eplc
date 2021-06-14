@@ -28,11 +28,10 @@ import (
 	"fmt"
 )
 
-//New create new eplparse struct
+//New create new parser struct
 func New(lx *epllex.Lexer) *Parser {
 	return &Parser{
 		Lexer:    lx,
-		GlobalST: symboltable.NewScopedSymbolTable(symboltable.GLOBAL),
 	}
 }
 
@@ -49,6 +48,8 @@ type Parser struct {
 
 	Symbols symboltable.TableMap
 	CurrentSymbolTable symboltable.ScopeSymbolTable
+	CurrentSymbolTableCode symboltable.TableCode
+	LastSymbolTableCode symboltable.TableCode
 
 	Errors      errors.InternalParserError
 	TypeHandler Types.TypeSystem
@@ -60,10 +61,18 @@ type Parser struct {
 
 	// set to true if the type handler is Initialized
 	Ok bool
-
-	// tell the functions to use SaveSymbol
-	GlobalPhase bool
 }
+
+
+func (p *Parser) Initialize() {
+	p.TypeHandler.Initialize(p.Lexer)
+	p.Ok = true
+
+	p.CurrentSymbolTable = *symboltable.NewScopedSymbolTable(symboltable.GLOBAL)
+	p.CurrentSymbolTableCode = 0
+	p.LastSymbolTableCode = symboltable.EndOfTable
+}
+
 
 //Parse main language constructs
 //------------------------------------------------------------------------------------------------------------------------------------------------
@@ -74,7 +83,6 @@ func (p *Parser) ParseProgramFile() ast.Node {
 		panic("eplc: Parser couldn't be initialized")
 	}
 	p.readNextToken()
-	p.GlobalPhase = true
 
 	var imports []ast.Import
 	var decls []ast.Decl
@@ -110,6 +118,7 @@ func (p *Parser) ParseProgramFile() ast.Node {
 
 	//check if any errors occurred
 	p.Errors.IsValidFile()
+	p.Symbols.Reset()
 
 	return &ast.ProgramFile{
 		Imports:       &imports,
@@ -141,9 +150,8 @@ func (p *Parser) ParseBlock(keepScope bool) *ast.Block {
 		p.readNextToken()
 	}
 
-	var inner = !keepScope
 
-	if inner {
+	if !keepScope {
 		p.NewScope(symboltable.BLOCK)
 	}
 
@@ -162,7 +170,6 @@ func (p *Parser) ParseBlock(keepScope bool) *ast.Block {
 		case epllex.REPEAT:
 			contents = append(contents, p.ParseRepeatFam())
 		case epllex.LBRACE:
-			libio.PrintLog("In loop current token:", p.currentLexeme, "Next: ", p.lookahead.Lexme)
 			contents = append(contents, p.ParseBlock(true))
 		default:
 			switch p.currentToken.Ttype {
@@ -201,11 +208,12 @@ func (p *Parser) ParseBlock(keepScope bool) *ast.Block {
 	if p.match(epllex.EOF) {
 		p.expect("'}'")
 	} else {
-		p.readNextToken() // skip }
+		p.readNextToken() // skip }Current
 	}
 
 	return &ast.Block{
-		Symbols:  &p.CurrentSymbolTable,
+		PreviousSymbols: p.LastSymbolTableCode,
+		Symbols:  p.CurrentSymbolTableCode,
 		ExprList: &contents,
 	}
 }
@@ -689,11 +697,6 @@ func (p *Parser) processType() (Type *Types.EplType) {
 	return
 }
 
-func (p *Parser) InitializeTypeHandler() {
-	p.TypeHandler.Initialize(p.Lexer)
-	p.Ok = true
-}
-
 //Error handling functions
 func (p *Parser) expect(ex string) {
 	p.report(fmt.Sprintf("expected %s found %s ", ex, p.currentLexeme))
@@ -708,6 +711,7 @@ func (p *Parser) NewScope(scope symboltable.ScopeType) {
 	p.Symbols.Insert(p.CurrentSymbolTable)
 	p.CurrentSymbolTable.Clear()
 	p.CurrentSymbolTable.SetScopeType(scope)
+	p.CurrentSymbolTableCode++
 }
 
 func (p *Parser) ProduceLocationInfo() libepl.LocationInfo {

@@ -67,7 +67,6 @@ func genProgram(program *ast.ProgramFile) {
 		libio.PrintFatalErr("Couldn't find main function")
 	}
 
-	writer.ProduceST(program.GlobalSymbols)
 	writer.ProduceAST(program)
 	writer.WriteToTarget()
 }

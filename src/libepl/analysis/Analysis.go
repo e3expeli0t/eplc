@@ -21,7 +21,7 @@ import (
 	"eplc/src/libepl"
 	"eplc/src/libepl/Types"
 	"eplc/src/libepl/eplparse/ast"
-	"eplc/src/libepl/eplparse/deprecated"
+	"eplc/src/libepl/eplparse/symboltable"
 	"eplc/src/libio"
 	"fmt"
 )
@@ -34,24 +34,24 @@ func NewAnalyzer(syntaxTree ast.Node) *Analysis {
 }
 
 type Analysis struct {
-	AST ast.Node
-	SymbolTable *deprecated.SymbolTable
-	TChecker *TypeChecker
-	phase libepl.PhaseIndicator
-	FileInfo libepl.InfoStruct
+	AST       ast.Node
+	SymbolMap *symboltable.TableMap
+	TChecker  *TypeChecker
+	phase     libepl.PhaseIndicator
+	FileInfo  libepl.InfoStruct
 }
 
 func (ana* Analysis) Init() {
 	switch n := ana.AST.(type) {
 	case *ast.ProgramFile:
-		ana.SymbolTable = n.GlobalSymbols
-		//Output.PrintFatalErr(ana.SymbolTable.ToString())
+		ana.SymbolMap = n.SymbolTableMap
+		//Output.PrintFatalErr(ana.SymbolMap.ToString())
 		ana.FileInfo = libepl.NewInfoStruct(n.FileName)
 	default:
 		panic(fmt.Sprintf("Couldn't initialize Analyser. Node %s is not recognized", n))
 	}
 
- 	ana.TChecker = NewTypeChecker(ana.SymbolTable)
+ 	ana.TChecker = NewTypeChecker(ana.SymbolMap)
 }
 
 func (ana* Analysis) Run() {
@@ -65,9 +65,14 @@ func (ana* Analysis) Run() {
 func (ana* Analysis) TravelAST(node ast.Node) bool {
 	switch n := node.(type) {
 	case *ast.ProgramFile:
-		ana.TChecker.enterBlock()
+		//todo: handle st frame change
+		ana.TravelAST(n.MainFunction)
+		for _,function := range *n.Functions {
+			ana.TravelAST(function)
+		}
+
 	case *ast.IfStmt:
-		ana.TChecker.enterBlock()
+		//todo: handle st frame change
 		t := ana.TChecker.WalkExpression(*n.Condition)
 
 		if t != Types.TypeBool.AsEplType() {
@@ -77,12 +82,11 @@ func (ana* Analysis) TravelAST(node ast.Node) bool {
 				ana.PrintError("Expected boolean expression got expression of type:" + t.TypeName)
 			}
 
-			ana.TChecker.exitBlock()
 			return false
 		}
-		ana.TChecker.exitBlock()
+
 	case *ast.ForLoop:
-		ana.TChecker.enterBlock()
+		//todo: handle st frame change
 		t := ana.TChecker.WalkExpression(*n.Condition)
 
 		if t != Types.TypeBool.AsEplType() {
@@ -92,12 +96,10 @@ func (ana* Analysis) TravelAST(node ast.Node) bool {
 				ana.PrintError("Expected boolean expression got expression of type:" + t.TypeName)
 			}
 
-			ana.TChecker.exitBlock()
 			return false
 		}
-		ana.TChecker.exitBlock()
 	case *ast.RepeatUntil:
-		ana.TChecker.enterBlock()
+		//todo: handle st frame change
 		t := ana.TChecker.WalkExpression(*n.Condition)
 
 		if t != Types.TypeBool.AsEplType() {
@@ -107,10 +109,8 @@ func (ana* Analysis) TravelAST(node ast.Node) bool {
 				ana.PrintError("Expected boolean expression got expression of type:" + t.TypeName)
 			}
 
-			ana.TChecker.exitBlock()
 			return false
 		}
-		ana.TChecker.exitBlock()
 	}
 
 	return true
